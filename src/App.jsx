@@ -4,23 +4,27 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import PrivateRoute from "./auth";
-import Layout from "./components/Layout/Layout";
 
-const isAuthenticated = true;
-const userRole = "student";
+import AdminRoutes from "./routes/AdminRoutes";
+import StudentRoutes from "./routes/StudentRoutes";
+import Login from "./components/Login/Login";
+import Signup from "./components/Signup/Signup";
+
+const isAuthenticated = false;
+const userRole = "admin";
 
 const App = () => {
   return (
     <Router>
       <Routes>
+        {/* Public Routes */}
         <Route
           path="/login"
           element={
             isAuthenticated ? (
               <Navigate to={userRole === "admin" ? "/admin" : "/student"} />
             ) : (
-              <h2>Login</h2>
+              <Login />
             )
           }
         />
@@ -30,40 +34,30 @@ const App = () => {
             isAuthenticated ? (
               <Navigate to={userRole === "admin" ? "/admin" : "/student"} />
             ) : (
-              <h2>Signup</h2>
+              <Signup />
             )
           }
         />
 
+        {/* Redirect Based on Role */}
         <Route
           path="/"
           element={
             isAuthenticated ? (
-              userRole === "admin" ? (
-                <Navigate to="/admin" />
-              ) : (
-                <Navigate to="/student" />
-              )
+              <Navigate to={userRole === "admin" ? "/admin" : "/student"} />
             ) : (
               <Navigate to="/login" />
             )
           }
         />
 
-        <Route element={<PrivateRoute roleRequired="admin" />}>
-          <Route path="admin" element={<Layout userRole="admin" />}>
-            <Route path="" element={<h2>Admin Dashboard</h2>} />
-            <Route path="users" element={<h2>Admin Users</h2>} />
-          </Route>
-        </Route>
+        {/* Admin Routes */}
+        <Route path="/admin/*" element={<AdminRoutes />} />
 
-        <Route element={<PrivateRoute roleRequired="student" />}>
-          <Route path="student" element={<Layout userRole="student" />}>
-            <Route path="" element={<h2>Student Dashboard</h2>} />
-            <Route path="courses" element={<h2>Student Courses</h2>} />
-          </Route>
-        </Route>
+        {/* Student Routes */}
+        <Route path="/student/*" element={<StudentRoutes />} />
 
+        {/* Not Found */}
         <Route path="*" element={<h2>Not Found</h2>} />
       </Routes>
     </Router>

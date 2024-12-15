@@ -2,8 +2,8 @@ import { Navigate, Outlet } from "react-router-dom";
 import PropTypes from "prop-types";
 
 const PrivateRoute = ({ roleRequired }) => {
-  const isAuthenticated = true;
-  const role = "student";
+  const isAuthenticated = false;
+  const role = "admin";
 
   if (!isAuthenticated) {
     return <Navigate to="/login" />;

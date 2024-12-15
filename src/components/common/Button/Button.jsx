@@ -1,11 +1,11 @@
 import PropTypes from "prop-types";
 
 const Button = ({
-  text = "Button", // Default button text
-  icon: Icon = null, // Optional icon component
-  onClick, // Event handler
-  className = "", // Additional Tailwind classes
-  disabled = false, // Disabled state
+  text = "Button",
+  icon: Icon = null,
+  onClick,
+  className = "",
+  disabled = false,
 }) => {
   return (
     <button
@@ -16,7 +16,7 @@ const Button = ({
       disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
       {text}
-      {Icon && <Icon className="ml-2" size={20} />} {/* Optional Icon */}
+      {Icon && <Icon className="ml-2" size={20} />}
     </button>
   );
 };

@@ -2,7 +2,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import PropTypes from "prop-types";
 
 const PrivateRoute = ({ roleRequired }) => {
-  const isAuthenticated = false;
+  const isAuthenticated = true;
   const role = "admin";
 
   if (!isAuthenticated) {

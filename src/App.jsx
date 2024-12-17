@@ -10,7 +10,7 @@ import StudentRoutes from "./routes/StudentRoutes";
 import Login from "./components/Login/Login";
 import Signup from "./components/Signup/Signup";
 
-const isAuthenticated = false;
+const isAuthenticated = true;
 const userRole = "admin";
 
 const App = () => {

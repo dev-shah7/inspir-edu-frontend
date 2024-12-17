@@ -3,6 +3,15 @@ export default {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        outfit: ['Outfit', 'sans-serif'],
+      },
+      fontSize: {
+        'xl': '24px',
+      },
+      lineHeight: {
+        'xl': '30.24px',
+      },
       colors: {
         "form-bg": "#C6E0FF", // Form background
         "button-blue": "#1A73E8", // Button

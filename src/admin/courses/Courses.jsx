@@ -43,7 +43,7 @@ const Courses = () => {
                         <td className="p-4 text-center">
                         <div className="flex gap-2 justify-center">
                             <CustomButton text="View Content" className="w-auto bg-green-800 hover:bg-green-700" onClick={() => alert("Button Clicked!")} />
-                            <CustomButton text="View Users" className="w-auto bg-blue-900 hover:bg-blue-800" onClick={() => alert("Button Clicked!")} />
+                            <CustomButton text="View Users" className="w-auto bg-blue-950 hover:bg-blue-800" onClick={() => alert("Button Clicked!")} />
                         </div>
                         </td>
                         <td className="p-4 border-b text-center">

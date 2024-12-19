@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import PrivateRoute from "../auth/PrivateRoute";
 import Layout from "../components/Layout/Layout";
-import Courses from "../admin/Courses/Courses";
+import Courses from "../admin/courses/Courses";
 
 import MainContent from "../admin/MainContent";
 import Dashboard from "../admin/dashboard/Dashboard";

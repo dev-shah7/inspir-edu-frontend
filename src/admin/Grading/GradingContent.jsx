@@ -1,7 +1,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import useModalStore from "../store/useModalStore";
-import ProceedToNextStepContent from "../ProceedToNextStepContent/ProceedToNextStepContent";
+import ProceedToNextStepContent from "../proceedToNextSection/ProceedToNextStepContent";
 
 const GradingContent = () => {
   const { closeModal, queueModal } = useModalStore();

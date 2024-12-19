@@ -1,5 +1,6 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router";
 
 const Sidebar = ({ isSidebarOpen, userRole }) => {
   const [isUsersMenuOpen, setUsersMenuOpen] = useState(false);
@@ -11,9 +12,8 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
       }`}
     >
       <nav className="space-y-4">
-        {/* Dashboard Link */}
-        <a
-          href="/"
+        <Link
+          to="/"
           className="flex items-center space-x-2 p-2 rounded hover:bg-blue-300"
         >
           <svg
@@ -25,17 +25,15 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
             <path d="M10 3a1 1 0 00-.894.553L5.382 11H4a1 1 0 000 2h2a1 1 0 00.894-.553L9.618 5H16a1 1 0 100-2h-6a1 1 0 00-.894.553L10 3z" />
           </svg>
           <span>Dashboard</span>
-        </a>
+        </Link>
 
-        {/* Courses Link - Common to both roles */}
-        <a
-          href="/courses"
+        <Link
+          to="/admin/courses"
           className="flex items-center space-x-2 p-2 rounded hover:bg-blue-300"
         >
           <span>Courses</span>
-        </a>
+        </Link>
 
-        {/* Conditional Links for Admin */}
         {userRole === "admin" && (
           <>
             <div>
@@ -63,39 +61,38 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
               </button>
               {isUsersMenuOpen && (
                 <div className="ml-4 space-y-2">
-                  <a
-                    href="/users/all"
+                  <Link
+                    to="/users/all"
                     className="block p-2 rounded hover:bg-blue-300"
                   >
                     All Users
-                  </a>
-                  <a
-                    href="/users/enrolled"
+                  </Link>
+                  <Link
+                    to="/users/enrolled"
                     className="block p-2 rounded hover:bg-blue-300"
                   >
                     Enrolled Users
-                  </a>
+                  </Link>
                 </div>
               )}
             </div>
           </>
         )}
 
-        {/* Conditional Links for Student */}
         {userRole === "student" && (
           <div>
-            <a
-              href="/student/courses"
+            <Link
+              to="/student/courses"
               className="flex items-center space-x-2 p-2 rounded hover:bg-blue-300"
             >
               <span>My Courses</span>
-            </a>
-            <a
-              href="/student/progress"
+            </Link>
+            <Link
+              to="/student/progress"
               className="flex items-center space-x-2 p-2 rounded hover:bg-blue-300"
             >
               <span>My Progress</span>
-            </a>
+            </Link>
           </div>
         )}
       </nav>
@@ -103,7 +100,6 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
   );
 };
 
-// Prop validation
 Sidebar.propTypes = {
   isSidebarOpen: PropTypes.bool.isRequired,
   userRole: PropTypes.string.isRequired,

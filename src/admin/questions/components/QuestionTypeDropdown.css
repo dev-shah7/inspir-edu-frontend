@@ -1,0 +1,27 @@
+select {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: #fff;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  appearance: none;
+}
+
+select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px #93c5fd;
+}
+
+select option {
+  font-size: 14px;
+  color: #1f2937;
+}
+
+label {
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #374151;
+}

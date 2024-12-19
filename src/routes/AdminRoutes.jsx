@@ -1,15 +1,31 @@
 import { Routes, Route } from "react-router-dom";
 import PrivateRoute from "../auth/PrivateRoute";
 import Layout from "../components/Layout/Layout";
-import Courses from "../admin/courses/Courses";
+import Courses from "../admin/Courses/Courses";
+import Dashboard from "../admin/Dashboard/Dashboard";
+import MainContent from "../admin/MainContent";
 
 const AdminRoutes = () => {
   return (
     <Routes>
       <Route element={<PrivateRoute roleRequired="admin" />}>
         <Route path="/" element={<Layout userRole="admin" />}>
-          <Route index element={<h2>Admin Dashboard</h2>} />
-          <Route path="courses" element={<Courses />} />
+          <Route
+            index
+            element={
+              <MainContent>
+                <Dashboard />
+              </MainContent>
+            }
+          />
+          <Route
+            path="courses"
+            element={
+              <MainContent>
+                <Courses />
+              </MainContent>
+            }
+          />
           <Route path="users" element={<h2>Admin Users</h2>} />
         </Route>
       </Route>

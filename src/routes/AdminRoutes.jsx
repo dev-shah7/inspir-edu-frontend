@@ -6,6 +6,7 @@ import MainContent from "../admin/MainContent";
 import Courses from "../admin/courses/Courses";
 import Dashboard from "../admin/dashboard/Dashboard";
 import Modules from "../admin/modules/Modules";
+import Questions from "../admin/questions/Questions"
 
 const AdminRoutes = () => {
   return (
@@ -28,11 +29,19 @@ const AdminRoutes = () => {
               </MainContent>
             }
           />
-            <Route
+          <Route
             path="modules"
             element={
               <MainContent>
                 <Modules />
+              </MainContent>
+            }
+          />
+          <Route
+            path="questions"
+            element={
+              <MainContent>
+                <Questions />
               </MainContent>
             }
           />

@@ -24,24 +24,17 @@ const Modules = () => {
       <div className="flex justify-between items-center relative">
         <div>
           <h1 className="text-3xl font-outfit text-gray-800">All Modules</h1>
-          <p className="text-lg font-outfit text-gray-600 mt-1">
-            Welcome to inspireEDU Dashboard
-          </p>
         </div>
         <div className="absolute right-20">
-          <p className="text-lg font-outfit text-gray-800 mt-10">
+          <p className="text-lg font-outfit text-gray-800">
             Passing Percentage: 75%
           </p>
         </div>
       </div>
       <div className="mt-4 h-0.5 bg-gradient-to-r from-custom-div-blue to-transparent"></div>
-
-      {/* Module Card */}
       <div className="w-full mt-8">
         <ModuleCard description="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum." />
       </div>
-
-      {/* Modules Table */}
       <div className="overflow-x-auto mt-8">
         <table className="min-w-full text-md">
           <thead className="text-gray-800">

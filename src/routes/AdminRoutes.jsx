@@ -5,6 +5,7 @@ import Layout from "../components/Layout/Layout";
 import MainContent from "../admin/MainContent";
 import Courses from "../admin/courses/Courses";
 import Dashboard from "../admin/dashboard/Dashboard";
+import Modules from "../admin/modules/Modules";
 
 const AdminRoutes = () => {
   return (
@@ -24,6 +25,14 @@ const AdminRoutes = () => {
             element={
               <MainContent>
                 <Courses />
+              </MainContent>
+            }
+          />
+            <Route
+            path="modules"
+            element={
+              <MainContent>
+                <Modules />
               </MainContent>
             }
           />

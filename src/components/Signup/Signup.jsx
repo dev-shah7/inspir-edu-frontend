@@ -1,4 +1,4 @@
-import SignUpForm from "./SignUpForm";
+import SignUpForm from "./SignupForm";
 
 const Signup = () => {
   return (
@@ -13,7 +13,8 @@ const Signup = () => {
             <span className="text-yellow-400 mr-2">💡</span> inspirEDU
           </h2>
           <p className="text-2xl text-gray-700 text-center leading-relaxed max-w-md mx-auto">
-            Lorem ipsum dolor sit amet consectetur. Pellentesque dui vivamus etiam senectus nulla rhoncus in fermentum non.
+            Lorem ipsum dolor sit amet consectetur. Pellentesque dui vivamus
+            etiam senectus nulla rhoncus in fermentum non.
           </p>
         </div>
 

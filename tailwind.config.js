@@ -27,7 +27,8 @@ export default {
         "button-black": "#222222", // Black button
         "button-yellow": "#C07906", // Yellowish button
         "custom-div-blue": "#B5D5FF",
-        "custom-border-blue": "#C9E2FF"
+        "custom-border-blue": "#C9E2FF",
+        "gradient-blue": "#7DCAFA"
       },
     },
   },

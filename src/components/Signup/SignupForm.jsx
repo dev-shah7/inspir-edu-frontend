@@ -42,7 +42,6 @@ const SignUpForm = () => {
     e.preventDefault();
     try {
       signupSchema.parse(formData);
-      console.log("Form Submitted Successfully:", formData);
       setErrors({});
     } catch (err) {
       const fieldErrors = {};

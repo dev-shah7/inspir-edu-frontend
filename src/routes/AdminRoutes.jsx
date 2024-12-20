@@ -6,7 +6,7 @@ import MainContent from "../admin/MainContent";
 import Courses from "../admin/courses/Courses";
 import Dashboard from "../admin/dashboard/Dashboard";
 import Modules from "../admin/modules/Modules";
-import Questions from "../admin/questions/Questions"
+import Questions from "../admin/questions/Questions";
 
 const AdminRoutes = () => {
   return (
@@ -30,7 +30,7 @@ const AdminRoutes = () => {
             }
           />
           <Route
-            path="modules"
+            path="courses/:courseId/modules"
             element={
               <MainContent>
                 <Modules />
@@ -38,7 +38,7 @@ const AdminRoutes = () => {
             }
           />
           <Route
-            path="questions"
+            path="modules/:moduleId/questions"
             element={
               <MainContent>
                 <Questions />

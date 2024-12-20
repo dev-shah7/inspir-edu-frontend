@@ -1,7 +1,10 @@
 import { useState } from "react";
 import QuestionTypeDropdown from "./components/QuestionTypeDropdown";
+import useModalStore from "../store/useModalStore";
+import AddMoreQuestionsContent from "./AddMoreQuestionsContent";
 
 const CreateQuestionContent = () => {
+  const { closeModal, queueModal } = useModalStore();
   const [questionType, setQuestionType] = useState("");
   const [options, setOptions] = useState([{ key: Date.now(), value: "" }]);
 
@@ -18,6 +21,11 @@ const CreateQuestionContent = () => {
   const removeOption = (index) => {
     const newOptions = options.filter((_, i) => i !== index);
     setOptions(newOptions);
+  };
+
+  const handleCreateQuestions = () => {
+    queueModal("Add More Questions", <AddMoreQuestionsContent />);
+    closeModal();
   };
 
   const renderOptions = (type) => {
@@ -186,7 +194,10 @@ const CreateQuestionContent = () => {
       </div>
       <div className="mb-6">{renderAnswerInput()}</div>
       <div className="flex justify-center space-x-4">
-        <button className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+        <button
+          className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+          onClick={handleCreateQuestions}
+        >
           Create Question
         </button>
         <button className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition">

@@ -12,7 +12,6 @@ const GradingContent = () => {
   } = useForm();
 
   const onSubmit = (data) => {
-    console.log("Form Data:", data);
     queueModal("Proceed To Next", <ProceedToNextStepContent />);
     closeModal();
   };

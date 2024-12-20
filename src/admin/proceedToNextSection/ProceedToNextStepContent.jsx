@@ -6,7 +6,6 @@ const ProceedToNextStepContent = () => {
   const { closeModal, queueModal } = useModalStore();
 
   const onProceedNext = () => {
-    console.log("Proceeding to add modules...");
     queueModal("Add Module", <CreateModuleContent />);
     closeModal();
   };

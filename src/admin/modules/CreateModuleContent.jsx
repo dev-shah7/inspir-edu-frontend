@@ -32,7 +32,6 @@ const CreateModuleContent = ({ onCancel }) => {
       moduleName: e.target.moduleName.value,
       description: e.target.description.value,
     };
-    console.log("Form Data:", formData);
     queueModal("Add Question", <AddQuestionContent />);
     closeModal();
   };

@@ -15,8 +15,6 @@ const CreateCourseContent = () => {
   const isDeadlineBased = watch("deadlineBased") === "Yes";
 
   const onSubmit = (data) => {
-    console.log("Form Data:", data);
-
     queueModal("Add Grading", <GradingContent />);
     closeModal();
   };

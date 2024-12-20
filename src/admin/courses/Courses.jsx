@@ -1,28 +1,33 @@
 import React from "react";
+import { useNavigate } from "react-router";
 import CustomButton from "../../components/common/CustomButton/CustomButton";
-
-const dummyCourses = [
-  {
-    id: 1,
-    name: "Demo Course 01",
-    deadline: "Yes",
-    hours: 48,
-  },
-  {
-    id: 2,
-    name: "Demo Course 01",
-    deadline: "Yes",
-    hours: 48,
-  },
-];
+import { dummyCourses } from "../../static/data";
+import useModalStore from "../store/useModalStore";
+import CreateCourseContent from "./CreateCourseContent";
 
 const Courses = () => {
+  const { openModal } = useModalStore();
+  const navigate = useNavigate();
+
+  const handleCreateCourse = () => {
+    openModal("Create Course", <CreateCourseContent />);
+  };
   return (
     <>
-      <h1 className="mt-4 text-3xl font-bold text-gray-800">All Courses</h1>
-      <p className="text-lg text-gray-600 mt-1">
-        Welcome to inspireEDU Dashboard
-      </p>
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="mt-4 text-3xl font-bold text-gray-800">All Courses</h1>
+          <p className="text-md text-gray-600 mt-1">
+            Welcome to inspireEDU Dashboard
+          </p>
+        </div>
+        <button
+          onClick={handleCreateCourse}
+          className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 hover:shadow-lg focus:outline-none focus:ring focus:ring-blue-300 transition"
+        >
+          Create Course
+        </button>
+      </div>
       <div className="mt-4 h-0.5 bg-gradient-to-r from-custom-div-blue to-transparent"></div>
       <div className="overflow-x-auto mt-8">
         <table className="min-w-full text-md">
@@ -51,7 +56,9 @@ const Courses = () => {
                       <CustomButton
                         text="View Content"
                         className="w-auto bg-green-800 hover:bg-green-700"
-                        onClick={() => alert("Button Clicked!")}
+                        onClick={() =>
+                          navigate(`/admin/courses/${course.id}/modules`)
+                        }
                       />
                       <CustomButton
                         text="View Users"

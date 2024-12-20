@@ -3,7 +3,7 @@ import CreateCourseContent from "../courses/CreateCourseContent";
 import useModalStore from "../store/useModalStore";
 
 const Dashboard = () => {
-  const { openModal, closeModal, queueModal } = useModalStore();
+  const { openModal } = useModalStore();
 
   return (
     <>
@@ -19,7 +19,6 @@ const Dashboard = () => {
           title="Add new Course"
           buttonText="Add Course"
           onClick={() => {
-            console.log("Clicked");
             openModal("Create Course", <CreateCourseContent />);
           }}
         />

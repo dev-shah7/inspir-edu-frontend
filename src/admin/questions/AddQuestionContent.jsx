@@ -33,11 +33,17 @@ const AddQuestionContent = () => {
           <span className="text-gray-700">No (Own)</span>
         </label>
       </div>
-      <div className="flex justify-center space-x-4" onClick={handleSave}>
-        <button className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+      <div className="flex justify-center space-x-4">
+        <button
+          className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+          onClick={handleSave}
+        >
           Create Questions
         </button>
-        <button className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition">
+        <button
+          className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+          onClick={closeModal}
+        >
           Cancel
         </button>
       </div>

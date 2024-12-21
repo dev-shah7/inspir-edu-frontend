@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import useModalStore from "../store/useModalStore";
 import AddQuestionContent from "../Questions/AddQuestionContent";
 
-const CreateModuleContent = ({ onCancel }) => {
+const CreateModuleContent = () => {
   const { closeModal, queueModal } = useModalStore();
 
   const [selectedType, setSelectedType] = useState(null);
@@ -216,7 +216,7 @@ const CreateModuleContent = ({ onCancel }) => {
           </button>
           <button
             type="button"
-            onClick={onCancel}
+            onClick={() => closeModal()}
             className="px-6 py-2 bg-[#C6433D] text-white font-medium rounded-md hover:bg-[#B91C1C] transition"
           >
             Cancel

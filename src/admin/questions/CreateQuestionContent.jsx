@@ -200,7 +200,10 @@ const CreateQuestionContent = () => {
         >
           Create Question
         </button>
-        <button className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition">
+        <button
+          className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+          onClick={closeModal}
+        >
           Cancel
         </button>
       </div>

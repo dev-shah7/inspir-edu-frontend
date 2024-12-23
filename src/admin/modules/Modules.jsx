@@ -25,6 +25,14 @@ const Modules = () => {
     closeModal();
   };
 
+  const handleEditModule = (moduleId) => {
+    queueModal(
+      "Edit Module",
+      <CreateModuleContent mode="edit" moduleId={moduleId} />
+    );
+    closeModal();
+  };
+
   const headers = [
     { label: "Module Name", align: "left" },
     { label: "Module Type", align: "left" },
@@ -51,7 +59,7 @@ const Modules = () => {
             <CustomButton
               text="Edit"
               className="w-auto bg-blue-900 hover:bg-gray-600"
-              onClick={() => alert("Edit Button Clicked!")}
+              onClick={() => handleEditModule(module.id)}
             />
             <CustomButton
               text="Delete"

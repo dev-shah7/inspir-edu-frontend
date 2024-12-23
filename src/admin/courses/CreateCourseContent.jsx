@@ -1,22 +1,97 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import useModalStore from "../store/useModalStore";
 import GradingContent from "../Grading/GradingContent";
+import { dummyCourses } from "../../static/data";
 
-const CreateCourseContent = () => {
+const CreateCourseContent = ({ mode = "add", courseId }) => {
   const { closeModal, queueModal } = useModalStore();
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm();
 
   const isDeadlineBased = watch("deadlineBased") === "Yes";
 
-  const onSubmit = (data) => {
-    queueModal("Add Grading", <GradingContent />);
-    closeModal();
+  useEffect(() => {
+    if (mode === "edit" && courseId) {
+      const fetchCourseData = async () => {
+        try {
+          // Simulate API delay
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          // Find the course in dummyCourses array
+          const courseData = dummyCourses.find(
+            (course) => course.id === parseInt(courseId)
+          );
+
+          if (!courseData) {
+            throw new Error("Course not found");
+          }
+
+          // Set form values
+          setValue("courseName", courseData.name);
+          setValue("description", courseData.description || "");
+          setValue("deadlineBased", courseData.deadline);
+          if (courseData.deadline === "Yes") {
+            setValue("time", courseData.hours);
+          }
+        } catch (error) {
+          console.error("Error fetching course data:", error);
+          // You might want to show an error message to the user
+        }
+      };
+
+      fetchCourseData();
+    }
+  }, [mode, courseId, setValue]);
+
+  const onSubmit = async (data) => {
+    try {
+      // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const courseData = {
+        name: data.courseName,
+        description: data.description,
+        deadline: data.deadlineBased,
+        hours: data.deadlineBased === "Yes" ? data.time : null,
+      };
+
+      if (mode === "edit") {
+        console.log("Updating course:", courseId, courseData);
+        // Find and update the course in dummyCourses array
+        const courseIndex = dummyCourses.findIndex(
+          (course) => course.id === parseInt(courseId)
+        );
+        if (courseIndex !== -1) {
+          dummyCourses[courseIndex] = {
+            ...dummyCourses[courseIndex],
+            ...courseData,
+          };
+        }
+
+        closeModal();
+      } else {
+        console.log("Creating new course:", courseData);
+        // Add new course to dummyCourses array
+        const newId =
+          Math.max(...dummyCourses.map((course) => course.id), 0) + 1;
+        dummyCourses.push({
+          id: newId,
+          ...courseData,
+        });
+
+        queueModal("Add Grading", <GradingContent />);
+        closeModal();
+      }
+    } catch (error) {
+      console.error("Error saving course:", error);
+      // You might want to show an error message to the user
+    }
   };
 
   return (
@@ -135,7 +210,7 @@ const CreateCourseContent = () => {
             type="submit"
             className="px-6 py-2 bg-[#1A73E8] text-white font-medium rounded-md hover:bg-[#1E40AF] transition"
           >
-            Submit
+            {mode === "edit" ? "Update" : "Submit"}
           </button>
         </div>
       </form>

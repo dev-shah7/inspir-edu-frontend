@@ -1,14 +1,145 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useModalStore from "../store/useModalStore";
 import AddQuestionContent from "../Questions/AddQuestionContent";
 
-const CreateModuleContent = () => {
+// Dummy data structure (replace with your actual data source)
+export const dummyModules = [
+  {
+    id: 1,
+    moduleType: "Document",
+    mediaInputType: "upload",
+    mediaUrl: "",
+    moduleName: "Introduction to React",
+    description: "Learn the basics of React",
+  },
+  {
+    id: 2,
+    moduleType: "Video",
+    mediaInputType: "url",
+    mediaUrl: "https://example.com/video",
+    moduleName: "Advanced React Concepts",
+    description: "Deep dive into React hooks",
+  },
+];
+
+const MediaPreview = ({ type, file, url }) => {
+  if (!file && !url) return null;
+
+  if (type === "Image") {
+    return (
+      <div className="mt-4">
+        <img
+          src={file ? URL.createObjectURL(file) : url}
+          alt="Preview"
+          className="w-48 h-48 object-cover rounded-md mx-auto"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "path/to/fallback-image.png"; // Add your fallback image
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (type === "Video") {
+    return (
+      <div className="mt-4">
+        {file ? (
+          <video
+            className="w-full max-w-lg mx-auto rounded-md"
+            controls
+            src={URL.createObjectURL(file)}
+          >
+            Your browser does not support the video tag.
+          </video>
+        ) : (
+          <div className="aspect-video w-full max-w-lg mx-auto">
+            {url?.includes("youtube") ? (
+              <iframe
+                className="w-full h-full rounded-md"
+                src={getYouTubeEmbedUrl(url)}
+                title="Video preview"
+                allowFullScreen
+              />
+            ) : (
+              <video className="w-full rounded-md" controls src={url}>
+                Your browser does not support the video tag.
+              </video>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4">
+      <p className="text-sm text-gray-600">
+        Selected File: {file?.name || url}
+      </p>
+    </div>
+  );
+};
+
+const getYouTubeEmbedUrl = (url) => {
+  if (!url) return "";
+
+  // Handle different YouTube URL formats
+  const regExp =
+    /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+
+  if (match && match[2].length === 11) {
+    return `https://www.youtube.com/embed/${match[2]}`;
+  }
+
+  return url;
+};
+
+const CreateModuleContent = ({ mode = "add", moduleId }) => {
   const { closeModal, queueModal } = useModalStore();
+  const [isLoading, setIsLoading] = useState(mode === "edit");
 
   const [selectedType, setSelectedType] = useState(null);
   const [mediaInputType, setMediaInputType] = useState("upload");
   const [selectedFile, setSelectedFile] = useState(null);
   const [mediaUrl, setMediaUrl] = useState("");
+  const [moduleName, setModuleName] = useState("");
+  const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    const loadModuleData = async () => {
+      if (mode === "edit" && moduleId) {
+        try {
+          setIsLoading(true);
+          // Simulate API call
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          const moduleData = dummyModules.find(
+            (module) => module.id === parseInt(moduleId)
+          );
+
+          if (!moduleData) {
+            throw new Error("Module not found");
+          }
+
+          // Populate form with existing data
+          setSelectedType(moduleData.moduleType);
+          setMediaInputType(moduleData.mediaInputType);
+          setMediaUrl(moduleData.mediaUrl);
+          setModuleName(moduleData.moduleName);
+          setDescription(moduleData.description);
+        } catch (error) {
+          console.error("Error loading module:", error);
+          // TODO: Show error message to user
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadModuleData();
+  }, [mode, moduleId]);
 
   const handleTypeSelect = (type) => {
     setSelectedType(type);
@@ -22,85 +153,106 @@ const CreateModuleContent = () => {
     setSelectedFile(file);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    const formData = {
-      moduleType: selectedType,
-      mediaInputType,
-      file: selectedFile,
-      mediaUrl,
-      moduleName: e.target.moduleName.value,
-      description: e.target.description.value,
-    };
-    queueModal("Add Question", <AddQuestionContent />);
-    closeModal();
+
+    try {
+      const moduleData = {
+        moduleType: selectedType,
+        mediaInputType,
+        mediaUrl,
+        moduleName,
+        description,
+        file: selectedFile,
+      };
+
+      if (mode === "edit") {
+        // Simulate API update call
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        console.log("Updating module:", { id: moduleId, ...moduleData });
+
+        // Update in dummy data
+        const moduleIndex = dummyModules.findIndex(
+          (module) => module.id === parseInt(moduleId)
+        );
+        if (moduleIndex !== -1) {
+          dummyModules[moduleIndex] = {
+            ...dummyModules[moduleIndex],
+            ...moduleData,
+          };
+        }
+        closeModal();
+      } else {
+        // Simulate API create call
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        console.log("Creating new module:", moduleData);
+
+        // Add to dummy data
+        const newId =
+          Math.max(...dummyModules.map((module) => module.id), 0) + 1;
+        dummyModules.push({
+          id: newId,
+          ...moduleData,
+        });
+
+        queueModal("Add Question", <AddQuestionContent />);
+        closeModal();
+      }
+    } catch (error) {
+      console.error("Error saving module:", error);
+      // TODO: Show error message to user
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="my-2">
       <form onSubmit={handleFormSubmit} className="space-y-6 px-16">
         <h2 className="text-md text-center font-light text-[#0F172A]">
-          Select Module Type
+          {mode === "edit" ? "Edit Module" : "Create New Module"}
         </h2>
 
+        {/* Type Selection Buttons */}
         <div>
           <div className="flex justify-center space-x-6">
-            <button
-              type="button"
-              onClick={() => handleTypeSelect("Document")}
-              className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${
-                selectedType === "Document"
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300 bg-gray-100 opacity-50"
-              } hover:shadow-md transition`}
-            >
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/337/337946.png"
-                alt="Document"
-                className="w-12"
-              />
-              <p className="text-sm mt-2">Document</p>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleTypeSelect("Image")}
-              className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${
-                selectedType === "Image"
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300 bg-gray-100 opacity-50"
-              } hover:shadow-md transition`}
-            >
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/1000/1000917.png"
-                alt="Image"
-                className="w-12"
-              />
-              <p className="text-sm mt-2">Image</p>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleTypeSelect("Video")}
-              className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${
-                selectedType === "Video"
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300 bg-gray-100 opacity-50"
-              } hover:shadow-md transition`}
-            >
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png"
-                alt="Video"
-                className="w-12"
-              />
-              <p className="text-sm mt-2">Video</p>
-            </button>
+            {["Document", "Image", "Video"].map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => handleTypeSelect(type)}
+                className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${
+                  selectedType === type
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300 bg-gray-100 opacity-50"
+                } hover:shadow-md transition`}
+                disabled={mode === "edit"}
+              >
+                <img
+                  src={`https://cdn-icons-png.flaticon.com/512/${
+                    type === "Document"
+                      ? "337/337946"
+                      : type === "Image"
+                      ? "1000/1000917"
+                      : "1384/1384060"
+                  }.png`}
+                  alt={type}
+                  className="w-12"
+                />
+                <p className="text-sm mt-2">{type}</p>
+              </button>
+            ))}
           </div>
         </div>
 
-        {(selectedType === "Document" ||
-          selectedType === "Image" ||
-          selectedType === "Video") && (
+        {/* Media Input Section */}
+        {selectedType && (
           <div>
             <div className="flex justify-center space-x-4 mb-4">
               <button
@@ -135,23 +287,16 @@ const CreateModuleContent = () => {
                 <input
                   type="file"
                   onChange={handleFileChange}
+                  accept={
+                    selectedType === "Image"
+                      ? "image/*"
+                      : selectedType === "Video"
+                      ? "video/*"
+                      : ".pdf,.doc,.docx,.txt"
+                  }
                   className="w-full p-2 border rounded-md focus:outline-none"
                 />
-                {selectedFile && (
-                  <div className="mt-4">
-                    {selectedType === "Image" ? (
-                      <img
-                        src={URL.createObjectURL(selectedFile)}
-                        alt="Preview"
-                        className="w-32 h-32 object-cover rounded-md mx-auto"
-                      />
-                    ) : (
-                      <p className="text-sm text-gray-600">
-                        Selected File: {selectedFile.name}
-                      </p>
-                    )}
-                  </div>
-                )}
+                <MediaPreview type={selectedType} file={selectedFile} />
               </div>
             )}
 
@@ -167,59 +312,56 @@ const CreateModuleContent = () => {
                   className="w-full p-2 border rounded-md focus:outline-none"
                   placeholder={`Enter ${selectedType} URL`}
                 />
-                {mediaUrl && selectedType === "Image" && (
-                  <div className="mt-4">
-                    <img
-                      src={mediaUrl}
-                      alt="Preview"
-                      className="w-32 h-32 object-cover rounded-md mx-auto"
-                    />
-                  </div>
-                )}
+                <MediaPreview type={selectedType} url={mediaUrl} />
               </div>
             )}
           </div>
         )}
 
+        {/* Module Name */}
         <div>
           <label className="block mb-2 text-sm font-medium text-[#0F172A]">
             Module name
           </label>
           <input
             type="text"
-            name="moduleName"
+            value={moduleName}
+            onChange={(e) => setModuleName(e.target.value)}
             className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder="Enter module name"
             required
           />
         </div>
 
+        {/* Description */}
         <div>
           <label className="block mb-2 text-sm font-medium text-[#0F172A]">
             Description
           </label>
           <textarea
-            name="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             rows="4"
             placeholder="Enter description"
             required
-          ></textarea>
+          />
         </div>
 
+        {/* Action Buttons */}
         <div className="flex justify-center space-x-4">
-          <button
-            type="submit"
-            className="px-6 py-2 bg-[#1A73E8] text-white font-medium rounded-md hover:bg-[#1E40AF] transition"
-          >
-            Create Module
-          </button>
           <button
             type="button"
             onClick={() => closeModal()}
             className="px-6 py-2 bg-[#C6433D] text-white font-medium rounded-md hover:bg-[#B91C1C] transition"
           >
             Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-6 py-2 bg-[#1A73E8] text-white font-medium rounded-md hover:bg-[#1E40AF] transition"
+          >
+            {mode === "edit" ? "Update Module" : "Create Module"}
           </button>
         </div>
       </form>

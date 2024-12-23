@@ -4,13 +4,13 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        outfit: ['Outfit', 'sans-serif'],
+        outfit: ["Outfit", "sans-serif"],
       },
       fontSize: {
-        'xl': '24px',
+        xl: "24px",
       },
       lineHeight: {
-        'xl': '30.24px',
+        xl: "30.24px",
       },
       colors: {
         "form-bg": "#C6E0FF", // Form background
@@ -28,7 +28,7 @@ export default {
         "button-yellow": "#C07906", // Yellowish button
         "custom-div-blue": "#B5D5FF",
         "custom-border-blue": "#C9E2FF",
-        "gradient-blue": "#7DCAFA"
+        "gradient-blue": "#7DCAFA",
       },
     },
   },

@@ -16,6 +16,13 @@ const Courses = () => {
     openModal("Create Course", <CreateCourseContent />);
   };
 
+  const handleEditCourse = (courseId) => {
+    openModal(
+      "Edit Course",
+      <CreateCourseContent mode="edit" courseId={courseId} />
+    );
+  };
+
   const filteredCourses = useMemo(() => {
     return dummyCourses.filter((course) =>
       course.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -55,7 +62,7 @@ const Courses = () => {
             <CustomButton
               text="Edit"
               className="w-auto bg-black hover:bg-gray-600"
-              onClick={() => alert("Button Clicked!")}
+              onClick={() => handleEditCourse(course.id)}
             />
             <CustomButton
               text="Invite Users"

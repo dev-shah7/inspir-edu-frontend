@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useModalStore from "../store/useModalStore";
-import AddQuestionContent from "../questions/AddQuestionContent";
+import AddQuestionContent from "../Questions/AddQuestionContent";
 import useModuleStore from "../store/useModuleStore";
 import useCourseStore from "../store/useCourseStore";
 import { toast } from "react-hot-toast";

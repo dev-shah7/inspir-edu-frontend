@@ -1,7 +1,19 @@
 import Logo from "../../../assets/Logo-Blue.png";
 import PropTypes from "prop-types";
+import useAuthStore from "../../../store/auth/useAuthStore";
 
 const Header = ({ isSidebarOpen, setSidebarOpen, userRole }) => {
+  const logout = useAuthStore((state) => state.logout);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Redirect will happen automatically through PrivateRoute when auth state changes
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <header className="bg-[#C6E0FF] mt-2 w-[98vw] mx-auto rounded-2xl h-20 flex items-center justify-between px-6 shadow-md text-black">
       <div className="flex items-center space-x-4">
@@ -37,6 +49,13 @@ const Header = ({ isSidebarOpen, setSidebarOpen, userRole }) => {
           </span>
         </div>
       </div>
+
+      <button
+        onClick={handleLogout}
+        className="px-4 py-2 bg-[#1A73E8] text-white rounded-lg hover:bg-blue-600 transition-colors"
+      >
+        Logout
+      </button>
     </header>
   );
 };

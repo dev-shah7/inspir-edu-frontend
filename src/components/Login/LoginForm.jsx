@@ -1,45 +1,73 @@
 import { useState } from "react";
 import { z } from "zod";
+import { useNavigate } from "react-router-dom";
 import useAuthStore from "../../store/auth/useAuthStore";
 import InputField from "../common/InputField/InputField";
 import Button from "../common/Button/Button";
 import { FiSend } from "react-icons/fi";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
-// Zod validation schema
+// Zod validation schema - Only validate on submit, not during input
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  isForStudentPortal: z.boolean(),
 });
 
 const LoginForm = () => {
-  const { email, password, setEmail, setPassword } = useAuthStore();
+  const navigate = useNavigate();
+  const { login, isLoading, error: authError, clearError } = useAuthStore();
 
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    isForStudentPortal: false,
+  });
   const [errors, setErrors] = useState({});
 
+  // Only validate on blur, not during typing
   const validateField = (name, value) => {
+    if (!value) return; // Don't validate empty fields during typing
+
     try {
-      loginSchema
-        .pick({ [name]: loginSchema.shape[name] })
-        .parse({ [name]: value });
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+      if (name in loginSchema.shape) {
+        loginSchema.shape[name].parse(value);
+        setErrors((prev) => ({ ...prev, [name]: "" }));
+      }
     } catch (err) {
       setErrors((prev) => ({ ...prev, [name]: err.errors[0].message }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    const newValue = type === "checkbox" ? checked : value;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: newValue,
+    }));
+
+    if (authError) clearError();
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = loginSchema.safeParse({ email, password });
-    if (!result.success) {
-      const fieldErrors = {};
-      result.error.errors.forEach((err) => {
-        fieldErrors[err.path[0]] = err.message;
-      });
-      setErrors(fieldErrors);
-    } else {
-      setErrors({});
-      console.log("Form Submitted Successfully:", { email, password });
+
+    try {
+      const validatedData = loginSchema.parse(formData);
+      await login(validatedData);
+      navigate("/");
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const fieldErrors = {};
+        error.errors.forEach((err) => {
+          fieldErrors[err.path[0]] = err.message;
+        });
+        setErrors(fieldErrors);
+      } else {
+        console.error("Login failed");
+      }
     }
   };
 
@@ -58,16 +86,26 @@ const LoginForm = () => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Display auth error if exists */}
+          {authError && (
+            <div className="text-red-500 text-sm text-center bg-red-100 p-2 rounded">
+              {authError}
+            </div>
+          )}
+
           {/* Email Field */}
           <div>
             <InputField
+              label="Email address"
+              placeholder="Email address "
               type="email"
-              placeholder="Email address *"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              name="email"
+              required
+              value={formData.email}
+              onChange={handleChange}
               onBlur={(e) => validateField("email", e.target.value)}
-              className="w-full py-2 px-4 bg-white border rounded-lg focus:ring-2 focus:ring-blue-500"
             />
+
             {errors.email && (
               <p className="text-red-500 text-xs mt-1">{errors.email}</p>
             )}
@@ -76,47 +114,70 @@ const LoginForm = () => {
           {/* Password Field */}
           <div>
             <InputField
+              label="Password"
+              placeholder="Password"
               type="password"
-              placeholder="Password *"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
+              required
+              value={formData.password}
+              onChange={handleChange}
               onBlur={(e) => validateField("password", e.target.value)}
-              className="w-full py-2 px-4 bg-white border rounded-lg focus:ring-2 focus:ring-blue-500"
             />
             {errors.password && (
               <p className="text-red-500 text-xs mt-1">{errors.password}</p>
             )}
           </div>
 
-          {/* Remember Me and Forgot */}
+          {/* Remember Me and Portal Selection */}
           <div className="flex items-center justify-between text-sm text-gray-600">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="remember"
-                className="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label htmlFor="remember" className="ml-2">
-                Remember me
-              </label>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="remember"
+                  className="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="remember" className="ml-2">
+                  Remember me
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isForStudentPortal"
+                  name="isForStudentPortal"
+                  checked={formData.isForStudentPortal}
+                  onChange={handleChange}
+                  className="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="isForStudentPortal" className="ml-2">
+                  Student Portal
+                </label>
+              </div>
             </div>
-            <Link to="/forgot-password" className="text-blue-500 hover:underline">
+            <Link
+              to="/forgot-password"
+              className="text-blue-500 hover:underline"
+            >
               Forgot your password?
             </Link>
           </div>
 
           {/* Submit Button */}
           <Button
-            text="Login Now"
+            text={isLoading ? "Logging in..." : "Login Now"}
             icon={FiSend}
             type="submit"
-            className="w-full flex justify-center items-center bg-blue-500 text-white font-bold py-3 rounded-lg hover:bg-blue-600 transition"
+            disabled={isLoading}
+            className="w-full flex justify-center items-center bg-blue-500 text-white font-bold py-3 rounded-lg hover:bg-blue-600 transition disabled:bg-blue-300"
           />
 
           {/* Or Login With */}
           <div className="flex items-center justify-center text-sm text-gray-500 space-x-2">
             <div className="w-full border-t border-gray-300"></div>
-            <span className="text-xs uppercase font-semibold">or Login with</span>
+            <span className="text-xs uppercase font-semibold">
+              or Login with
+            </span>
             <div className="w-full border-t border-gray-300"></div>
           </div>
 
@@ -138,7 +199,7 @@ const LoginForm = () => {
 
         {/* Footer */}
         <div className="text-center text-gray-600 text-sm">
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <Link to="/signup" className="text-blue-500 hover:underline">
             Register here
           </Link>

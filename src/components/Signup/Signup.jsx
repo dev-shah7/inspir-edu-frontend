@@ -3,9 +3,9 @@ import SignUpForm from "./SignupForm";
 const Signup = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-light-bg px-4 sm:px-6 md:px-8">
-      <div className="w-full max-w-7xl flex flex-col lg:flex-row items-center lg:space-x-8">
-        {/* Left Section */}
-        <div className="flex-1 flex flex-col justify-center items-center p-8 text-center space-y-4">
+      <div className="w-full max-w-7xl flex flex-col lg:flex-row items-stretch lg:space-x-8">
+        {/* Left Section - Fixed (40%) */}
+        <div className="w-full lg:w-[40%] flex flex-col justify-center items-center p-8 text-center space-y-4">
           <h1 className="font-outfit text-4xl sm:text-5xl leading-[3rem] sm:leading-[5rem] font-semibold text-gray-700">
             WELCOME <br /> TO
           </h1>
@@ -18,9 +18,11 @@ const Signup = () => {
           </p>
         </div>
 
-        {/* Right Section */}
-        <div className="flex-1 flex justify-center">
-          <SignUpForm />
+        {/* Right Section - Scrollable (60%) */}
+        <div className="w-full lg:w-[60%] flex justify-center items-center lg:h-screen lg:overflow-hidden">
+          <div className="w-full lg:max-h-screen lg:overflow-y-auto custom-scrollbar">
+            <SignUpForm />
+          </div>
         </div>
       </div>
     </div>

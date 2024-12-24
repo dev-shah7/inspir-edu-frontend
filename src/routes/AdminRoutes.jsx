@@ -2,8 +2,8 @@ import { Routes, Route } from "react-router-dom";
 import PrivateRoute from "../auth/PrivateRoute";
 import Layout from "../components/Layout/Layout";
 
-import MainContent from "../admin/MainContent";
-import Dashboard from "../admin/Dashboard";
+import MainContent from "../admin/questions/MainContent";
+import Dashboard from "../admin/questions/Dashboard";
 import Courses from "../admin/courses/Courses";
 import Modules from "../admin/modules/Modules";
 import Questions from "../admin/questions/Questions";

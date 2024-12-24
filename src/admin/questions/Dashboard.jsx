@@ -1,6 +1,6 @@
-import Card from "./common/Card/Card";
-import CreateCourseContent from "./courses/CreateCourseContent";
-import useModalStore from "./store/useModalStore";
+import Card from "../common/Card/Card";
+import CreateCourseContent from "../courses/CreateCourseContent";
+import useModalStore from "../store/useModalStore";
 
 const Dashboard = () => {
   const { openModal } = useModalStore();

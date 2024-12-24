@@ -1,24 +1,74 @@
 import { useNavigate, useParams } from "react-router";
+import { useState, useMemo, useEffect } from "react";
 import CustomButton from "../../components/common/CustomButton/CustomButton";
 import ModuleCard from "../common/ModuleCard/ModuleCard";
-import { dummyModules } from "../../static/data";
 import useModalStore from "../store/useModalStore";
 import Table from "../common/Table/Table";
 import CreateModuleContent from "../modules/CreateModuleContent";
-import { useState, useMemo } from "react";
+import { courseService } from "../../services/api/courseService";
+import useModuleStore from "../store/useModuleStore";
+import Loader from "../../components/common/Loader/Loader";
+import { toast } from "react-hot-toast";
 
 const Modules = () => {
   const { courseId } = useParams();
   const { closeModal, queueModal } = useModalStore();
   const navigate = useNavigate();
+  const {
+    modules,
+    fetchModulesByCourse,
+    isLoading: modulesLoading,
+  } = useModuleStore();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [gradingInfo, setGradingInfo] = useState(null);
+  const [gradingLoading, setGradingLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Fetch grading instructions when component mounts
+  useEffect(() => {
+    const fetchGradingInstructions = async () => {
+      setGradingLoading(true);
+      try {
+        const response = await courseService.getGradingInstructions(courseId);
+        if (response.isSuccess) {
+          setGradingInfo(response.data);
+        } else {
+          setError(response.message || "Failed to fetch grading instructions");
+        }
+      } catch (error) {
+        setError(
+          error.response?.data?.message ||
+            "Failed to fetch grading instructions"
+        );
+      } finally {
+        setGradingLoading(false);
+      }
+    };
+
+    fetchGradingInstructions();
+  }, [courseId]);
+
+  // Fetch modules when component mounts
+  useEffect(() => {
+    const loadModules = async () => {
+      try {
+        await fetchModulesByCourse(courseId);
+      } catch (error) {
+        toast.error("Failed to load modules");
+      }
+    };
+
+    if (courseId) {
+      loadModules();
+    }
+  }, [courseId, fetchModulesByCourse]);
 
   const filteredModules = useMemo(() => {
-    return dummyModules.filter((module) =>
-      module.name.toLowerCase().includes(searchQuery.toLowerCase())
+    return modules.filter((module) =>
+      module?.name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, modules]);
 
   const handleCreateModule = () => {
     queueModal("Add Module", <CreateModuleContent />);
@@ -35,7 +85,7 @@ const Modules = () => {
 
   const headers = [
     { label: "Module Name", align: "left" },
-    { label: "Module Type", align: "left" },
+    { label: "Description", align: "left" },
     { label: "View/Add Question", align: "center" },
     { label: "Action", align: "center" },
   ];
@@ -44,7 +94,7 @@ const Modules = () => {
     <>
       <tr className="hover:bg-gray-50 transition">
         <td className="p-4">{module.name}</td>
-        <td className="p-4">{module.type}</td>
+        <td className="p-4">{module.description}</td>
         <td className="p-4 text-center">
           <div className="flex gap-2 justify-center">
             <CustomButton
@@ -95,6 +145,14 @@ const Modules = () => {
     </div>
   );
 
+  if (modulesLoading || gradingLoading) {
+    return <Loader />;
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center py-4">Error: {error}</div>;
+  }
+
   return (
     <>
       <p className="text-md text-gray-600 mb-8">Courses / Modules</p>
@@ -134,16 +192,21 @@ const Modules = () => {
           />
         </div>
       </div>
+
       <div className="mt-4 h-0.5 bg-gradient-to-r from-custom-div-blue to-transparent"></div>
 
       <div className="flex justify-between items-center mt-6">
         <p className="text-lg font-outfit text-gray-800">
-          Passing Percentage: 75%
+          Passing Percentage: {gradingInfo?.passingPercentage || "N/A"}%
         </p>
       </div>
 
       <div className="w-full mt-8">
-        <ModuleCard description="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum." />
+        <ModuleCard
+          description={
+            gradingInfo?.instructions || "No instructions available."
+          }
+        />
       </div>
 
       {filteredModules.length > 0 ? (

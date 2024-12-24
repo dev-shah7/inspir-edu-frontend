@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import useModalStore from "../store/useModalStore";
 import AddQuestionContent from "../Questions/AddQuestionContent";
+import useModuleStore from "../store/useModuleStore";
+import useCourseStore from "../store/useCourseStore";
+import { toast } from "react-hot-toast";
 
 // Dummy data structure (replace with your actual data source)
 export const dummyModules = [
@@ -98,8 +102,18 @@ const getYouTubeEmbedUrl = (url) => {
 
 const CreateModuleContent = ({ mode = "add", moduleId }) => {
   const { closeModal, queueModal } = useModalStore();
-  const [isLoading, setIsLoading] = useState(mode === "edit");
+  const { createModule, updateModule, uploadFile } = useModuleStore();
+  const { currentCourse } = useCourseStore();
+  const { courseId: courseIdFromParams } = useParams();
 
+  // Use currentCourse if available, otherwise use courseId from params
+  const courseId = currentCourse || courseIdFromParams;
+
+  console.log("Current Course:", currentCourse);
+  console.log("Course ID from params:", courseIdFromParams);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedType, setSelectedType] = useState(null);
   const [mediaInputType, setMediaInputType] = useState("upload");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -155,52 +169,69 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+
+    if (!courseId) {
+      toast.error("Course ID is required");
+      setIsLoading(false);
+      return;
+    }
 
     try {
+      let fileUrl = "";
+
+      if (selectedFile) {
+        try {
+          fileUrl = await uploadFile(selectedFile, selectedType, (progress) => {
+            setUploadProgress(progress);
+          });
+        } catch (error) {
+          toast.error("File upload failed");
+          setIsLoading(false);
+          return;
+        }
+      }
+
       const moduleData = {
-        moduleType: selectedType,
-        mediaInputType,
-        mediaUrl,
-        moduleName,
-        description,
-        file: selectedFile,
+        name: moduleName,
+        description: description,
+        url: mediaInputType === "upload" ? fileUrl : mediaUrl,
+        courseId: parseInt(courseId),
+        // These will be handled by the service
+        // position: 0,
+        // releaseDate: new Date().toISOString(),
       };
 
       if (mode === "edit") {
-        // Simulate API update call
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        console.log("Updating module:", { id: moduleId, ...moduleData });
-
-        // Update in dummy data
-        const moduleIndex = dummyModules.findIndex(
-          (module) => module.id === parseInt(moduleId)
-        );
-        if (moduleIndex !== -1) {
-          dummyModules[moduleIndex] = {
-            ...dummyModules[moduleIndex],
-            ...moduleData,
-          };
-        }
+        await updateModule(moduleId, moduleData);
+        toast.success("Module updated successfully");
         closeModal();
       } else {
-        // Simulate API create call
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        console.log("Creating new module:", moduleData);
-
-        // Add to dummy data
-        const newId =
-          Math.max(...dummyModules.map((module) => module.id), 0) + 1;
-        dummyModules.push({
-          id: newId,
-          ...moduleData,
-        });
-
-        queueModal("Add Question", <AddQuestionContent />);
+        const response = await createModule(moduleData);
+        toast.success("Module created successfully");
+        queueModal(
+          "Add Question",
+          <AddQuestionContent moduleId={response.data.id} courseId={courseId} />
+        );
         closeModal();
       }
     } catch (error) {
-      console.error("Error saving module:", error);
-      // TODO: Show error message to user
+      toast.error(error.message || "Operation failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getModuleTypeNumber = (type) => {
+    switch (type) {
+      case "Document":
+        return 0;
+      case "Image":
+        return 1;
+      case "Video":
+        return 2;
+      default:
+        return 0;
     }
   };
 

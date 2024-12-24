@@ -2,17 +2,27 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import useModalStore from "../store/useModalStore";
 import GradingContent from "../Grading/GradingContent";
-import { dummyCourses } from "../../static/data";
+import { courseService } from "../../services/api/courseService";
+import useCourseStore from "../store/useCourseStore";
 
 const CreateCourseContent = ({ mode = "add", courseId }) => {
   const { closeModal, queueModal } = useModalStore();
+  const { saveCourse } = useCourseStore();
   const {
     register,
     handleSubmit,
     watch,
     setValue,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      courseName: "",
+      description: "",
+      deadlineBased: "No",
+      time: 0,
+      type: 0, // Default type
+    },
+  });
 
   const isDeadlineBased = watch("deadlineBased") === "Yes";
 
@@ -20,25 +30,15 @@ const CreateCourseContent = ({ mode = "add", courseId }) => {
     if (mode === "edit" && courseId) {
       const fetchCourseData = async () => {
         try {
-          // Simulate API delay
-          await new Promise((resolve) => setTimeout(resolve, 500));
-
-          // Find the course in dummyCourses array
-          const courseData = dummyCourses.find(
-            (course) => course.id === parseInt(courseId)
-          );
-
-          if (!courseData) {
-            throw new Error("Course not found");
-          }
+          const response = await courseService.getCourse(courseId);
+          const courseData = response.data;
 
           // Set form values
           setValue("courseName", courseData.name);
-          setValue("description", courseData.description || "");
-          setValue("deadlineBased", courseData.deadline);
-          if (courseData.deadline === "Yes") {
-            setValue("time", courseData.hours);
-          }
+          setValue("description", courseData.description);
+          setValue("deadlineBased", courseData.isDeadlineBase ? "Yes" : "No");
+          setValue("time", courseData.defaultDeadlineHrs);
+          setValue("type", courseData.type);
         } catch (error) {
           console.error("Error fetching course data:", error);
           // You might want to show an error message to the user
@@ -51,46 +51,26 @@ const CreateCourseContent = ({ mode = "add", courseId }) => {
 
   const onSubmit = async (data) => {
     try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
       const courseData = {
+        id: mode === "edit" ? parseInt(courseId) : 0,
         name: data.courseName,
         description: data.description,
-        deadline: data.deadlineBased,
-        hours: data.deadlineBased === "Yes" ? data.time : null,
+        isDeadlineBase: data.deadlineBased === "Yes",
+        type: 0,
+        defaultDeadlineHrs:
+          data.deadlineBased === "Yes" ? parseInt(data.time) : 0,
       };
 
-      if (mode === "edit") {
-        console.log("Updating course:", courseId, courseData);
-        // Find and update the course in dummyCourses array
-        const courseIndex = dummyCourses.findIndex(
-          (course) => course.id === parseInt(courseId)
-        );
-        if (courseIndex !== -1) {
-          dummyCourses[courseIndex] = {
-            ...dummyCourses[courseIndex],
-            ...courseData,
-          };
-        }
+      const savedCourse = await saveCourse(courseData);
 
+      if (mode === "edit") {
         closeModal();
       } else {
-        console.log("Creating new course:", courseData);
-        // Add new course to dummyCourses array
-        const newId =
-          Math.max(...dummyCourses.map((course) => course.id), 0) + 1;
-        dummyCourses.push({
-          id: newId,
-          ...courseData,
-        });
-
         queueModal("Add Grading", <GradingContent />);
         closeModal();
       }
     } catch (error) {
       console.error("Error saving course:", error);
-      // You might want to show an error message to the user
     }
   };
 

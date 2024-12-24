@@ -1,26 +1,88 @@
-import { useState, useMemo } from "react";
-import { useParams } from "react-router";
-import Table from "../common/Table/Table";
-import { dummyQuestions } from "../../static/data";
+import { useNavigate, useParams } from "react-router";
+import { useState, useMemo, useEffect } from "react";
 import CustomButton from "../../components/common/CustomButton/CustomButton";
 import useModalStore from "../store/useModalStore";
+import Table from "../common/Table/Table";
 import CreateQuestionContent from "./CreateQuestionContent";
+import useQuestionStore from "../store/useQuestionStore";
+import Loader from "../../components/common/Loader/Loader";
+import { toast } from "react-hot-toast";
 
 const Questions = () => {
   const { moduleId } = useParams();
-  const { queueModal, closeModal } = useModalStore();
+  const { closeModal, queueModal } = useModalStore();
+  const navigate = useNavigate();
+  const { questions, fetchQuestionsByModule, isLoading } = useQuestionStore();
+
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Fetch questions when component mounts
+  useEffect(() => {
+    const loadQuestions = async () => {
+      try {
+        await fetchQuestionsByModule(moduleId);
+      } catch (error) {
+        toast.error("Failed to load questions");
+      }
+    };
+
+    if (moduleId) {
+      loadQuestions();
+    }
+  }, [moduleId, fetchQuestionsByModule]);
+
   const filteredQuestions = useMemo(() => {
-    return dummyQuestions.filter((question) =>
-      question.question.toLowerCase().includes(searchQuery.toLowerCase())
+    return questions.filter((question) =>
+      question?.question?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, questions]);
 
   const handleCreateQuestion = () => {
-    queueModal("Create Question", <CreateQuestionContent />);
+    queueModal("Add Question", <CreateQuestionContent />);
     closeModal();
   };
+
+  const handleEditQuestion = (questionId) => {
+    queueModal(
+      "Edit Question",
+      <CreateQuestionContent mode="edit" questionId={questionId} />
+    );
+    closeModal();
+  };
+
+  const headers = [
+    { label: "Question", align: "left" },
+    { label: "Type", align: "left" },
+    { label: "Action", align: "center" },
+  ];
+
+  const renderRow = (question) => (
+    <>
+      <tr className="hover:bg-gray-50 transition">
+        <td className="p-4">{question.question}</td>
+        <td className="p-4">{question.type}</td>
+        <td className="p-4 text-center">
+          <div className="flex gap-2 justify-center">
+            <CustomButton
+              text="Edit"
+              className="w-auto bg-blue-900 hover:bg-gray-600"
+              onClick={() => handleEditQuestion(question.id)}
+            />
+            <CustomButton
+              text="Delete"
+              className="w-auto bg-red-600 hover:bg-red-500"
+              onClick={() => alert("Delete Button Clicked!")}
+            />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td colSpan={headers.length}>
+          <div className="h-0.5 bg-gradient-to-r from-custom-border-blue to-transparent"></div>
+        </td>
+      </tr>
+    </>
+  );
 
   const renderEmptyState = () => (
     <div className="flex flex-col items-center justify-center py-12">
@@ -40,49 +102,15 @@ const Questions = () => {
     </div>
   );
 
-  const headers = [
-    { label: "Question", align: "left" },
-    { label: "Answer", align: "left" },
-    { label: "Question Type", align: "center" },
-    { label: "Action", align: "center" },
-  ];
-
-  const renderRow = (question) => (
-    <>
-      <tr className="hover:bg-gray-50 transition">
-        <td className="p-4">{question.question}</td>
-        <td className="p-4">{question.answer}</td>
-        <td className="p-4 text-center">{question.type}</td>
-        <td className="p-4 text-center">
-          <div className="flex gap-2 justify-center">
-            <CustomButton
-              text="Edit"
-              className="w-auto bg-blue-900 hover:bg-gray-600"
-              onClick={() => alert("Edit Clicked!")}
-            />
-            <CustomButton
-              text="Delete"
-              className="w-auto bg-red-600 hover:bg-red-500"
-              onClick={() => alert("Delete Clicked!")}
-            />
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td colSpan={headers.length}>
-          <div className="h-0.5 bg-gradient-to-r from-custom-border-blue to-transparent"></div>
-        </td>
-      </tr>
-    </>
-  );
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <>
-      <p className="text-md text-gray-600 mb-8">
-        Courses / Modules / Questions
-      </p>
+      <p className="text-md text-gray-600 mb-8">Modules / Questions</p>
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-800">
+        <h1 className="text-3xl font-outfit text-gray-800">
           All Questions for Module ID&nbsp;:&nbsp; {moduleId}
         </h1>
         <div className="flex items-center gap-4">
@@ -117,6 +145,7 @@ const Questions = () => {
           />
         </div>
       </div>
+
       <div className="mt-4 h-0.5 bg-gradient-to-r from-custom-div-blue to-transparent"></div>
 
       {filteredQuestions.length > 0 ? (

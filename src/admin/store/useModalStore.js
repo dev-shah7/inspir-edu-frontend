@@ -4,43 +4,40 @@ const useModalStore = create((set, get) => ({
   isOpen: false,
   title: "",
   content: null,
-  dynamicButtonLabel: "",
-  dynamicButtonCallback: () => {},
   modalQueue: [],
 
-  openModal: (title, content) =>
+  openModal: (title, content) => {
     set({
       isOpen: true,
       title,
       content,
-    }),
+    });
+  },
+
+  queueModal: (title, content) => {
+    set((state) => ({
+      modalQueue: [...state.modalQueue, { title, content }],
+    }));
+  },
 
   closeModal: () => {
     const { modalQueue } = get();
     if (modalQueue.length > 0) {
-      const nextModal = modalQueue.shift();
+      const nextModal = modalQueue[0];
+      const remainingQueue = modalQueue.slice(1);
       set({
         isOpen: true,
         title: nextModal.title,
         content: nextModal.content,
-        modalQueue,
+        modalQueue: remainingQueue,
       });
     } else {
       set({
         isOpen: false,
         title: "",
         content: null,
-        dynamicButtonLabel: "",
-        dynamicButtonCallback: () => {},
       });
     }
-  },
-
-  queueModal: (title, content) => {
-    const { modalQueue } = get();
-    set({
-      modalQueue: [...modalQueue, { title, content }],
-    });
   },
 }));
 

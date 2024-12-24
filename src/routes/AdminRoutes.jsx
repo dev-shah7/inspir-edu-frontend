@@ -2,11 +2,11 @@ import { Routes, Route } from "react-router-dom";
 import PrivateRoute from "../auth/PrivateRoute";
 import Layout from "../components/Layout/Layout";
 
-import MainContent from "../admin/Questions/MainContent";
-import Dashboard from "../admin/Questions/Dashboard";
+import Dashboard from "../admin/Dashboard";
 import Courses from "../admin/courses/Courses";
 import Modules from "../admin/modules/Modules";
-import Questions from "../admin/Questions/Questions";
+import Questions from "../admin/questions/Questions";
+import MainContent from "../admin/MainContent";
 
 const AdminRoutes = () => {
   return (

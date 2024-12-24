@@ -4,6 +4,7 @@ import CustomButton from "../../components/common/CustomButton/CustomButton";
 import useModalStore from "../store/useModalStore";
 import Table from "../common/Table/Table";
 import CreateQuestionContent from "./CreateQuestionContent";
+import AddMoreQuestionsContent from "./AddMoreQuestionsContent";
 import useQuestionStore from "../store/useQuestionStore";
 import Loader from "../../components/common/Loader/Loader";
 import { toast } from "react-hot-toast";

@@ -3,8 +3,8 @@ import PrivateRoute from "../auth/PrivateRoute";
 import Layout from "../components/Layout/Layout";
 
 import MainContent from "../admin/MainContent";
-import Courses from "../admin/courses/Courses";
 import Dashboard from "../admin/dashboard/Dashboard";
+import Courses from "../admin/courses/Courses";
 import Modules from "../admin/modules/Modules";
 import Questions from "../admin/questions/Questions";
 

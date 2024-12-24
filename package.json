@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "echo 'Build started at: '$(date) && rm -rf dist && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "vercel-build": "echo 'Build started at: '$(date) && rm -rf dist && vite build"
   },
   "dependencies": {
     "axios": "^1.7.9",

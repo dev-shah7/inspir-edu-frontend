@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useModalStore from "../store/useModalStore";
-import AddQuestionContent from "../Questions/AddQuestionContent";
 import useModuleStore from "../store/useModuleStore";
 import useCourseStore from "../store/useCourseStore";
 import { toast } from "react-hot-toast";
+import AddMoreQuestionsContent from "../testQuestions/AddMoreQuestionsContent";
 
 // Dummy data structure (replace with your actual data source)
 export const dummyModules = [
@@ -211,7 +211,10 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
         toast.success("Module created successfully");
         queueModal(
           "Add Question",
-          <AddQuestionContent moduleId={response.data.id} courseId={courseId} />
+          <AddMoreQuestionsContent
+            moduleId={response.data.id}
+            courseId={courseId}
+          />
         );
         closeModal();
       }

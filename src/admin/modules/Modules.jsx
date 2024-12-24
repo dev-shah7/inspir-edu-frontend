@@ -4,7 +4,7 @@ import CustomButton from "../../components/common/CustomButton/CustomButton";
 import ModuleCard from "../common/ModuleCard/ModuleCard";
 import useModalStore from "../store/useModalStore";
 import Table from "../common/Table/Table";
-import CreateModuleContent from "../modules/CreateModuleContent";
+import CreateModuleContent from "./CreateModuleContent";
 import { courseService } from "../../services/api/courseService";
 import useModuleStore from "../store/useModuleStore";
 import Loader from "../../components/common/Loader/Loader";

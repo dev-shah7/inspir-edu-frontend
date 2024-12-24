@@ -1,16 +1,24 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import Table from "../common/Table/Table";
 import CustomButton from "../../components/common/CustomButton/CustomButton";
 import { dummyCourses } from "../../static/data";
 import useModalStore from "../store/useModalStore";
 import CreateCourseContent from "./CreateCourseContent";
-// import noDataGif from "../../assets/no-data.gif";
+import { courseService } from "../../services/api/courseService";
+import Loader from "../../components/common/Loader/Loader";
+import useCourseStore from "../store/useCourseStore";
 
 const Courses = () => {
   const { openModal } = useModalStore();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const { courses, fetchCourses, isLoading } = useCourseStore();
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
 
   const handleCreateCourse = () => {
     openModal("Create Course", <CreateCourseContent />);
@@ -24,10 +32,10 @@ const Courses = () => {
   };
 
   const filteredCourses = useMemo(() => {
-    return dummyCourses.filter((course) =>
-      course.name.toLowerCase().includes(searchQuery.toLowerCase())
+    return courses.filter((course) =>
+      course?.name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, courses]);
 
   const headers = [
     { label: "Course Name", align: "left" },
@@ -41,8 +49,8 @@ const Courses = () => {
     <>
       <tr className="hover:bg-gray-50 transition">
         <td className="p-4">{course.name}</td>
-        <td className="p-4">{course.deadline}</td>
-        <td className="p-4">{course.hours}</td>
+        <td className="p-4">{course.isDeadlineBase ? "Yes" : "No"}</td>
+        <td className="p-4">{course.defaultDeadlineHrs || "-"}</td>
         <td className="p-4 text-center">
           <div className="flex gap-2 justify-center">
             <CustomButton
@@ -108,6 +116,18 @@ const Courses = () => {
       </button>
     </div>
   );
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  if (error) {
+    return (
+      <div className="text-red-500 text-center py-4">
+        Error loading courses: {error}
+      </div>
+    );
+  }
 
   return (
     <>

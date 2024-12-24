@@ -72,14 +72,17 @@ const useAuthStore = create(
             roles: data.roles,
           };
 
+          const token = data.token;
+          console.log("Setting token:", token);
+
+          localStorage.setItem("token", token);
+
           set({
             user: userData,
-            token: data.token,
+            token: token,
             isLoading: false,
-            isAuthenticated: true,
-            userRole: data.roles[0].toLowerCase(),
           });
-          localStorage.setItem("token", data.token);
+
           return response;
         } catch (error) {
           set({

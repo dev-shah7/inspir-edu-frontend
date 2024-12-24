@@ -1,12 +1,71 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import QuestionTypeDropdown from "./components/QuestionTypeDropdown";
 import useModalStore from "../store/useModalStore";
+import useQuestionStore from "../store/useQuestionStore";
+import useModuleStore from "../store/useModuleStore";
+import { questionService } from "../../services/api/questionService";
+import { toast } from "react-hot-toast";
 import AddMoreQuestionsContent from "./AddMoreQuestionsContent";
 
 const CreateQuestionContent = () => {
+  const { moduleId: paramModuleId } = useParams();
+  const { currentModule } = useModuleStore();
   const { closeModal, queueModal } = useModalStore();
+  const { createQuestion } = useQuestionStore();
+
+  const moduleId = paramModuleId || currentModule;
+
   const [questionType, setQuestionType] = useState("");
+  const [questionText, setQuestionText] = useState("");
+  const [correctAnswer, setCorrectAnswer] = useState("");
   const [options, setOptions] = useState([{ key: Date.now(), value: "" }]);
+
+  const handleSubmit = async () => {
+    try {
+      if (!moduleId) {
+        toast.error("Module ID is required");
+        return;
+      }
+
+      if (!questionText) {
+        toast.error("Please enter a question");
+        return;
+      }
+
+      if (!questionType) {
+        toast.error("Please select a question type");
+        return;
+      }
+
+      // Format the correct answer based on question type
+      let finalCorrectAnswer = correctAnswer;
+      if (questionType === "mcq") {
+        const selectedOption = options.find(
+          (opt, idx) => idx === parseInt(correctAnswer)
+        );
+        finalCorrectAnswer = selectedOption?.value || "";
+      }
+
+      const questionData = {
+        moduleId: parseInt(moduleId),
+        question: questionText,
+        type: questionService.getQuestionTypeNumber(questionType),
+        correctAnswer: finalCorrectAnswer,
+        sectionId: 0, // Default section
+      };
+
+      await createQuestion(questionData);
+      toast.success("Question created successfully");
+      queueModal(
+        "Add More Questions",
+        <AddMoreQuestionsContent moduleId={moduleId} />
+      );
+      closeModal();
+    } catch (error) {
+      toast.error(error.message || "Failed to create question");
+    }
+  };
 
   const handleOptionChange = (index, newValue) => {
     const newOptions = [...options];
@@ -21,11 +80,6 @@ const CreateQuestionContent = () => {
   const removeOption = (index) => {
     const newOptions = options.filter((_, i) => i !== index);
     setOptions(newOptions);
-  };
-
-  const handleCreateQuestions = () => {
-    queueModal("Add More Questions", <AddMoreQuestionsContent />);
-    closeModal();
   };
 
   const renderOptions = (type) => {
@@ -84,6 +138,8 @@ const CreateQuestionContent = () => {
             <div className="col-span-12">
               <input
                 type="text"
+                value={correctAnswer}
+                onChange={(e) => setCorrectAnswer(e.target.value)}
                 placeholder="Enter your answer"
                 className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -133,6 +189,8 @@ const CreateQuestionContent = () => {
                     <input
                       type="radio"
                       name="correctOption"
+                      checked={correctAnswer === index.toString()}
+                      onChange={() => setCorrectAnswer(index.toString())}
                       className="form-radio h-5 w-5 text-blue-600"
                     />
                   )}
@@ -188,6 +246,8 @@ const CreateQuestionContent = () => {
         <input
           type="text"
           id="question"
+          value={questionText}
+          onChange={(e) => setQuestionText(e.target.value)}
           placeholder="What is the topic of this session?"
           className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
@@ -196,7 +256,7 @@ const CreateQuestionContent = () => {
       <div className="flex justify-center space-x-4">
         <button
           className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-          onClick={handleCreateQuestions}
+          onClick={handleSubmit}
         >
           Create Question
         </button>

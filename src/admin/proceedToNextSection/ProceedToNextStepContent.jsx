@@ -1,6 +1,6 @@
 import React from "react";
 import useModalStore from "../store/useModalStore";
-import CreateModuleContent from "../Modules/CreateModuleContent";
+import CreateModuleContent from "../testModule/CreateModuleContent";
 
 const ProceedToNextStepContent = () => {
   const { closeModal, queueModal } = useModalStore();

@@ -4,7 +4,7 @@ import Layout from "../components/Layout/Layout";
 
 import Dashboard from "../admin/Dashboard";
 import Courses from "../admin/courses/Courses";
-import Modules from "../admin/modules/Modules";
+import Modules from "../admin/testModule/Modules";
 
 import MainContent from "../admin/MainContent";
 import Questions from "../admin/testQuestions/Questions";

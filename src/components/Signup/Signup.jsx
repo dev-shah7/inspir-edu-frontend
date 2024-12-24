@@ -1,6 +1,6 @@
 import SignUpForm from "./SignUpForm";
 
-const Signup = () => {
+const SignUp = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-light-bg px-4 sm:px-6 md:px-8">
       <div className="w-full max-w-7xl flex flex-col lg:flex-row items-stretch lg:space-x-8">
@@ -29,4 +29,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default SignUp;

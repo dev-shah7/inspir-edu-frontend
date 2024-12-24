@@ -171,30 +171,6 @@ const LoginForm = () => {
             disabled={isLoading}
             className="w-full flex justify-center items-center bg-blue-500 text-white font-bold py-3 rounded-lg hover:bg-blue-600 transition disabled:bg-blue-300"
           />
-
-          {/* Or Login With */}
-          <div className="flex items-center justify-center text-sm text-gray-500 space-x-2">
-            <div className="w-full border-t border-gray-300"></div>
-            <span className="text-xs uppercase font-semibold">
-              or Login with
-            </span>
-            <div className="w-full border-t border-gray-300"></div>
-          </div>
-
-          <div className="flex justify-center space-x-4">
-            <button className="w-10 h-10 flex items-center justify-center bg-blue-200 rounded-full hover:bg-blue-300">
-              <span className="text-blue-600">G</span>
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center bg-blue-200 rounded-full hover:bg-blue-300">
-              <span className="text-blue-600">f</span>
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center bg-blue-200 rounded-full hover:bg-blue-300">
-              <span className="text-blue-600">in</span>
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center bg-blue-200 rounded-full hover:bg-blue-300">
-              <span className="text-blue-600">t</span>
-            </button>
-          </div>
         </form>
 
         {/* Footer */}

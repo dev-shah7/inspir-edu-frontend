@@ -9,7 +9,7 @@ import { Toaster } from "react-hot-toast";
 import AdminRoutes from "./routes/AdminRoutes";
 import StudentRoutes from "./routes/StudentRoutes";
 import Login from "./components/Login/Login";
-import Signup from "./components/Signup/SignUp";
+import SignUp from "./components/Signup/SignUp";
 import useAuthStore from "./store/auth/useAuthStore";
 
 const App = () => {
@@ -37,7 +37,7 @@ const App = () => {
               isAuthenticated ? (
                 <Navigate to={userRole === "admin" ? "/admin" : "/student"} />
               ) : (
-                <Signup />
+                <SignUp />
               )
             }
           />

@@ -73,14 +73,14 @@ const useAuthStore = create(
           };
 
           const token = data.token;
-          console.log("Setting token:", token);
-
           localStorage.setItem("token", token);
 
           set({
             user: userData,
             token: token,
             isLoading: false,
+            isAuthenticated: true,
+            userRole: data.roles[0].toLowerCase(),
           });
 
           return response;

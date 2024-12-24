@@ -4,7 +4,7 @@ import useModalStore from "../store/useModalStore";
 import useModuleStore from "../store/useModuleStore";
 import useCourseStore from "../store/useCourseStore";
 import { toast } from "react-hot-toast";
-import AddMoreQuestionsContent from "../questions/AddMoreQuestionsContent";
+import AddMoreQuestionsContent from "../testQuestions/AddMoreQuestionsContent";
 
 // Dummy data structure (replace with your actual data source)
 export const dummyModules = [

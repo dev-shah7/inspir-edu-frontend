@@ -7,7 +7,7 @@ import Courses from "../admin/courses/Courses";
 import Modules from "../admin/modules/Modules";
 
 import MainContent from "../admin/MainContent";
-import Questions from "../admin/questions/Questions";
+import Questions from "../admin/testQuestions/Questions";
 
 const AdminRoutes = () => {
   return (

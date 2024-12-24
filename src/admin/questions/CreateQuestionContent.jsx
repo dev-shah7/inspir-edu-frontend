@@ -23,44 +23,41 @@ const CreateQuestionContent = () => {
 
   const handleSubmit = async () => {
     try {
-      if (!moduleId) {
-        toast.error("Module ID is required");
-        return;
-      }
+      // if (!moduleId) {
+      //   toast.error("Module ID is required");
+      //   return;
+      // }
 
-      if (!questionText) {
-        toast.error("Please enter a question");
-        return;
-      }
+      // if (!questionText) {
+      //   toast.error("Please enter a question");
+      //   return;
+      // }
 
-      if (!questionType) {
-        toast.error("Please select a question type");
-        return;
-      }
+      // if (!questionType) {
+      //   toast.error("Please select a question type");
+      //   return;
+      // }
 
-      // Format the correct answer based on question type
-      let finalCorrectAnswer = correctAnswer;
-      if (questionType === "mcq") {
-        const selectedOption = options.find(
-          (opt, idx) => idx === parseInt(correctAnswer)
-        );
-        finalCorrectAnswer = selectedOption?.value || "";
-      }
+      // // Format the correct answer based on question type
+      // let finalCorrectAnswer = correctAnswer;
+      // if (questionType === "mcq") {
+      //   const selectedOption = options.find(
+      //     (opt, idx) => idx === parseInt(correctAnswer)
+      //   );
+      //   finalCorrectAnswer = selectedOption?.value || "";
+      // }
 
-      const questionData = {
-        moduleId: parseInt(moduleId),
-        question: questionText,
-        type: questionService.getQuestionTypeNumber(questionType),
-        correctAnswer: finalCorrectAnswer,
-        sectionId: 0, // Default section
-      };
+      // const questionData = {
+      //   moduleId: parseInt(moduleId),
+      //   question: questionText,
+      //   type: questionService.getQuestionTypeNumber(questionType),
+      //   correctAnswer: finalCorrectAnswer,
+      //   sectionId: 0, // Default section
+      // };
 
-      await createQuestion(questionData);
+      // await createQuestion(questionData);
       toast.success("Question created successfully");
-      queueModal(
-        "Add More Questions",
-        <AddMoreQuestionsContent moduleId={moduleId} />
-      );
+      queueModal("Add More Questions", <AddMoreQuestionsContent />);
       closeModal();
     } catch (error) {
       toast.error(error.message || "Failed to create question");

@@ -1,6 +1,6 @@
-import SignUpForm from "./SignUpForm";
+import RegisterForm from "./ResgiterForm";
 
-const SignUp = () => {
+const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-light-bg px-4 sm:px-6 md:px-8">
       <div className="w-full max-w-7xl flex flex-col lg:flex-row items-stretch lg:space-x-8">
@@ -21,7 +21,7 @@ const SignUp = () => {
         {/* Right Section - Scrollable (60%) */}
         <div className="w-full lg:w-[60%] flex justify-center items-center lg:h-screen lg:overflow-hidden">
           <div className="w-full lg:max-h-screen lg:overflow-y-auto custom-scrollbar">
-            <SignUpForm />
+            <RegisterForm />
           </div>
         </div>
       </div>
@@ -29,4 +29,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default Register;

@@ -40,7 +40,7 @@ const companySchema = z.object({
   phoneNumber: z.string().min(10, "Invalid phone number"),
 });
 
-const SignUpForm = () => {
+const RegisterForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [userFormData, setUserFormData] = useState({
     name: "",
@@ -333,4 +333,4 @@ const SignUpForm = () => {
   );
 };
 
-export default SignUpForm;
+export default RegisterForm;

@@ -1,6 +1,6 @@
 import useModalStore from "../store/useModalStore";
 import CreateQuestionContent from "./CreateQuestionContent";
-import AddMoreModulesContent from "../testModule/AddMoreModulesContent";
+import AddMoreModulesContent from "../modules/AddMoreModulesContent";
 
 const AddMoreQuestionsContent = () => {
   const { closeModal, queueModal } = useModalStore();

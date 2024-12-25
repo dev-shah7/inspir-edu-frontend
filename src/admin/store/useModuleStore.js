@@ -42,6 +42,21 @@ const useModuleStore = create((set) => ({
     }
   },
 
+  fetchModuleById: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await moduleService.getModuleById(id);
+      set({ currentModule: response, isLoading: false });
+      return response.data;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to fetch module",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
   saveModule: async (moduleData) => {
     set({ isLoading: true, error: null });
     try {

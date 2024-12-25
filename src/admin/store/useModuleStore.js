@@ -73,7 +73,7 @@ const useModuleStore = create((set, get) => ({
               module.id === moduleData.id ? response : module
             )
           : [...state.modules, response],
-        currentModule: response,
+        currentModule: response.data,
       }));
 
       return response;

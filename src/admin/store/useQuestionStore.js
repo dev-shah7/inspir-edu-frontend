@@ -61,7 +61,7 @@ const useQuestionStore = create((set, get) => ({
               question.id === questionData.id ? response : question
             )
           : [...state.questions, response],
-        currentQuestion: response,
+        currentQuestion: response.data,
       }));
 
       return response;

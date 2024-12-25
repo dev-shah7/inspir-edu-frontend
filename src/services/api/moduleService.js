@@ -20,38 +20,8 @@ export const moduleService = {
     return response.data;
   },
 
-  createModule: async (moduleData) => {
-    const formattedData = {
-      id: 0, // For new modules
-      name: moduleData.name,
-      url: moduleData.url,
-      description: moduleData.description,
-      position: 0, // You might want to calculate this based on existing modules
-      releaseDate: new Date().toISOString(),
-      courseId: moduleData.courseId,
-    };
-
-    const response = await api.post("/Module/save", formattedData);
-    return response.data;
-  },
-
-  updateModule: async (moduleId, moduleData) => {
-    const formattedData = {
-      id: moduleId,
-      name: moduleData.name,
-      url: moduleData.url,
-      description: moduleData.description,
-      position: moduleData.position || 0,
-      releaseDate: moduleData.releaseDate || new Date().toISOString(),
-      courseId: moduleData.courseId,
-    };
-
-    const response = await api.put(`/Module/${moduleId}`, formattedData);
-    return response.data;
-  },
-
   deleteModule: async (moduleId) => {
-    const response = await api.delete(`/Module/${moduleId}`);
+    const response = await api.delete(`/Module/delete/${moduleId}`);
     return response.data;
   },
 
@@ -60,8 +30,23 @@ export const moduleService = {
     return response.data;
   },
 
-  getModule: async (moduleId) => {
-    const response = await api.get(`/Module/${moduleId}`);
+  getModuleById: async (id) => {
+    const response = await api.get(`/Module/get-by-id/${id}`);
+    return response.data;
+  },
+
+  saveModule: async (moduleData) => {
+    const formattedData = {
+      id: moduleData.id || 0,
+      name: moduleData.name,
+      url: moduleData.url,
+      description: moduleData.description,
+      position: moduleData.position || 0,
+      releaseDate: moduleData.releaseDate || new Date().toISOString(),
+      courseId: moduleData.courseId,
+    };
+
+    const response = await api.post("/Module/save", formattedData);
     return response.data;
   },
 };

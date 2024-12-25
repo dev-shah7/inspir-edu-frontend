@@ -29,15 +29,43 @@ const useCourseStore = create((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await courseService.saveCourse(courseData);
-      set((state) => ({
-        currentCourse: response.data,
-        courses: [...state.courses, response.data],
-        isLoading: false,
-      }));
+
+      if (courseData.id > 0) {
+        set((state) => ({
+          currentCourse: response.data,
+          courses: state.courses.map((course) =>
+            course.id === response.data.id ? response.data : course
+          ),
+          isLoading: false,
+        }));
+      } else {
+        set((state) => ({
+          currentCourse: response.data,
+          courses: [...state.courses, response.data],
+          isLoading: false,
+        }));
+      }
       return response.data;
     } catch (error) {
       set({
         error: error.response?.data?.message || "Failed to save course",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  deleteCourse: async (courseId) => {
+    set({ isLoading: true, error: null });
+    try {
+      await courseService.deleteCourse(courseId);
+      set((state) => ({
+        courses: state.courses.filter((course) => course.id !== courseId),
+        isLoading: false,
+      }));
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to delete course",
         isLoading: false,
       });
       throw error;

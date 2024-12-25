@@ -13,7 +13,7 @@ const Courses = () => {
   const { openModal } = useModalStore();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const { courses, fetchCourses, isLoading } = useCourseStore();
+  const { courses, fetchCourses, deleteCourse, isLoading } = useCourseStore();
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -29,6 +29,17 @@ const Courses = () => {
       "Edit Course",
       <CreateCourseContent mode="edit" courseId={courseId} />
     );
+  };
+
+  const handleDeleteCourse = async (courseId) => {
+    if (window.confirm("Are you sure you want to delete this course?")) {
+      try {
+        await deleteCourse(courseId);
+      } catch (error) {
+        setError("Failed to delete course");
+        console.error("Error deleting course:", error);
+      }
+    }
   };
 
   const filteredCourses = useMemo(() => {
@@ -80,7 +91,7 @@ const Courses = () => {
             <CustomButton
               text="Delete"
               className="w-auto bg-red-600 hover:bg-red-500"
-              onClick={() => alert("Button Clicked!")}
+              onClick={() => handleDeleteCourse(course.id)}
             />
           </div>
         </td>

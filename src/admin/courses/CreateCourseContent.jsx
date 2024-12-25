@@ -7,7 +7,7 @@ import useCourseStore from "../store/useCourseStore";
 
 const CreateCourseContent = ({ mode = "add", courseId }) => {
   const { closeModal, queueModal } = useModalStore();
-  const { saveCourse } = useCourseStore();
+  const { saveCourse, fetchCourses } = useCourseStore();
   const {
     register,
     handleSubmit,
@@ -61,11 +61,13 @@ const CreateCourseContent = ({ mode = "add", courseId }) => {
           data.deadlineBased === "Yes" ? parseInt(data.time) : 0,
       };
 
-      const savedCourse = await saveCourse(courseData);
+      await saveCourse(courseData);
 
       if (mode === "edit") {
         closeModal();
+        await fetchCourses();
       } else {
+        await fetchCourses();
         queueModal("Add Grading", <GradingContent />);
         closeModal();
       }

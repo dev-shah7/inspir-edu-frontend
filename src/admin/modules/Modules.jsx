@@ -12,11 +12,12 @@ import { toast } from "react-hot-toast";
 
 const Modules = () => {
   const { courseId } = useParams();
-  const { closeModal, queueModal } = useModalStore();
+  const { closeModal, queueModal, openModal } = useModalStore();
   const navigate = useNavigate();
   const {
     modules,
     fetchModulesByCourse,
+    deleteModule,
     isLoading: modulesLoading,
   } = useModuleStore();
 
@@ -76,11 +77,22 @@ const Modules = () => {
   };
 
   const handleEditModule = (moduleId) => {
-    queueModal(
+    openModal(
       "Edit Module",
       <CreateModuleContent mode="edit" moduleId={moduleId} />
     );
-    closeModal();
+  };
+
+  const handleDeleteModule = async (moduleId) => {
+    if (window.confirm("Are you sure you want to delete this module?")) {
+      try {
+        await deleteModule(moduleId);
+        toast.success("Module deleted successfully");
+      } catch (error) {
+        toast.error("Failed to delete module");
+        console.error("Error deleting module:", error);
+      }
+    }
   };
 
   const headers = [
@@ -114,7 +126,7 @@ const Modules = () => {
             <CustomButton
               text="Delete"
               className="w-auto bg-red-600 hover:bg-red-500"
-              onClick={() => alert("Delete Button Clicked!")}
+              onClick={() => handleDeleteModule(module.id)}
             />
           </div>
         </td>

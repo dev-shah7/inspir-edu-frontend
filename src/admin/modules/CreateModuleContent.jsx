@@ -4,7 +4,7 @@ import useModalStore from "../store/useModalStore";
 import useModuleStore from "../store/useModuleStore";
 import useCourseStore from "../store/useCourseStore";
 import { toast } from "react-hot-toast";
-import AddMoreQuestionsContent from "../testQuestions/AddMoreQuestionsContent";
+import InputField from "../../components/common/InputField/InputField";
 
 // Dummy data structure (replace with your actual data source)
 export const dummyModules = [
@@ -101,12 +101,11 @@ const getYouTubeEmbedUrl = (url) => {
 };
 
 const CreateModuleContent = ({ mode = "add", moduleId }) => {
-  const { closeModal, queueModal } = useModalStore();
-  const { createModule, updateModule, uploadFile } = useModuleStore();
+  const { closeModal } = useModalStore();
+  const { saveModule, fetchModuleById, uploadFile } = useModuleStore();
   const { currentCourse } = useCourseStore();
   const { courseId: courseIdFromParams } = useParams();
 
-  // Use currentCourse if available, otherwise use courseId from params
   const courseId = currentCourse || courseIdFromParams;
 
   console.log("Current Course:", currentCourse);
@@ -118,42 +117,60 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
   const [mediaInputType, setMediaInputType] = useState("upload");
   const [selectedFile, setSelectedFile] = useState(null);
   const [mediaUrl, setMediaUrl] = useState("");
-  const [moduleName, setModuleName] = useState("");
-  const [description, setDescription] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    url: "",
+    position: 0,
+    releaseDate: new Date().toISOString(),
+  });
 
+  // Add state to track if we want to replace existing media
+  const [replaceMedia, setReplaceMedia] = useState(false);
+
+  // Determine media type from URL
+  const getMediaTypeFromUrl = (url) => {
+    if (!url) return null;
+    if (url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) return "Image";
+    if (url.match(/\.(mp4|webm|ogg)$/i)) return "Video";
+    if (url.match(/\.(pdf|doc|docx|txt)$/i)) return "Document";
+    if (url.includes("youtube.com") || url.includes("youtu.be")) return "Video";
+    return "Document"; // default case
+  };
+
+  // Update form data when editing
   useEffect(() => {
-    const loadModuleData = async () => {
-      if (mode === "edit" && moduleId) {
+    if (mode === "edit" && moduleId) {
+      const loadModule = async () => {
         try {
           setIsLoading(true);
-          // Simulate API call
-          await new Promise((resolve) => setTimeout(resolve, 500));
+          const moduleData = await fetchModuleById(moduleId);
+          console.log(moduleData, "moduleData");
 
-          const moduleData = dummyModules.find(
-            (module) => module.id === parseInt(moduleId)
-          );
-
-          if (!moduleData) {
-            throw new Error("Module not found");
+          // Set the media type based on the URL
+          if (moduleData.url) {
+            const mediaType = getMediaTypeFromUrl(moduleData.url);
+            setSelectedType(mediaType);
+            setMediaInputType("url");
+            setMediaUrl(moduleData.url);
           }
 
-          // Populate form with existing data
-          setSelectedType(moduleData.moduleType);
-          setMediaInputType(moduleData.mediaInputType);
-          setMediaUrl(moduleData.mediaUrl);
-          setModuleName(moduleData.moduleName);
-          setDescription(moduleData.description);
+          setFormData({
+            name: moduleData.name,
+            description: moduleData.description,
+            url: moduleData.url,
+            position: moduleData.position,
+            releaseDate: moduleData.releaseDate,
+          });
         } catch (error) {
-          console.error("Error loading module:", error);
-          // TODO: Show error message to user
+          toast.error("Failed to load module");
         } finally {
           setIsLoading(false);
         }
-      }
-    };
-
-    loadModuleData();
-  }, [mode, moduleId]);
+      };
+      loadModule();
+    }
+  }, [mode, moduleId, fetchModuleById]);
 
   const handleTypeSelect = (type) => {
     setSelectedType(type);
@@ -167,57 +184,146 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
     setSelectedFile(file);
   };
 
-  const handleFormSubmit = async (e) => {
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Modify the media section to show current media and replacement option
+  const renderMediaSection = () => {
+    if (mode === "edit" && formData.url && !replaceMedia) {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-md font-medium">Current Media</h3>
+            <button
+              type="button"
+              onClick={() => setReplaceMedia(true)}
+              className="text-blue-600 hover:text-blue-800"
+            >
+              Replace Media
+            </button>
+          </div>
+          <MediaPreview type={selectedType} url={formData.url} />
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <div className="flex justify-center space-x-4 mb-4">
+          <button
+            type="button"
+            onClick={() => setMediaInputType("upload")}
+            className={`px-4 py-2 border rounded-lg ${
+              mediaInputType === "upload"
+                ? "border-blue-500 bg-blue-50 text-blue-700"
+                : "border-gray-300 bg-gray-100 text-gray-700"
+            } hover:shadow-md transition`}
+          >
+            Upload {selectedType}
+          </button>
+          <button
+            type="button"
+            onClick={() => setMediaInputType("url")}
+            className={`px-4 py-2 border rounded-lg ${
+              mediaInputType === "url"
+                ? "border-blue-500 bg-blue-50 text-blue-700"
+                : "border-gray-300 bg-gray-100 text-gray-700"
+            } hover:shadow-md transition`}
+          >
+            {selectedType} URL
+          </button>
+        </div>
+
+        {mediaInputType === "upload" && (
+          <div>
+            <label className="block mb-2 text-sm font-medium text-[#0F172A]">
+              Select file
+            </label>
+            <input
+              type="file"
+              onChange={handleFileChange}
+              accept={
+                selectedType === "Image"
+                  ? "image/*"
+                  : selectedType === "Video"
+                  ? "video/*"
+                  : ".pdf,.doc,.docx,.txt"
+              }
+              className="w-full p-2 border rounded-md focus:outline-none"
+            />
+            <MediaPreview type={selectedType} file={selectedFile} />
+          </div>
+        )}
+
+        {mediaInputType === "url" && (
+          <div>
+            <label className="block mb-2 text-sm font-medium text-[#0F172A]">
+              Enter {selectedType} URL
+            </label>
+            <input
+              type="text"
+              value={mediaUrl}
+              onChange={(e) => setMediaUrl(e.target.value)}
+              className="w-full p-2 border rounded-md focus:outline-none"
+              placeholder={`Enter ${selectedType} URL`}
+            />
+            <MediaPreview type={selectedType} url={mediaUrl} />
+          </div>
+        )}
+
+        {mode === "edit" && (
+          <button
+            type="button"
+            onClick={() => setReplaceMedia(false)}
+            className="mt-4 text-blue-600 hover:text-blue-800"
+          >
+            Cancel Replacement
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  // Update handleSubmit to handle media replacement
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (!courseId) {
-      toast.error("Course ID is required");
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      let fileUrl = "";
+      let fileUrl = formData.url;
 
-      if (selectedFile) {
-        try {
+      // Only update the URL if we're replacing the media or it's a new module
+      if (replaceMedia || mode === "add") {
+        if (selectedFile) {
           fileUrl = await uploadFile(selectedFile, selectedType, (progress) => {
             setUploadProgress(progress);
           });
-        } catch (error) {
-          toast.error("File upload failed");
-          setIsLoading(false);
-          return;
+        } else if (mediaInputType === "url" && mediaUrl) {
+          fileUrl = mediaUrl;
         }
       }
 
       const moduleData = {
-        name: moduleName,
-        description: description,
-        url: mediaInputType === "upload" ? fileUrl : mediaUrl,
+        id: mode === "edit" ? parseInt(moduleId) : 0,
+        name: formData.name,
+        description: formData.description,
+        url: fileUrl,
+        position: formData.position,
+        releaseDate: formData.releaseDate,
         courseId: parseInt(courseId),
-        // These will be handled by the service
-        // position: 0,
-        // releaseDate: new Date().toISOString(),
       };
 
-      if (mode === "edit") {
-        await updateModule(moduleId, moduleData);
-        toast.success("Module updated successfully");
-        closeModal();
-      } else {
-        const response = await createModule(moduleData);
-        toast.success("Module created successfully");
-        queueModal(
-          "Add Question",
-          <AddMoreQuestionsContent
-            moduleId={response.data.id}
-            courseId={courseId}
-          />
-        );
-        closeModal();
-      }
+      console.log(moduleData);
+      await saveModule(moduleData);
+      toast.success(
+        `Module ${mode === "edit" ? "updated" : "created"} successfully`
+      );
+      closeModal();
     } catch (error) {
       toast.error(error.message || "Operation failed");
     } finally {
@@ -248,7 +354,7 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
 
   return (
     <div className="my-2">
-      <form onSubmit={handleFormSubmit} className="space-y-6 px-16">
+      <form onSubmit={handleSubmit} className="space-y-6 px-16">
         <h2 className="text-md text-center font-light text-[#0F172A]">
           {mode === "edit" ? "Edit Module" : "Create New Module"}
         </h2>
@@ -285,83 +391,17 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
           </div>
         </div>
 
-        {/* Media Input Section */}
-        {selectedType && (
-          <div>
-            <div className="flex justify-center space-x-4 mb-4">
-              <button
-                type="button"
-                onClick={() => setMediaInputType("upload")}
-                className={`px-4 py-2 border rounded-lg ${
-                  mediaInputType === "upload"
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-300 bg-gray-100 text-gray-700"
-                } hover:shadow-md transition`}
-              >
-                Upload {selectedType}
-              </button>
-              <button
-                type="button"
-                onClick={() => setMediaInputType("url")}
-                className={`px-4 py-2 border rounded-lg ${
-                  mediaInputType === "url"
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-300 bg-gray-100 text-gray-700"
-                } hover:shadow-md transition`}
-              >
-                {selectedType} URL
-              </button>
-            </div>
-
-            {mediaInputType === "upload" && (
-              <div>
-                <label className="block mb-2 text-sm font-medium text-[#0F172A]">
-                  Select file
-                </label>
-                <input
-                  type="file"
-                  onChange={handleFileChange}
-                  accept={
-                    selectedType === "Image"
-                      ? "image/*"
-                      : selectedType === "Video"
-                      ? "video/*"
-                      : ".pdf,.doc,.docx,.txt"
-                  }
-                  className="w-full p-2 border rounded-md focus:outline-none"
-                />
-                <MediaPreview type={selectedType} file={selectedFile} />
-              </div>
-            )}
-
-            {mediaInputType === "url" && (
-              <div>
-                <label className="block mb-2 text-sm font-medium text-[#0F172A]">
-                  Enter {selectedType} URL
-                </label>
-                <input
-                  type="text"
-                  value={mediaUrl}
-                  onChange={(e) => setMediaUrl(e.target.value)}
-                  className="w-full p-2 border rounded-md focus:outline-none"
-                  placeholder={`Enter ${selectedType} URL`}
-                />
-                <MediaPreview type={selectedType} url={mediaUrl} />
-              </div>
-            )}
-          </div>
-        )}
+        {/* Media Section */}
+        {selectedType && renderMediaSection()}
 
         {/* Module Name */}
         <div>
-          <label className="block mb-2 text-sm font-medium text-[#0F172A]">
-            Module name
-          </label>
-          <input
+          <InputField
+            label="Module name"
+            value={formData.name}
             type="text"
-            value={moduleName}
-            onChange={(e) => setModuleName(e.target.value)}
-            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            name="name"
+            onChange={handleInputChange}
             placeholder="Enter module name"
             required
           />
@@ -373,8 +413,9 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
             Description
           </label>
           <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            value={formData.description}
+            name="description"
+            onChange={handleInputChange}
             className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             rows="4"
             placeholder="Enter description"

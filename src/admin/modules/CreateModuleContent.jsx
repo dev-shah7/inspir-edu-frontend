@@ -5,6 +5,7 @@ import useModuleStore from "../store/useModuleStore";
 import useCourseStore from "../store/useCourseStore";
 import { toast } from "react-hot-toast";
 import InputField from "../../components/common/InputField/InputField";
+import AddQuestionContent from "../testQuestions/AddQuestionContent";
 
 // Dummy data structure (replace with your actual data source)
 export const dummyModules = [
@@ -101,8 +102,9 @@ const getYouTubeEmbedUrl = (url) => {
 };
 
 const CreateModuleContent = ({ mode = "add", moduleId }) => {
-  const { closeModal } = useModalStore();
-  const { saveModule, fetchModuleById, uploadFile } = useModuleStore();
+  const { closeModal, queueModal } = useModalStore();
+  const { saveModule, fetchModuleById, uploadFile, fetchModulesByCourse } =
+    useModuleStore();
   const { currentCourse } = useCourseStore();
   const { courseId: courseIdFromParams } = useParams();
 
@@ -113,7 +115,7 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [selectedType, setSelectedType] = useState(null);
+  const [selectedType, setSelectedType] = useState("Image");
   const [mediaInputType, setMediaInputType] = useState("upload");
   const [selectedFile, setSelectedFile] = useState(null);
   const [mediaUrl, setMediaUrl] = useState("");
@@ -131,11 +133,34 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
   // Determine media type from URL
   const getMediaTypeFromUrl = (url) => {
     if (!url) return null;
+
+    // Check for video file extensions including .mov
+    if (url.match(/\.(mp4|webm|ogg|mov)$/i)) return "Video";
+
+    // Check for image file extensions
     if (url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) return "Image";
-    if (url.match(/\.(mp4|webm|ogg)$/i)) return "Video";
+
+    // Check for document file extensions
     if (url.match(/\.(pdf|doc|docx|txt)$/i)) return "Document";
+
+    // Check for YouTube videos
     if (url.includes("youtube.com") || url.includes("youtu.be")) return "Video";
-    return "Document"; // default case
+
+    // For Azure blob storage URLs, check the content by filename
+    if (url.includes("blob.core.windows.net")) {
+      const filename = url.split("/").pop(); // Get the filename from URL
+      if (filename.match(/\.(mp4|webm|ogg|mov)$/i)) return "Video";
+      if (filename.match(/\.(jpg|jpeg|png|gif|webp)$/i)) return "Image";
+      if (filename.match(/\.(pdf|doc|docx|txt)$/i)) return "Document";
+    }
+
+    // If no matches found, try to determine from the filename
+    const filename = url.split("/").pop();
+    if (filename.match(/\.(mp4|webm|ogg|mov)$/i)) return "Video";
+    if (filename.match(/\.(jpg|jpeg|png|gif|webp)$/i)) return "Image";
+
+    // Default case
+    return "Document";
   };
 
   // Update form data when editing
@@ -194,96 +219,151 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
 
   // Modify the media section to show current media and replacement option
   const renderMediaSection = () => {
-    if (mode === "edit" && formData.url && !replaceMedia) {
-      return (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-md font-medium">Current Media</h3>
-            <button
-              type="button"
-              onClick={() => setReplaceMedia(true)}
-              className="text-blue-600 hover:text-blue-800"
-            >
-              Replace Media
-            </button>
-          </div>
-          <MediaPreview type={selectedType} url={formData.url} />
-        </div>
-      );
-    }
-
+    // Show type selection even in edit mode
     return (
       <div>
-        <div className="flex justify-center space-x-4 mb-4">
-          <button
-            type="button"
-            onClick={() => setMediaInputType("upload")}
-            className={`px-4 py-2 border rounded-lg ${
-              mediaInputType === "upload"
-                ? "border-blue-500 bg-blue-50 text-blue-700"
-                : "border-gray-300 bg-gray-100 text-gray-700"
-            } hover:shadow-md transition`}
-          >
-            Upload {selectedType}
-          </button>
-          <button
-            type="button"
-            onClick={() => setMediaInputType("url")}
-            className={`px-4 py-2 border rounded-lg ${
-              mediaInputType === "url"
-                ? "border-blue-500 bg-blue-50 text-blue-700"
-                : "border-gray-300 bg-gray-100 text-gray-700"
-            } hover:shadow-md transition`}
-          >
-            {selectedType} URL
-          </button>
+        {/* Type Selection Buttons - Now available in edit mode too */}
+        <div className="mb-6">
+          <div className="flex justify-center space-x-6">
+            {["Document", "Image", "Video"].map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => {
+                  setSelectedType(type);
+                  // Reset media state when changing type
+                  setMediaInputType("upload");
+                  setSelectedFile(null);
+                  setMediaUrl("");
+                  if (mode === "edit") {
+                    setReplaceMedia(true);
+                  }
+                }}
+                className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${
+                  selectedType === type
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300 bg-gray-100 opacity-50"
+                } hover:shadow-md transition`}
+              >
+                <img
+                  src={`https://cdn-icons-png.flaticon.com/512/${
+                    type === "Document"
+                      ? "337/337946"
+                      : type === "Image"
+                      ? "1000/1000917"
+                      : "1384/1384060"
+                  }.png`}
+                  alt={type}
+                  className="w-12"
+                />
+                <p className="text-sm mt-2">{type}</p>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {mediaInputType === "upload" && (
-          <div>
-            <label className="block mb-2 text-sm font-medium text-[#0F172A]">
-              Select file
-            </label>
-            <input
-              type="file"
-              onChange={handleFileChange}
-              accept={
-                selectedType === "Image"
-                  ? "image/*"
-                  : selectedType === "Video"
-                  ? "video/*"
-                  : ".pdf,.doc,.docx,.txt"
-              }
-              className="w-full p-2 border rounded-md focus:outline-none"
-            />
-            <MediaPreview type={selectedType} file={selectedFile} />
+        {/* Show current media if not replacing */}
+        {mode === "edit" && formData.url && !replaceMedia && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-md font-medium">
+                Current Media ({selectedType})
+              </h3>
+              <button
+                type="button"
+                onClick={() => setReplaceMedia(true)}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                Replace Media
+              </button>
+            </div>
+            <MediaPreview type={selectedType} url={formData.url} />
           </div>
         )}
 
-        {mediaInputType === "url" && (
-          <div>
-            <label className="block mb-2 text-sm font-medium text-[#0F172A]">
-              Enter {selectedType} URL
-            </label>
-            <input
-              type="text"
-              value={mediaUrl}
-              onChange={(e) => setMediaUrl(e.target.value)}
-              className="w-full p-2 border rounded-md focus:outline-none"
-              placeholder={`Enter ${selectedType} URL`}
-            />
-            <MediaPreview type={selectedType} url={mediaUrl} />
-          </div>
-        )}
+        {/* Show upload/URL options when adding new or replacing */}
+        {(mode === "add" || replaceMedia) && (
+          <>
+            <div className="flex justify-center space-x-4 mb-4">
+              <button
+                type="button"
+                onClick={() => setMediaInputType("upload")}
+                className={`px-4 py-2 border rounded-lg ${
+                  mediaInputType === "upload"
+                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-gray-300 bg-gray-100 text-gray-700"
+                } hover:shadow-md transition`}
+              >
+                Upload {selectedType}
+              </button>
+              <button
+                type="button"
+                onClick={() => setMediaInputType("url")}
+                className={`px-4 py-2 border rounded-lg ${
+                  mediaInputType === "url"
+                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-gray-300 bg-gray-100 text-gray-700"
+                } hover:shadow-md transition`}
+              >
+                {selectedType} URL
+              </button>
+            </div>
 
-        {mode === "edit" && (
-          <button
-            type="button"
-            onClick={() => setReplaceMedia(false)}
-            className="mt-4 text-blue-600 hover:text-blue-800"
-          >
-            Cancel Replacement
-          </button>
+            {mediaInputType === "upload" && (
+              <div>
+                <label className="block mb-2 text-sm font-medium text-[#0F172A]">
+                  Select file
+                </label>
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  accept={
+                    selectedType === "Image"
+                      ? "image/*"
+                      : selectedType === "Video"
+                      ? "video/*"
+                      : ".pdf,.doc,.docx,.txt"
+                  }
+                  className="w-full p-2 border rounded-md focus:outline-none"
+                />
+                <MediaPreview type={selectedType} file={selectedFile} />
+              </div>
+            )}
+
+            {mediaInputType === "url" && (
+              <div>
+                <label className="block mb-2 text-sm font-medium text-[#0F172A]">
+                  Enter {selectedType} URL
+                </label>
+                <input
+                  type="text"
+                  value={mediaUrl}
+                  onChange={(e) => setMediaUrl(e.target.value)}
+                  className="w-full p-2 border rounded-md focus:outline-none"
+                  placeholder={`Enter ${selectedType} URL`}
+                />
+                <MediaPreview type={selectedType} url={mediaUrl} />
+              </div>
+            )}
+
+            {mode === "edit" && (
+              <button
+                type="button"
+                onClick={() => {
+                  setReplaceMedia(false);
+                  // Reset to original media type and URL
+                  if (formData.url) {
+                    const originalType = getMediaTypeFromUrl(formData.url);
+                    setSelectedType(originalType);
+                    setMediaUrl(formData.url);
+                  }
+                }}
+                className="mt-4 text-blue-600 hover:text-blue-800"
+              >
+                Cancel Replacement
+              </button>
+            )}
+          </>
         )}
       </div>
     );
@@ -297,7 +377,6 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
     try {
       let fileUrl = formData.url;
 
-      // Only update the URL if we're replacing the media or it's a new module
       if (replaceMedia || mode === "add") {
         if (selectedFile) {
           fileUrl = await uploadFile(selectedFile, selectedType, (progress) => {
@@ -318,11 +397,16 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
         courseId: parseInt(courseId),
       };
 
-      console.log(moduleData);
+      // Save module first
       await saveModule(moduleData);
+
+      // Then refresh the list in the background
+      fetchModulesByCourse(courseId).catch(console.error);
+
       toast.success(
         `Module ${mode === "edit" ? "updated" : "created"} successfully`
       );
+      queueModal("Add More Questions", <AddQuestionContent />);
       closeModal();
     } catch (error) {
       toast.error(error.message || "Operation failed");
@@ -359,40 +443,8 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
           {mode === "edit" ? "Edit Module" : "Create New Module"}
         </h2>
 
-        {/* Type Selection Buttons */}
-        <div>
-          <div className="flex justify-center space-x-6">
-            {["Document", "Image", "Video"].map((type) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => handleTypeSelect(type)}
-                className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${
-                  selectedType === type
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-300 bg-gray-100 opacity-50"
-                } hover:shadow-md transition`}
-                disabled={mode === "edit"}
-              >
-                <img
-                  src={`https://cdn-icons-png.flaticon.com/512/${
-                    type === "Document"
-                      ? "337/337946"
-                      : type === "Image"
-                      ? "1000/1000917"
-                      : "1384/1384060"
-                  }.png`}
-                  alt={type}
-                  className="w-12"
-                />
-                <p className="text-sm mt-2">{type}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Media Section */}
-        {selectedType && renderMediaSection()}
+        {renderMediaSection()}
 
         {/* Module Name */}
         <div>

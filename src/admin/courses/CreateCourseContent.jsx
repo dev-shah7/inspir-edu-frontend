@@ -1,13 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import useModalStore from "../store/useModalStore";
 import GradingContent from "../Grading/GradingContent";
 import { courseService } from "../../services/api/courseService";
 import useCourseStore from "../store/useCourseStore";
+import { toast } from "react-hot-toast";
 
 const CreateCourseContent = ({ mode = "add", courseId }) => {
   const { closeModal, queueModal } = useModalStore();
   const { saveCourse, fetchCourses } = useCourseStore();
+  const [isLoading, setIsLoading] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -20,7 +23,7 @@ const CreateCourseContent = ({ mode = "add", courseId }) => {
       description: "",
       deadlineBased: "No",
       time: 0,
-      type: 0, // Default type
+      type: 0,
     },
   });
 
@@ -51,6 +54,7 @@ const CreateCourseContent = ({ mode = "add", courseId }) => {
 
   const onSubmit = async (data) => {
     try {
+      setIsLoading(true);
       const courseData = {
         id: mode === "edit" ? parseInt(courseId) : 0,
         name: data.courseName,
@@ -64,17 +68,28 @@ const CreateCourseContent = ({ mode = "add", courseId }) => {
       await saveCourse(courseData);
 
       if (mode === "edit") {
+        fetchCourses().catch(console.error);
         closeModal();
-        await fetchCourses();
       } else {
-        await fetchCourses();
+        fetchCourses().catch(console.error);
         queueModal("Add Grading", <GradingContent />);
         closeModal();
       }
     } catch (error) {
       console.error("Error saving course:", error);
+      toast.error("Failed to save course");
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="my-6">
@@ -179,20 +194,30 @@ const CreateCourseContent = ({ mode = "add", courseId }) => {
         )}
 
         <div className="flex justify-center space-x-8 mt-8">
-          {/* Cancel Button */}
           <button
+            type="button"
             className="px-6 py-2 bg-[#C6433D] text-white font-medium rounded-md hover:bg-[#B91C1C] transition"
             onClick={closeModal}
+            disabled={isLoading}
           >
             Cancel
           </button>
 
-          {/* Dynamic Action Button */}
           <button
             type="submit"
             className="px-6 py-2 bg-[#1A73E8] text-white font-medium rounded-md hover:bg-[#1E40AF] transition"
+            disabled={isLoading}
           >
-            {mode === "edit" ? "Update" : "Submit"}
+            {isLoading ? (
+              <div className="flex items-center">
+                <div className="animate-spin h-5 w-5 mr-2 border-b-2 border-white rounded-full"></div>
+                {mode === "edit" ? "Updating..." : "Submitting..."}
+              </div>
+            ) : mode === "edit" ? (
+              "Update"
+            ) : (
+              "Submit"
+            )}
           </button>
         </div>
       </form>

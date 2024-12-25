@@ -25,6 +25,7 @@ const Modules = () => {
   const [gradingInfo, setGradingInfo] = useState(null);
   const [gradingLoading, setGradingLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isOperationLoading, setIsOperationLoading] = useState(false);
 
   // Fetch grading instructions when component mounts
   useEffect(() => {
@@ -157,7 +158,7 @@ const Modules = () => {
     </div>
   );
 
-  if (modulesLoading || gradingLoading) {
+  if (modulesLoading && modules.length === 0) {
     return <Loader />;
   }
 
@@ -168,64 +169,78 @@ const Modules = () => {
   return (
     <>
       <p className="text-md text-gray-600 mb-8">Courses / Modules</p>
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-outfit text-gray-800">
-          All Modules for Course ID&nbsp;:&nbsp; {courseId}
-        </h1>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search modules..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-64 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition"
-            />
-            <svg
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+      <div className="bg-white rounded-lg shadow-md">
+        <div className="p-6 border-b">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-outfit text-gray-800">
+              All Modules for Course ID&nbsp;:&nbsp; {courseId}
+            </h1>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search modules..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-64 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition"
+                />
+                <svg
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <CustomButton
+                text="Create Module"
+                className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 focus:ring focus:ring-blue-300 transition"
+                onClick={handleCreateModule}
               />
-            </svg>
+            </div>
           </div>
-          <CustomButton
-            text="Create Module"
-            className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 focus:ring focus:ring-blue-300 transition"
-            onClick={handleCreateModule}
-          />
+
+          <div className="mt-4 h-0.5 bg-gradient-to-r from-custom-div-blue to-transparent"></div>
+
+          <div className="flex justify-between items-center mt-6">
+            <p className="text-lg font-outfit text-gray-800">
+              Passing Percentage: {gradingInfo?.passingPercentage || "N/A"}%
+            </p>
+          </div>
+
+          <div className="w-full mt-8">
+            <ModuleCard
+              description={
+                gradingInfo?.instructions || "No instructions available."
+              }
+            />
+          </div>
+
+          {filteredModules.length > 0 ? (
+            <Table
+              headers={headers}
+              data={filteredModules}
+              renderRow={renderRow}
+            />
+          ) : (
+            renderEmptyState()
+          )}
         </div>
+
+        {isOperationLoading && (
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+          </div>
+        )}
       </div>
-
-      <div className="mt-4 h-0.5 bg-gradient-to-r from-custom-div-blue to-transparent"></div>
-
-      <div className="flex justify-between items-center mt-6">
-        <p className="text-lg font-outfit text-gray-800">
-          Passing Percentage: {gradingInfo?.passingPercentage || "N/A"}%
-        </p>
-      </div>
-
-      <div className="w-full mt-8">
-        <ModuleCard
-          description={
-            gradingInfo?.instructions || "No instructions available."
-          }
-        />
-      </div>
-
-      {filteredModules.length > 0 ? (
-        <Table headers={headers} data={filteredModules} renderRow={renderRow} />
-      ) : (
-        renderEmptyState()
-      )}
     </>
   );
 };

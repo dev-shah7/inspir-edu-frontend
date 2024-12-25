@@ -2,8 +2,7 @@ import api from "./axios";
 
 export const questionService = {
   getQuestionsByModule: async (moduleId) => {
-    // /api/Question/get-all/{moduleId}
-    const response = await api.get(`/Question/get-all/${moduleId}`);
+    const response = await api.get(`/Question/get-all-by-module/${moduleId}`);
     return response.data;
   },
 

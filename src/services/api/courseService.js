@@ -12,7 +12,7 @@ export const courseService = {
   },
 
   getCourse: async (id) => {
-    const response = await api.get(`/Course/${id}`);
+    const response = await api.get(`/Course/get-by-id/${id}`);
     return response.data;
   },
 

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { moduleService } from "../../services/api/moduleService";
 
-const useModuleStore = create((set) => ({
+const useModuleStore = create((set, get) => ({
   modules: [],
   currentModule: null,
   isLoading: false,
@@ -25,7 +25,12 @@ const useModuleStore = create((set) => ({
   },
 
   fetchModulesByCourse: async (courseId) => {
-    set({ isLoading: true, error: null });
+    // Only set loading if we don't have any modules
+    const hasModules = get().modules.length > 0;
+    if (!hasModules) {
+      set({ isLoading: true });
+    }
+
     try {
       const response = await moduleService.getModulesByCourse(courseId);
       set({
@@ -58,11 +63,10 @@ const useModuleStore = create((set) => ({
   },
 
   saveModule: async (moduleData) => {
-    set({ isLoading: true, error: null });
     try {
       const response = await moduleService.saveModule(moduleData);
 
-      // Update the modules list
+      // Update store without setting loading state
       set((state) => ({
         modules: moduleData.id
           ? state.modules.map((module) =>
@@ -70,31 +74,27 @@ const useModuleStore = create((set) => ({
             )
           : [...state.modules, response],
         currentModule: response,
-        isLoading: false,
       }));
 
       return response;
     } catch (error) {
       set({
         error: error.response?.data?.message || "Failed to save module",
-        isLoading: false,
       });
       throw error;
     }
   },
 
   deleteModule: async (moduleId) => {
-    set({ isLoading: true, error: null });
     try {
       await moduleService.deleteModule(moduleId);
+      // Update store without setting loading state
       set((state) => ({
         modules: state.modules.filter((module) => module.id !== moduleId),
-        isLoading: false,
       }));
     } catch (error) {
       set({
         error: error.response?.data?.message || "Failed to delete module",
-        isLoading: false,
       });
       throw error;
     }

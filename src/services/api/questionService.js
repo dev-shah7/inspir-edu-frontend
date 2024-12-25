@@ -11,36 +11,8 @@ export const questionService = {
     return response.data;
   },
 
-  createQuestion: async (questionData) => {
-    const formattedData = {
-      id: 0, // For new questions
-      question: questionData.question,
-      type: questionData.type,
-      correctAnswer: questionData.correctAnswer,
-      moduleId: questionData.moduleId,
-      sectionId: questionData.sectionId || 0,
-    };
-
-    const response = await api.post("/Question/save", formattedData);
-    return response.data;
-  },
-
-  updateQuestion: async (questionId, questionData) => {
-    const formattedData = {
-      id: questionId,
-      question: questionData.question,
-      type: questionData.type,
-      correctAnswer: questionData.correctAnswer,
-      moduleId: questionData.moduleId,
-      sectionId: questionData.sectionId || 0,
-    };
-
-    const response = await api.put(`/Question/${questionId}`, formattedData);
-    return response.data;
-  },
-
   deleteQuestion: async (questionId) => {
-    const response = await api.delete(`/Question/${questionId}`);
+    const response = await api.delete(`/Question/delete/${questionId}`);
     return response.data;
   },
 
@@ -72,20 +44,111 @@ export const questionService = {
   },
 
   // Helper function to convert frontend type to backend enum
-  getQuestionTypeNumber: (frontendType) => {
-    switch (frontendType) {
-      case "short-answer":
-        return 0; // SHORT
-      case "long-answer":
-        return 1; // LONG
-      case "mcq":
-        return 2; // MCQS
-      case "true-false":
-        return 3; // TRUE_FALSE
-      case "yes-no":
-        return 4; // YES_NO
-      default:
-        return 0; // Default to SHORT
+  getQuestionTypeNumber: (type) => {
+    const types = {
+      "short-answer": 0,
+      "long-answer": 1,
+      mcq: 2,
+      checkbox: 2, // MCQs
+      "true-false": 3,
+      "yes-no": 4,
+    };
+    return types[type] || 0;
+  },
+
+  saveQuestion: async (questionData) => {
+    const response = await api.post("/Question/Save", questionData);
+    return response.data;
+  },
+
+  formatQuestionData: (data) => {
+    const type = questionService.getQuestionTypeNumber(data.type);
+    const isTextQuestion = type === 0 || type === 1; // Short or Long answer
+
+    let questionOptions = [];
+
+    if (!isTextQuestion) {
+      switch (type) {
+        case 2: // MCQs or Checkbox
+          if (data.type === "checkbox") {
+            const selectedIndices = data.correctAnswer
+              ? data.correctAnswer.split(",").map(Number)
+              : [];
+            questionOptions = data.options.map((opt, idx) => ({
+              id: 0,
+              questionId: 0,
+              option: opt.value,
+              isCorrect: selectedIndices.includes(idx),
+            }));
+          } else {
+            questionOptions = data.options.map((opt, idx) => ({
+              id: 0,
+              questionId: 0,
+              option: opt.value,
+              isCorrect: data.correctAnswer === idx.toString(),
+            }));
+          }
+          break;
+        case 3: // True/False
+          questionOptions = [
+            {
+              id: 0,
+              questionId: 0,
+              option: "True",
+              isCorrect: data.correctAnswer === "true",
+            },
+            {
+              id: 0,
+              questionId: 0,
+              option: "False",
+              isCorrect: data.correctAnswer === "false",
+            },
+          ];
+          break;
+        case 4: // Yes/No
+          questionOptions = [
+            {
+              id: 0,
+              questionId: 0,
+              option: "Yes",
+              isCorrect: data.correctAnswer === "yes",
+            },
+            {
+              id: 0,
+              questionId: 0,
+              option: "No",
+              isCorrect: data.correctAnswer === "no",
+            },
+          ];
+          break;
+      }
     }
+
+    return {
+      id: data.id || 0,
+      question: data.question,
+      type: type,
+      correctAnswer: isTextQuestion ? data.correctAnswer : "",
+      moduleId: data.moduleId || null,
+      sectionId: data.sectionId || null,
+      questionOptions: questionOptions,
+    };
+  },
+
+  getQuestionById: async (id) => {
+    const response = await api.get(`/Question/get-by-id/${id}`);
+    return response.data;
+  },
+
+  // Add helper to convert backend type to frontend type
+  getFrontendQuestionType: (type) => {
+    const types = {
+      0: "short-answer",
+      1: "long-answer",
+      2: "mcq",
+      3: "true-false",
+      4: "yes-no",
+    };
+    return types[type] || "short-answer";
   },
 };

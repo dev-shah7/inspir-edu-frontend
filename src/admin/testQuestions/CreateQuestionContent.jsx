@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import QuestionTypeDropdown from "./components/QuestionTypeDropdown";
 import useModalStore from "../store/useModalStore";
@@ -8,11 +8,12 @@ import { questionService } from "../../services/api/questionService";
 import { toast } from "react-hot-toast";
 import AddMoreQuestionsContent from "./AddMoreQuestionsContent";
 
-const CreateQuestionContent = () => {
+const CreateQuestionContent = ({ mode = "add", questionId }) => {
   const { moduleId: paramModuleId } = useParams();
   const { currentModule } = useModuleStore();
   const { closeModal, queueModal } = useModalStore();
-  const { createQuestion } = useQuestionStore();
+  const { saveQuestion, fetchQuestionsByModule, fetchQuestionById } =
+    useQuestionStore();
 
   const moduleId = paramModuleId || currentModule;
 
@@ -20,47 +21,181 @@ const CreateQuestionContent = () => {
   const [questionText, setQuestionText] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState("");
   const [options, setOptions] = useState([{ key: Date.now(), value: "" }]);
+  const [selectedCheckboxes, setSelectedCheckboxes] = useState(new Set());
+
+  useEffect(() => {
+    const loadQuestion = async () => {
+      if (mode === "edit" && questionId) {
+        try {
+          const question = await fetchQuestionById(questionId);
+
+          // Set question type
+          setQuestionType(
+            questionService.getFrontendQuestionType(question.type)
+          );
+
+          // Set question text
+          setQuestionText(question.question);
+
+          // Handle different question types
+          if (question.type === 0 || question.type === 1) {
+            // Short or Long answer
+            setCorrectAnswer(question.correctAnswer);
+          } else if (question.type === 2) {
+            // MCQ or Checkbox
+            // Format options
+            const formattedOptions = question.questionOptions.map((opt) => ({
+              key: Date.now() + Math.random(),
+              value: opt.option,
+            }));
+            setOptions(formattedOptions);
+
+            // Set correct answers
+            if (question.questionOptions.some((opt) => opt.isCorrect)) {
+              if (questionType === "checkbox") {
+                const selected = new Set();
+                question.questionOptions.forEach((opt, idx) => {
+                  if (opt.isCorrect) selected.add(idx);
+                });
+                setSelectedCheckboxes(selected);
+              } else {
+                const correctIndex = question.questionOptions.findIndex(
+                  (opt) => opt.isCorrect
+                );
+                setCorrectAnswer(correctIndex.toString());
+              }
+            }
+          } else if (question.type === 3 || question.type === 4) {
+            // True/False or Yes/No
+            const correctOption = question.questionOptions.find(
+              (opt) => opt.isCorrect
+            );
+            if (correctOption) {
+              setCorrectAnswer(correctOption.option.toLowerCase());
+            }
+          }
+        } catch (error) {
+          toast.error("Failed to load question");
+          closeModal();
+        }
+      }
+    };
+
+    loadQuestion();
+  }, [mode, questionId, fetchQuestionById, closeModal]);
 
   const handleSubmit = async () => {
     try {
-      // if (!moduleId) {
-      //   toast.error("Module ID is required");
-      //   return;
-      // }
+      if (!moduleId) {
+        toast.error("Module ID is required");
+        return;
+      }
 
-      // if (!questionText) {
-      //   toast.error("Please enter a question");
-      //   return;
-      // }
+      if (!questionText) {
+        toast.error("Please enter a question");
+        return;
+      }
 
-      // if (!questionType) {
-      //   toast.error("Please select a question type");
-      //   return;
-      // }
+      if (!questionType) {
+        toast.error("Please select a question type");
+        return;
+      }
 
-      // // Format the correct answer based on question type
-      // let finalCorrectAnswer = correctAnswer;
-      // if (questionType === "mcq") {
-      //   const selectedOption = options.find(
-      //     (opt, idx) => idx === parseInt(correctAnswer)
-      //   );
-      //   finalCorrectAnswer = selectedOption?.value || "";
-      // }
+      const isTextQuestion =
+        questionType === "short-answer" || questionType === "long-answer";
 
-      // const questionData = {
-      //   moduleId: parseInt(moduleId),
-      //   question: questionText,
-      //   type: questionService.getQuestionTypeNumber(questionType),
-      //   correctAnswer: finalCorrectAnswer,
-      //   sectionId: 0, // Default section
-      // };
+      // Validate options for non-text questions
+      if (!isTextQuestion) {
+        if (questionType === "mcq" && !correctAnswer) {
+          toast.error("Please select a correct answer for MCQ");
+          return;
+        }
 
-      // await createQuestion(questionData);
-      toast.success("Question created successfully");
-      queueModal("Add More Questions", <AddMoreQuestionsContent />);
+        if (questionType === "true-false" || questionType === "yes-no") {
+          if (!correctAnswer) {
+            toast.error(
+              `Please select the correct ${
+                questionType === "true-false" ? "True/False" : "Yes/No"
+              } option`
+            );
+            return;
+          }
+        } else if (options.some((opt) => !opt.value)) {
+          toast.error("Please fill in all options");
+          return;
+        }
+      }
+
+      const questionData = {
+        id: mode === "edit" ? parseInt(questionId) : 0,
+        moduleId: parseInt(moduleId),
+        question: questionText,
+        type: questionType,
+        correctAnswer: getCorrectAnswer(),
+        options: getOptions(),
+      };
+
+      await saveQuestion(questionData);
+
+      // Refresh questions list in the background
+      fetchQuestionsByModule(moduleId).catch(console.error);
+
+      toast.success("Question saved successfully");
+
+      if (mode === "add") {
+        queueModal("Add More Questions", <AddMoreQuestionsContent />);
+      }
       closeModal();
     } catch (error) {
-      toast.error(error.message || "Failed to create question");
+      toast.error(error.message || "Failed to save question");
+    }
+  };
+
+  const getCorrectAnswer = () => {
+    switch (questionType) {
+      case "short-answer":
+      case "long-answer":
+        return correctAnswer;
+      case "true-false":
+        return correctAnswer.toLowerCase();
+      case "yes-no":
+        return correctAnswer.toLowerCase();
+      case "mcq":
+        return correctAnswer;
+      case "checkbox":
+        return Array.from(selectedCheckboxes).join(",");
+      default:
+        return "";
+    }
+  };
+
+  const getOptions = () => {
+    switch (questionType) {
+      case "short-answer":
+      case "long-answer":
+        return [];
+      case "true-false":
+        return [
+          { value: "True", isCorrect: correctAnswer === "true" },
+          { value: "False", isCorrect: correctAnswer === "false" },
+        ];
+      case "yes-no":
+        return [
+          { value: "Yes", isCorrect: correctAnswer === "yes" },
+          { value: "No", isCorrect: correctAnswer === "no" },
+        ];
+      case "mcq":
+        return options.map((opt, idx) => ({
+          value: opt.value,
+          isCorrect: idx.toString() === correctAnswer,
+        }));
+      case "checkbox":
+        return options.map((opt, idx) => ({
+          value: opt.value,
+          isCorrect: selectedCheckboxes.has(idx),
+        }));
+      default:
+        return [];
     }
   };
 
@@ -77,6 +212,16 @@ const CreateQuestionContent = () => {
   const removeOption = (index) => {
     const newOptions = options.filter((_, i) => i !== index);
     setOptions(newOptions);
+  };
+
+  const handleCheckboxChange = (index) => {
+    const newSelected = new Set(selectedCheckboxes);
+    if (newSelected.has(index)) {
+      newSelected.delete(index);
+    } else {
+      newSelected.add(index);
+    }
+    setSelectedCheckboxes(newSelected);
   };
 
   const renderOptions = (type) => {
@@ -108,6 +253,9 @@ const CreateQuestionContent = () => {
               <input
                 type="radio"
                 name="correctOption"
+                value={value.toLowerCase()}
+                checked={correctAnswer === value.toLowerCase()}
+                onChange={(e) => setCorrectAnswer(e.target.value)}
                 className="form-radio h-5 w-5 text-blue-600"
               />
             </div>
@@ -150,6 +298,8 @@ const CreateQuestionContent = () => {
             <div className="col-span-12">
               <textarea
                 rows="4"
+                value={correctAnswer}
+                onChange={(e) => setCorrectAnswer(e.target.value)}
                 placeholder="Write a detailed answer"
                 className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               ></textarea>
@@ -182,7 +332,7 @@ const CreateQuestionContent = () => {
                   />
                 </div>
                 <div className="col-span-2 text-center">
-                  {questionType === "mcq" && (
+                  {questionType === "mcq" ? (
                     <input
                       type="radio"
                       name="correctOption"
@@ -190,10 +340,11 @@ const CreateQuestionContent = () => {
                       onChange={() => setCorrectAnswer(index.toString())}
                       className="form-radio h-5 w-5 text-blue-600"
                     />
-                  )}
-                  {questionType === "checkbox" && (
+                  ) : (
                     <input
                       type="checkbox"
+                      checked={selectedCheckboxes.has(index)}
+                      onChange={() => handleCheckboxChange(index)}
                       className="form-checkbox h-5 w-5 text-blue-600"
                     />
                   )}
@@ -226,6 +377,13 @@ const CreateQuestionContent = () => {
       default:
         return <p className="text-gray-500">Please select a question type.</p>;
     }
+  };
+
+  const getSubmitButtonText = () => {
+    if (mode === "edit") {
+      return isLoading ? "Updating..." : "Update Question";
+    }
+    return isLoading ? "Creating..." : "Create Question";
   };
 
   return (

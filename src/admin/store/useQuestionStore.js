@@ -1,14 +1,18 @@
 import { create } from "zustand";
 import { questionService } from "../../services/api/questionService";
 
-const useQuestionStore = create((set) => ({
+const useQuestionStore = create((set, get) => ({
   questions: [],
   currentQuestion: null,
   isLoading: false,
   error: null,
 
   fetchQuestionsByModule: async (moduleId) => {
-    set({ isLoading: true, error: null });
+    const hasQuestions = get().questions.length > 0;
+    if (!hasQuestions) {
+      set({ isLoading: true });
+    }
+
     try {
       const response = await questionService.getQuestionsByModule(moduleId);
       set({
@@ -25,69 +29,62 @@ const useQuestionStore = create((set) => ({
     }
   },
 
-  createQuestion: async (questionData) => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await questionService.createQuestion(questionData);
-      set((state) => ({
-        questions: [...state.questions, response.data],
-        currentQuestion: response.data,
-        isLoading: false,
-      }));
-      return response;
-    } catch (error) {
-      set({
-        error: error.response?.data?.message || "Failed to create question",
-        isLoading: false,
-      });
-      throw error;
-    }
-  },
-
-  updateQuestion: async (questionId, questionData) => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await questionService.updateQuestion(
-        questionId,
-        questionData
-      );
-      set((state) => ({
-        questions: state.questions.map((question) =>
-          question.id === questionId ? response.data : question
-        ),
-        currentQuestion: response.data,
-        isLoading: false,
-      }));
-      return response;
-    } catch (error) {
-      set({
-        error: error.response?.data?.message || "Failed to update question",
-        isLoading: false,
-      });
-      throw error;
-    }
-  },
-
   deleteQuestion: async (questionId) => {
-    set({ isLoading: true, error: null });
     try {
       await questionService.deleteQuestion(questionId);
+
+      // Update store without setting loading state
       set((state) => ({
         questions: state.questions.filter(
           (question) => question.id !== questionId
         ),
-        isLoading: false,
       }));
     } catch (error) {
       set({
         error: error.response?.data?.message || "Failed to delete question",
-        isLoading: false,
       });
       throw error;
     }
   },
 
   clearError: () => set({ error: null }),
+
+  saveQuestion: async (questionData) => {
+    try {
+      const formattedData = questionService.formatQuestionData(questionData);
+      const response = await questionService.saveQuestion(formattedData);
+
+      // Update store without setting loading state
+      set((state) => ({
+        questions: questionData.id
+          ? state.questions.map((question) =>
+              question.id === questionData.id ? response : question
+            )
+          : [...state.questions, response],
+        currentQuestion: response,
+      }));
+
+      return response;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to save question",
+      });
+      throw error;
+    }
+  },
+
+  fetchQuestionById: async (id) => {
+    try {
+      const response = await questionService.getQuestionById(id);
+      set({ currentQuestion: response });
+      return response;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to fetch question",
+      });
+      throw error;
+    }
+  },
 }));
 
 export default useQuestionStore;

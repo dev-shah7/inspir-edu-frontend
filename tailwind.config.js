@@ -30,6 +30,10 @@ export default {
         "custom-border-blue": "#C9E2FF",
         "gradient-blue": "#7DCAFA",
       },
+      backgroundImage: {
+        "card-blue-gradient":
+          "linear-gradient(90deg, #95C3FF 0%, #929FF5 100%)",
+      },
     },
   },
   plugins: [],

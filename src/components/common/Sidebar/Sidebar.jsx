@@ -27,15 +27,14 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
           <span>Dashboard</span>
         </Link>
 
-        <Link
-          to="/admin/courses"
-          className="flex items-center space-x-2 p-2 rounded hover:bg-blue-300"
-        >
-          <span>Courses</span>
-        </Link>
-
         {userRole === "admin" && (
           <>
+            <Link
+              to="/admin/courses"
+              className="flex items-center space-x-2 p-2 rounded hover:bg-blue-300"
+            >
+              <span>Courses</span>
+            </Link>
             <div>
               <button
                 onClick={() => setUsersMenuOpen(!isUsersMenuOpen)}

@@ -2,14 +2,16 @@ export const dummyCourses = [
   {
     id: 1,
     name: "Demo Course 01",
+    description: "This is a demo course description",
     deadline: "Yes",
     hours: 48,
   },
   {
     id: 2,
-    name: "Demo Course 01",
-    deadline: "Yes",
-    hours: 48,
+    name: "Demo Course 02",
+    description: "Another demo course description",
+    deadline: "No",
+    hours: null,
   },
 ];
 

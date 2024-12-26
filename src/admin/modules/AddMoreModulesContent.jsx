@@ -1,5 +1,5 @@
 import useModalStore from "../store/useModalStore";
-import CreateModuleContent from "../modules/CreateModuleContent";
+import CreateModuleContent from "./CreateModuleContent";
 import InviteUsersContent from "../users/InviteUsersContent";
 
 const AddMoreModulesContent = () => {

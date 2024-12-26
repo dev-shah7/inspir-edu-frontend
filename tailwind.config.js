@@ -4,13 +4,13 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        outfit: ['Outfit', 'sans-serif'],
+        outfit: ["Outfit", "sans-serif"],
       },
       fontSize: {
-        'xl': '24px',
+        xl: "24px",
       },
       lineHeight: {
-        'xl': '30.24px',
+        xl: "30.24px",
       },
       colors: {
         "form-bg": "#C6E0FF", // Form background
@@ -31,7 +31,8 @@ export default {
         "gradient-blue": "#7DCAFA",
       },
       backgroundImage: {
-        'card-blue-gradient': 'linear-gradient(90deg, #95C3FF 0%, #929FF5 100%)',
+        "card-blue-gradient":
+          "linear-gradient(90deg, #95C3FF 0%, #929FF5 100%)",
       },
     },
   },

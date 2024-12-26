@@ -1,9 +1,13 @@
-import Card from "../common/Card/Card";
-import CreateCourseContent from "../courses/CreateCourseContent";
-import useModalStore from "../store/useModalStore";
+import Card from "./common/Card/Card";
+import CreateCourseContent from "./courses/CreateCourseContent";
+import useModalStore from "./store/useModalStore";
 
 const Dashboard = () => {
   const { openModal } = useModalStore();
+
+  const handleAddCourse = () => {
+    openModal("Create Course", <CreateCourseContent mode="add" />);
+  };
 
   return (
     <>
@@ -14,13 +18,13 @@ const Dashboard = () => {
         Welcome to inspireEDU Dashboard
       </p>
       <div className="mt-4 h-0.5 bg-gradient-to-r from-custom-div-blue to-transparent"></div>
+
+      {/* Add Course Card */}
       <div className="my-5">
         <Card
           title="Add new Course"
           buttonText="Add Course"
-          onClick={() => {
-            openModal("Create Course", <CreateCourseContent />);
-          }}
+          onClick={handleAddCourse}
         />
       </div>
     </>

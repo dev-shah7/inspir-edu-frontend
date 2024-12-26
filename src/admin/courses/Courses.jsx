@@ -1,26 +1,58 @@
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router";
-import Table from "../common/Table/Table";
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import CustomButton from "../../components/common/CustomButton/CustomButton";
-import { dummyCourses } from "../../static/data";
 import useModalStore from "../store/useModalStore";
+import Table from "../common/Table/Table";
 import CreateCourseContent from "./CreateCourseContent";
-// import noDataGif from "../../assets/no-data.gif";
+import useCourseStore from "../store/useCourseStore";
+import Loader from "../../components/common/Loader/Loader";
+import { toast } from "react-hot-toast";
 
 const Courses = () => {
-  const { openModal } = useModalStore();
   const navigate = useNavigate();
+  const { openModal } = useModalStore();
+  const { courses, fetchCourses, deleteCourse, isLoading } = useCourseStore();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isOperationLoading, setIsOperationLoading] = useState(false);
 
-  const handleCreateCourse = () => {
-    openModal("Create Course", <CreateCourseContent />);
-  };
+  useEffect(() => {
+    const loadCourses = async () => {
+      try {
+        await fetchCourses();
+      } catch (error) {
+        toast.error("Failed to load courses");
+      }
+    };
+    loadCourses();
+  }, [fetchCourses]);
 
   const filteredCourses = useMemo(() => {
-    return dummyCourses.filter((course) =>
-      course.name.toLowerCase().includes(searchQuery.toLowerCase())
+    return courses.filter((course) =>
+      course?.name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, courses]);
+
+  const handleCreateCourse = () => {
+    openModal("Add Course", <CreateCourseContent />);
+  };
+
+  const handleEditCourse = (courseId) => {
+    openModal(
+      "Edit Course",
+      <CreateCourseContent mode="edit" courseId={courseId} />
+    );
+  };
+
+  const handleDeleteCourse = async (courseId) => {
+    if (window.confirm("Are you sure you want to delete this course?")) {
+      try {
+        await deleteCourse(courseId);
+        toast.success("Course deleted successfully");
+      } catch (error) {
+        toast.error("Failed to delete course");
+      }
+    }
+  };
 
   const headers = [
     { label: "Course Name", align: "left" },
@@ -34,8 +66,8 @@ const Courses = () => {
     <>
       <tr className="hover:bg-gray-50 transition">
         <td className="p-4">{course.name}</td>
-        <td className="p-4">{course.deadline}</td>
-        <td className="p-4">{course.hours}</td>
+        <td className="p-4">{course.isDeadlineBase ? "Yes" : "No"}</td>
+        <td className="p-4">{course.defaultDeadlineHrs || "-"}</td>
         <td className="p-4 text-center">
           <div className="flex gap-2 justify-center">
             <CustomButton
@@ -55,7 +87,7 @@ const Courses = () => {
             <CustomButton
               text="Edit"
               className="w-auto bg-black hover:bg-gray-600"
-              onClick={() => alert("Button Clicked!")}
+              onClick={() => handleEditCourse(course.id)}
             />
             <CustomButton
               text="Invite Users"
@@ -65,7 +97,7 @@ const Courses = () => {
             <CustomButton
               text="Delete"
               className="w-auto bg-red-600 hover:bg-red-500"
-              onClick={() => alert("Button Clicked!")}
+              onClick={() => handleDeleteCourse(course.id)}
             />
           </div>
         </td>
@@ -102,55 +134,75 @@ const Courses = () => {
     </div>
   );
 
+  if (isLoading && courses.length === 0) {
+    return <Loader />;
+  }
+
   return (
     <>
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="mt-4 text-3xl font-bold text-gray-800">All Courses</h1>
-          <p className="text-md text-gray-600 mt-1">
-            Welcome to inspireEDU Dashboard
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search courses..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-64 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition"
-            />
-            <svg
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
+      <p className="text-md text-gray-600 mb-8">Courses</p>
+      <div className="bg-white rounded-lg shadow-md">
+        <div className="p-6 border-b">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="mt-4 text-3xl font-bold text-gray-800">
+                All Courses
+              </h1>
+              <p className="text-md text-gray-600 mt-1">
+                Welcome to inspireEDU Dashboard
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search courses..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-64 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition"
+                />
+                <svg
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <button
+                onClick={handleCreateCourse}
+                className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 hover:shadow-lg focus:outline-none focus:ring focus:ring-blue-300 transition"
+              >
+                Create Course
+              </button>
+            </div>
           </div>
-          <button
-            onClick={handleCreateCourse}
-            className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 hover:shadow-lg focus:outline-none focus:ring focus:ring-blue-300 transition"
-          >
-            Create Course
-          </button>
-        </div>
-      </div>
-      <div className="mt-4 h-0.5 bg-gradient-to-r from-custom-div-blue to-transparent"></div>
 
-      {filteredCourses.length > 0 ? (
-        <Table headers={headers} data={filteredCourses} renderRow={renderRow} />
-      ) : (
-        renderEmptyState()
-      )}
+          {filteredCourses.length > 0 ? (
+            <Table
+              headers={headers}
+              data={filteredCourses}
+              renderRow={renderRow}
+            />
+          ) : (
+            renderEmptyState()
+          )}
+        </div>
+
+        {isOperationLoading && (
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+          </div>
+        )}
+      </div>
     </>
   );
 };

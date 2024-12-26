@@ -2,18 +2,46 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import useModalStore from "../store/useModalStore";
 import ProceedToNextStepContent from "../proceedToNextSection/ProceedToNextStepContent";
+import useCourseStore from "../store/useCourseStore";
+import { courseService } from "../../services/api/courseService";
 
 const GradingContent = () => {
   const { closeModal, queueModal } = useModalStore();
+  const { currentCourse } = useCourseStore();
+  console.log(currentCourse, "currentCourse");
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      percentage: "",
+      instructions: "",
+    },
+  });
 
-  const onSubmit = (data) => {
-    queueModal("Proceed To Next", <ProceedToNextStepContent />);
-    closeModal();
+  const onSubmit = async (data) => {
+    try {
+      if (!currentCourse) {
+        throw new Error("Course not found");
+      }
+
+      console.log(currentCourse, "currentCourse");
+      const gradingData = {
+        courseId: currentCourse,
+        instructions: data.instructions,
+        passingPercentage: parseInt(data.percentage),
+      };
+
+      await courseService.saveGradingInstructions(gradingData);
+
+      // After successful save, proceed to next step
+      queueModal("Proceed To Next", <ProceedToNextStepContent />);
+      closeModal();
+    } catch (error) {
+      console.error("Error saving grading instructions:", error);
+      // You might want to show an error message to the user
+    }
   };
 
   return (
@@ -21,7 +49,7 @@ const GradingContent = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 px-16">
         <div>
           <label className="block mb-2 text-md font-light text-[#0F172A]">
-            Enter Percentage
+            Enter Passing Percentage
           </label>
           <input
             type="number"

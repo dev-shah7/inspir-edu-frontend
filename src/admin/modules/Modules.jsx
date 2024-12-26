@@ -1,33 +1,104 @@
 import { useNavigate, useParams } from "react-router";
+import { useState, useMemo, useEffect } from "react";
 import CustomButton from "../../components/common/CustomButton/CustomButton";
 import ModuleCard from "../common/ModuleCard/ModuleCard";
-import { dummyModules } from "../../static/data";
 import useModalStore from "../store/useModalStore";
 import Table from "../common/Table/Table";
-import CreateModuleContent from "../modules/CreateModuleContent";
-import { useState, useMemo } from "react";
+import CreateModuleContent from "./CreateModuleContent";
+import { courseService } from "../../services/api/courseService";
+import useModuleStore from "../store/useModuleStore";
+import Loader from "../../components/common/Loader/Loader";
+import { toast } from "react-hot-toast";
 
 const Modules = () => {
   const { courseId } = useParams();
-  const { closeModal, queueModal } = useModalStore();
+  const { closeModal, queueModal, openModal } = useModalStore();
   const navigate = useNavigate();
+  const {
+    modules,
+    fetchModulesByCourse,
+    deleteModule,
+    isLoading: modulesLoading,
+  } = useModuleStore();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [gradingInfo, setGradingInfo] = useState(null);
+  const [gradingLoading, setGradingLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isOperationLoading, setIsOperationLoading] = useState(false);
+
+  // Fetch grading instructions when component mounts
+  useEffect(() => {
+    const fetchGradingInstructions = async () => {
+      setGradingLoading(true);
+      try {
+        const response = await courseService.getGradingInstructions(courseId);
+        if (response.isSuccess) {
+          setGradingInfo(response.data);
+        } else {
+          setError(response.message || "Failed to fetch grading instructions");
+        }
+      } catch (error) {
+        setError(
+          error.response?.data?.message ||
+            "Failed to fetch grading instructions"
+        );
+      } finally {
+        setGradingLoading(false);
+      }
+    };
+
+    fetchGradingInstructions();
+  }, [courseId]);
+
+  // Fetch modules when component mounts
+  useEffect(() => {
+    const loadModules = async () => {
+      try {
+        await fetchModulesByCourse(courseId);
+      } catch (error) {
+        toast.error("Failed to load modules");
+      }
+    };
+
+    if (courseId) {
+      loadModules();
+    }
+  }, [courseId, fetchModulesByCourse]);
 
   const filteredModules = useMemo(() => {
-    return dummyModules.filter((module) =>
-      module.name.toLowerCase().includes(searchQuery.toLowerCase())
+    return modules.filter((module) =>
+      module?.name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, modules]);
 
   const handleCreateModule = () => {
     queueModal("Add Module", <CreateModuleContent />);
     closeModal();
   };
 
+  const handleEditModule = (moduleId) => {
+    openModal(
+      "Edit Module",
+      <CreateModuleContent mode="edit" moduleId={moduleId} />
+    );
+  };
+
+  const handleDeleteModule = async (moduleId) => {
+    if (window.confirm("Are you sure you want to delete this module?")) {
+      try {
+        await deleteModule(moduleId);
+        toast.success("Module deleted successfully");
+      } catch (error) {
+        toast.error("Failed to delete module");
+        console.error("Error deleting module:", error);
+      }
+    }
+  };
+
   const headers = [
     { label: "Module Name", align: "left" },
-    { label: "Module Type", align: "left" },
+    { label: "Description", align: "left" },
     { label: "View/Add Question", align: "center" },
     { label: "Action", align: "center" },
   ];
@@ -36,7 +107,7 @@ const Modules = () => {
     <>
       <tr className="hover:bg-gray-50 transition">
         <td className="p-4">{module.name}</td>
-        <td className="p-4">{module.type}</td>
+        <td className="p-4">{module.description}</td>
         <td className="p-4 text-center">
           <div className="flex gap-2 justify-center">
             <CustomButton
@@ -51,12 +122,12 @@ const Modules = () => {
             <CustomButton
               text="Edit"
               className="w-auto bg-blue-900 hover:bg-gray-600"
-              onClick={() => alert("Edit Button Clicked!")}
+              onClick={() => handleEditModule(module.id)}
             />
             <CustomButton
               text="Delete"
               className="w-auto bg-red-600 hover:bg-red-500"
-              onClick={() => alert("Delete Button Clicked!")}
+              onClick={() => handleDeleteModule(module.id)}
             />
           </div>
         </td>
@@ -87,62 +158,89 @@ const Modules = () => {
     </div>
   );
 
+  if (modulesLoading && modules.length === 0) {
+    return <Loader />;
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center py-4">Error: {error}</div>;
+  }
+
   return (
     <>
       <p className="text-md text-gray-600 mb-8">Courses / Modules</p>
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-outfit text-gray-800">
-          All Modules for Course ID&nbsp;:&nbsp; {courseId}
-        </h1>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search modules..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-64 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition"
-            />
-            <svg
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+      <div className="bg-white rounded-lg shadow-md">
+        <div className="p-6 border-b">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-outfit text-gray-800">
+              All Modules for Course ID&nbsp;:&nbsp; {courseId}
+            </h1>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search modules..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-64 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition"
+                />
+                <svg
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <CustomButton
+                text="Create Module"
+                className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 focus:ring focus:ring-blue-300 transition"
+                onClick={handleCreateModule}
               />
-            </svg>
+            </div>
           </div>
-          <CustomButton
-            text="Create Module"
-            className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 focus:ring focus:ring-blue-300 transition"
-            onClick={handleCreateModule}
-          />
+
+          <div className="mt-4 h-0.5 bg-gradient-to-r from-custom-div-blue to-transparent"></div>
+
+          <div className="flex justify-between items-center mt-6">
+            <p className="text-lg font-outfit text-gray-800">
+              Passing Percentage: {gradingInfo?.passingPercentage || "N/A"}%
+            </p>
+          </div>
+
+          <div className="w-full mt-8">
+            <ModuleCard
+              description={
+                gradingInfo?.instructions || "No instructions available."
+              }
+            />
+          </div>
+
+          {filteredModules.length > 0 ? (
+            <Table
+              headers={headers}
+              data={filteredModules}
+              renderRow={renderRow}
+            />
+          ) : (
+            renderEmptyState()
+          )}
         </div>
-      </div>
-      <div className="mt-4 h-0.5 bg-gradient-to-r from-custom-div-blue to-transparent"></div>
 
-      <div className="flex justify-between items-center mt-6">
-        <p className="text-lg font-outfit text-gray-800">
-          Passing Percentage: 75%
-        </p>
+        {isOperationLoading && (
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+          </div>
+        )}
       </div>
-
-      <div className="w-full mt-8">
-        <ModuleCard description="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum." />
-      </div>
-
-      {filteredModules.length > 0 ? (
-        <Table headers={headers} data={filteredModules} renderRow={renderRow} />
-      ) : (
-        renderEmptyState()
-      )}
     </>
   );
 };

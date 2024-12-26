@@ -87,6 +87,8 @@ const Questions = () => {
         return "True/False";
       case 4:
         return "Yes/No";
+      case 5:
+        return "Checkbox";
       default:
         return "Unknown";
     }

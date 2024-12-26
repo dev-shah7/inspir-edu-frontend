@@ -38,6 +38,8 @@ export const questionService = {
         return "True/False";
       case 4:
         return "Yes/No";
+      case 5:
+        return "Checkbox";
       default:
         return "Unknown";
     }
@@ -49,7 +51,7 @@ export const questionService = {
       "short-answer": 0,
       "long-answer": 1,
       mcq: 2,
-      checkbox: 2, // MCQs
+      checkbox: 5,
       "true-false": 3,
       "yes-no": 4,
     };
@@ -63,31 +65,30 @@ export const questionService = {
 
   formatQuestionData: (data) => {
     const type = questionService.getQuestionTypeNumber(data.type);
-    const isTextQuestion = type === 0 || type === 1; // Short or Long answer
+    const isTextQuestion = type === 0 || type === 1;
 
     let questionOptions = [];
 
     if (!isTextQuestion) {
       switch (type) {
-        case 2: // MCQs or Checkbox
-          if (data.type === "checkbox") {
-            const selectedIndices = data.correctAnswer
-              ? data.correctAnswer.split(",").map(Number)
-              : [];
-            questionOptions = data.options.map((opt, idx) => ({
-              id: 0,
-              questionId: 0,
-              option: opt.value,
-              isCorrect: selectedIndices.includes(idx),
-            }));
-          } else {
-            questionOptions = data.options.map((opt, idx) => ({
-              id: 0,
-              questionId: 0,
-              option: opt.value,
-              isCorrect: data.correctAnswer === idx.toString(),
-            }));
-          }
+        case 2: // MCQs
+          questionOptions = data.options.map((opt, idx) => ({
+            id: 0,
+            questionId: 0,
+            option: opt.value,
+            isCorrect: data.correctAnswer === idx.toString(),
+          }));
+          break;
+        case 5: // Checkbox
+          const selectedIndices = data.correctAnswer
+            ? data.correctAnswer.split(",").map(Number)
+            : [];
+          questionOptions = data.options.map((opt, idx) => ({
+            id: 0,
+            questionId: 0,
+            option: opt.value,
+            isCorrect: selectedIndices.includes(idx),
+          }));
           break;
         case 3: // True/False
           questionOptions = [
@@ -148,6 +149,7 @@ export const questionService = {
       2: "mcq",
       3: "true-false",
       4: "yes-no",
+      5: "checkbox",
     };
     return types[type] || "short-answer";
   },

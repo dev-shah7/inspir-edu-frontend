@@ -27,21 +27,19 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
     const loadQuestion = async () => {
       if (mode === "edit" && questionId) {
         try {
-          const question = await fetchQuestionById(questionId);
+          const { data: question } = await fetchQuestionById(questionId);
 
-          // Set question type
-          setQuestionType(
-            questionService.getFrontendQuestionType(question.type)
+          // First set the question type
+          const frontendType = questionService.getFrontendQuestionType(
+            question.type
           );
-
-          // Set question text
+          setQuestionType(frontendType);
           setQuestionText(question.question);
 
-          // Handle different question types
           if (question.type === 0 || question.type === 1) {
             // Short or Long answer
             setCorrectAnswer(question.correctAnswer);
-          } else if (question.type === 2) {
+          } else if (question.type === 2 || question.type === 5) {
             // MCQ or Checkbox
             // Format options
             const formattedOptions = question.questionOptions.map((opt) => ({
@@ -50,9 +48,9 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
             }));
             setOptions(formattedOptions);
 
-            // Set correct answers
             if (question.questionOptions.some((opt) => opt.isCorrect)) {
-              if (questionType === "checkbox") {
+              if (question.type === 5) {
+                // Changed from questionType to question.type
                 const selected = new Set();
                 question.questionOptions.forEach((opt, idx) => {
                   if (opt.isCorrect) selected.add(idx);
@@ -66,7 +64,6 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
               }
             }
           } else if (question.type === 3 || question.type === 4) {
-            // True/False or Yes/No
             const correctOption = question.questionOptions.find(
               (opt) => opt.isCorrect
             );

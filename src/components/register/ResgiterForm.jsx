@@ -125,14 +125,11 @@ const RegisterForm = () => {
           userDetail: userFormData,
           companyDetail: companyFormData,
           subscriptionPlanId: selectedPlan,
-          successUrl: window.location.origin + "/dashboard",
+          successUrl: window.location.origin + "/login",
           cancelUrl: window.location.origin + "/signup",
         };
 
-        console.log("finalData", finalData);
         await signup(finalData);
-        toast.success("Signup successful! Redirecting to dashboard...");
-        // Redirect will happen automatically through routing due to auth state change
       } catch (error) {
         toast.error(
           error.response?.data?.message || "Signup failed. Please try again."
@@ -301,19 +298,17 @@ const RegisterForm = () => {
               text={currentStep === 3 ? "Complete Signup" : "Next"}
               type="submit"
               disabled={isLoading}
-              className={`px-6 py-2 ${
-                currentStep === 3
-                  ? "bg-green-500 hover:bg-green-600"
-                  : "bg-blue-500 hover:bg-blue-600"
-              } text-white rounded-lg ${
-                isLoading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`px-6 py-2 ${currentStep === 3
+                ? "bg-green-500 hover:bg-green-600"
+                : "bg-blue-500 hover:bg-blue-600"
+                } text-white rounded-lg ${isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
             >
               {isLoading
                 ? "Loading..."
                 : currentStep === 3
-                ? "Complete Signup"
-                : "Next"}
+                  ? "Complete Signup"
+                  : "Next"}
             </Button>
           </div>
 

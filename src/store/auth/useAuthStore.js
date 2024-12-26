@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { authService } from "../../services/api/authService";
+import { plansDetails } from "../../assets/plansDetails";
 
 /**
  * @typedef {Object} User
@@ -21,6 +22,7 @@ const useAuthStore = create(
       token: null,
       isAuthenticated: false,
       userRole: null,
+      subscriptionPlans: [],
       isLoading: false,
       error: null,
 
@@ -29,24 +31,8 @@ const useAuthStore = create(
         try {
           const response = await authService.signup(signupData);
           const { data } = response;
-
-          const userData = {
-            id: data.id,
-            name: data.name,
-            email: data.email,
-            phoneNumber: data.phoneNumber,
-            companyId: data.companyId,
-            roles: data.roles,
-          };
-
-          set({
-            user: userData,
-            token: data.token,
-            isLoading: false,
-            isAuthenticated: true,
-            userRole: data.roles[0].toLowerCase(),
-          });
-          localStorage.setItem("token", data.token);
+          set({ isLoading: false, error: null });
+          window.location.href = data.sessionUrl;
           return response;
         } catch (error) {
           set({
@@ -92,6 +78,35 @@ const useAuthStore = create(
           throw error;
         }
       },
+
+      fetchSubscriptionPlans: async () => {
+        set({ isLoading: true });
+        try {
+          const response = await authService.getSubscriptionPlans();
+          const { data } = response;
+
+          const mergedPlans = plansDetails.map((plan) => {
+            const matchedData = data.find((item) => item.title === plan.title);
+            return matchedData
+              ? { ...plan, ...matchedData }
+              : plan;
+          });
+
+          set({
+            subscriptionPlans: mergedPlans,
+            isLoading: false,
+          });
+
+          return response;
+        } catch (error) {
+          set({
+            error: error.response?.data?.message || "Failed to fetch subscription plans",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+
 
       logout: async () => {
         set({ isLoading: true, error: null });

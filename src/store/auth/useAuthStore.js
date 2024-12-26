@@ -102,9 +102,7 @@ const useAuthStore = create(
 
           const mergedPlans = plansDetails.map((plan) => {
             const matchedData = data.find((item) => item.title === plan.title);
-            return matchedData
-              ? { ...plan, ...matchedData }
-              : plan;
+            return matchedData ? { ...plan, ...matchedData } : plan;
           });
 
           set({
@@ -115,32 +113,29 @@ const useAuthStore = create(
           return response;
         } catch (error) {
           set({
-            error: error.response?.data?.message || "Failed to fetch subscription plans",
+            error:
+              error.response?.data?.message ||
+              "Failed to fetch subscription plans",
             isLoading: false,
           });
           throw error;
         }
       },
 
+      logout: () => {
+        localStorage.removeItem("auth-storage");
 
-      logout: async () => {
-        set({ isLoading: true, error: null });
-        try {
-          await authService.logout();
-          set({
+        set(
+          {
             user: null,
             token: null,
             isAuthenticated: false,
             userRole: null,
             isLoading: false,
-          });
-          localStorage.removeItem("token");
-        } catch (error) {
-          set({
-            error: error.response?.data?.message || "Logout failed",
-            isLoading: false,
-          });
-        }
+            error: null,
+          },
+          true
+        );
       },
 
       clearError: () => set({ error: null }),

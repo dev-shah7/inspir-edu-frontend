@@ -11,7 +11,7 @@ import Login from "./components/Login/Login";
 import Signup from "./components/Signup/Signup";
 
 const isAuthenticated = true;
-const userRole = "admin";
+const userRole = "student";
 
 const App = () => {
   return (

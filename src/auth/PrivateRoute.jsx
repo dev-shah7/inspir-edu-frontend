@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 const PrivateRoute = ({ roleRequired }) => {
   const isAuthenticated = true;
-  const role = "admin";
+  const role = "student";
 
   if (!isAuthenticated) {
     return <Navigate to="/login" />;

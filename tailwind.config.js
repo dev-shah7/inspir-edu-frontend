@@ -28,7 +28,10 @@ export default {
         "button-yellow": "#C07906", // Yellowish button
         "custom-div-blue": "#B5D5FF",
         "custom-border-blue": "#C9E2FF",
-        "gradient-blue": "#7DCAFA"
+        "gradient-blue": "#7DCAFA",
+      },
+      backgroundImage: {
+        'card-blue-gradient': 'linear-gradient(90deg, #95C3FF 0%, #929FF5 100%)',
       },
     },
   },

@@ -1,6 +1,19 @@
+import toast from "react-hot-toast";
 import LoginForm from "./LoginForm";
+import { useSearchParams } from "react-router";
+import { useEffect } from "react";
 
 const Login = () => {
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const isNewSubscription = searchParams.get("isNewSubscription");
+
+    if (isNewSubscription && isNewSubscription.toLowerCase() === "true") {
+      toast.success("User registered successfully!");
+    }
+  }, [searchParams]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-light-bg px-4 sm:px-6 md:px-8">
       <div className="flex flex-col lg:flex-row w-full max-w-7xl">

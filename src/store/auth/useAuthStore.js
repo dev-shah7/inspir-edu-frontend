@@ -43,6 +43,21 @@ const useAuthStore = create(
         }
       },
 
+      studentSignup: async (signupData) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await authService.studentSignup(signupData);
+          set({ isLoading: false, error: null });
+          return response;
+        } catch (error) {
+          set({
+            error: error.response?.data?.message || "Signup failed",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+
       login: async (credentials) => {
         set({ isLoading: true, error: null });
         try {

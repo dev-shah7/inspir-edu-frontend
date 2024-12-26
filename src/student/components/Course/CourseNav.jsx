@@ -10,21 +10,6 @@ const CourseNav = ({ course = null }) => {
       <button className="px-6 py-2 bg-gray-200 text-gray-700 rounded-md shadow-md font-medium" onClick={() => navigate(`/student/courses/${course?.id || 2}/modules`)}>
         Modules
       </button>
-      <button className="px-6 py-2 bg-gray-200 text-gray-700 rounded-md shadow-md font-medium">
-        Assignment
-      </button>
-      <button className="px-6 py-2 bg-gray-200 text-gray-700 rounded-md shadow-md font-medium">
-        Resource
-      </button>
-      <button className="px-6 py-2 bg-gray-200 text-gray-700 rounded-md shadow-md font-medium">
-        Recordings
-      </button>
-      <button className="px-6 py-2 bg-gray-200 text-gray-700 rounded-md shadow-md font-medium">
-        Report Details
-      </button>
-      <button className="px-6 py-2 bg-gray-200 text-gray-700 rounded-md shadow-md font-medium">
-        Certificate
-      </button>
     </div>
   )
 }

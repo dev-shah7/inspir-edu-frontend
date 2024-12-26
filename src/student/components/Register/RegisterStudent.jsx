@@ -1,0 +1,199 @@
+import { useState, useEffect } from "react";
+import { z } from "zod";
+import { FiUser, FiMail, FiLock, FiPhone, FiMapPin } from "react-icons/fi";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import Button from "../../../components/common/Button/Button";
+import InputField from "../../../components/common/InputField/InputField";
+import useAuthStore from "../../../store/auth/useAuthStore";
+
+// Zod Validation Schema for User
+const userSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  phoneNumber: z.string().min(10, "Invalid phone number"),
+  address: z.string().min(5, "Address must be at least 5 characters"),
+  city: z.string().min(2, "City must be at least 2 characters"),
+  terms: z
+    .boolean()
+    .refine((val) => val === true, "You must agree to the terms"),
+});
+
+const RegisterStudent = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { studentSignup, isLoading } = useAuthStore();
+
+  const [invitationToken, setInvitationToken] = useState("Dpl26nynPP"); // add some invitation token from Postman as long as invite User is not working
+  const [userFormData, setUserFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    phoneNumber: "",
+    address: "",
+    city: "",
+    terms: false,
+  });
+
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const token = searchParams.get("invitationToken");
+    if (token) {
+      setInvitationToken(token);
+    }
+  }, [location.search]);
+
+  const validateUserDetails = () => {
+    try {
+      userSchema.parse(userFormData);
+      setErrors({});
+      return true;
+    } catch (err) {
+      const fieldErrors = {};
+      err.errors.forEach((error) => {
+        fieldErrors[error.path[0]] = error.message;
+      });
+      setErrors(fieldErrors);
+      return false;
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (validateUserDetails()) {
+      try {
+        const payload = {
+          name: userFormData.name,
+          password: userFormData.password,
+          address: userFormData.address,
+          phoneNumber: userFormData.phoneNumber,
+          city: userFormData.city,
+          invitationToken,
+        };
+
+        console.log("Payload:", payload);
+
+        await studentSignup(payload);
+        toast.success("User registered successfully!");
+        navigate('/login');
+      } catch (error) {
+        toast.error("Signup failed. Please try again.");
+      }
+    }
+  };
+
+  return (
+    <div className="w-full flex justify-center items-start px-4 py-8">
+      <div className="w-full max-w-4xl bg-blue-100 rounded-xl shadow-lg p-8">
+        <div className="text-center space-y-2 mb-6">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">
+            SignUp
+          </h2>
+          <p className="text-gray-600 font-medium text-sm sm:text-base">
+            CREATE AN ACCOUNT
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <InputField
+            type="text"
+            placeholder="Name *"
+            value={userFormData.name}
+            onChange={(e) =>
+              setUserFormData({ ...userFormData, name: e.target.value })
+            }
+            error={errors.name}
+            Icon={FiUser}
+          />
+          <InputField
+            type="email"
+            placeholder="Email address *"
+            value={userFormData.email}
+            onChange={(e) =>
+              setUserFormData({ ...userFormData, email: e.target.value })
+            }
+            error={errors.email}
+            Icon={FiMail}
+          />
+          <InputField
+            type="password"
+            placeholder="Password * (at least 8 characters)"
+            value={userFormData.password}
+            onChange={(e) =>
+              setUserFormData({ ...userFormData, password: e.target.value })
+            }
+            error={errors.password}
+            Icon={FiLock}
+          />
+          <InputField
+            type="tel"
+            placeholder="Phone Number *"
+            value={userFormData.phoneNumber}
+            onChange={(e) =>
+              setUserFormData({ ...userFormData, phoneNumber: e.target.value })
+            }
+            error={errors.phoneNumber}
+            Icon={FiPhone}
+          />
+          <InputField
+            type="text"
+            placeholder="Address *"
+            value={userFormData.address}
+            onChange={(e) =>
+              setUserFormData({ ...userFormData, address: e.target.value })
+            }
+            error={errors.address}
+            Icon={FiMapPin}
+          />
+          <InputField
+            type="text"
+            placeholder="City *"
+            value={userFormData.city}
+            onChange={(e) =>
+              setUserFormData({ ...userFormData, city: e.target.value })
+            }
+            error={errors.city}
+            Icon={FiMapPin}
+          />
+          <div className="flex items-center text-sm text-gray-600">
+            <input
+              type="checkbox"
+              id="terms"
+              checked={userFormData.terms}
+              onChange={(e) =>
+                setUserFormData({ ...userFormData, terms: e.target.checked })
+              }
+              className="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label htmlFor="terms" className="ml-2">
+              I agree to the terms of service
+            </label>
+          </div>
+          {errors.terms && <p className="text-red-500 text-xs">{errors.terms}</p>}
+
+          <Button
+            text="Sign Up"
+            type="submit"
+            disabled={isLoading}
+            className={`w-full px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg ${isLoading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+          >
+            {isLoading ? "Loading..." : "Sign Up"}
+          </Button>
+
+          <div className="text-center text-gray-600 text-sm mt-4">
+            Already a member?{" "}
+            <Link to="/login" className="text-blue-500 hover:underline">
+              Login here
+            </Link>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default RegisterStudent;

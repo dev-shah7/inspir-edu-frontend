@@ -6,7 +6,7 @@ import Dashboard from "../admin/Dashboard";
 import Courses from "../admin/courses/Courses";
 
 import MainContent from "../admin/MainContent";
-import Questions from "../admin/testQuestions/Questions";
+import Questions from "../admin/questions/Questions";
 import Modules from "../admin/modules/Modules";
 import UsersList from "../admin/users/UsersList";
 import EnrolledCourses from "../admin/enrolledCourses/EnrolledCourses";

@@ -27,6 +27,14 @@ export const sendInvitationEmail = async (email, token, courseDetails) => {
   });
 };
 
+export const sendInvitationEmailToAdmin = async (email, token) => {
+  const registrationUrl = `${window.location.origin}/signup/${token}?email=${email}`;
+
+  return sendTemplateEmail(emailConfig.templates.adminInvitation, {
+    admin_email: email,
+    register_link: registrationUrl,
+  });
+};
 export const sendAdminNotificationEmail = async (params) => {
   const templateParams = {
     from_name: params.from_name,

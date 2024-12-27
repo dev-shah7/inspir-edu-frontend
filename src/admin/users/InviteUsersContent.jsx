@@ -6,12 +6,13 @@ import api from "../../services/api/axios";
 import {
   sendInvitationEmail,
   sendAdminNotificationEmail,
+  sendInvitationEmailToAdmin,
 } from "../../services/emailjs/emailService";
 import { getCourseById } from "../../services/api/courseService";
 import useCourseStore from "../store/useCourseStore";
 import useAuthStore from "../../store/auth/useAuthStore";
 
-const InviteUsersContent = ({ courseId }) => {
+const InviteUsersContent = ({ courseId, companyId }) => {
   const { closeModal, queueModal } = useModalStore();
   const { currentCourse } = useCourseStore();
   const { user } = useAuthStore();
@@ -20,8 +21,10 @@ const InviteUsersContent = ({ courseId }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   console.log("Current Course:", currentCourse);
+  console.log("Company ID:", companyId);
   // Use courseId prop if provided, otherwise use currentCourse.id
   const effectiveCourseId = courseId || currentCourse;
+  console.log("courseId", effectiveCourseId);
 
   const handleAddEmail = () => {
     if (email.trim() && !emails.includes(email)) {
@@ -39,8 +42,6 @@ const InviteUsersContent = ({ courseId }) => {
     setIsLoading(true);
 
     try {
-      const { data: courseDetails } = await getCourseById(effectiveCourseId);
-
       // Process each email
       for (const studentEmail of emails) {
         const inviteData = {
@@ -53,24 +54,34 @@ const InviteUsersContent = ({ courseId }) => {
         const response = await api.post("/Invitation/save", inviteData);
         const { data: token } = response.data;
 
-        // Send invitation email to student
-        await sendInvitationEmail(studentEmail, token, courseDetails);
+        if (effectiveCourseId) {
+          const { data: courseDetails } = await getCourseById(
+            effectiveCourseId
+          );
 
-        // Send notification email to admin
-        const adminEmailParams = {
-          from_name: "inspirEDU",
-          student_email: studentEmail,
-          admin_name: user?.name || "Admin",
-          current_date: new Date().toLocaleDateString(),
-          admin_email: user?.email,
-        };
+          // Send invitation email to student
+          await sendInvitationEmail(studentEmail, token, courseDetails);
 
-        await sendAdminNotificationEmail(adminEmailParams);
+          // Send notification email to admin
+          const adminEmailParams = {
+            from_name: "inspirEDU",
+            student_email: studentEmail,
+            admin_name: user?.name || "Admin",
+            current_date: new Date().toLocaleDateString(),
+            admin_email: user?.email,
+          };
+
+          await sendAdminNotificationEmail(adminEmailParams);
+        } else {
+          console.log(token, "token");
+          console.log(response, "response");
+          await sendInvitationEmailToAdmin(studentEmail, token);
+        }
       }
 
       toast.success("Invitations sent successfully!");
 
-      if (!effectiveCourseId) {
+      if (effectiveCourseId) {
         queueModal("Congratulations!", <CourseCongratulations />);
       }
       closeModal();

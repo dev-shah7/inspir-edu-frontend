@@ -1,6 +1,7 @@
 import React from "react";
 
 const UserDetailsContent = ({ user }) => {
+  console.log(user);
   return (
     <div className="flex flex-col w-[80%] font-outfit p-4 mx-auto">
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center p-4 bg-white rounded-lg shadow-sm">
@@ -58,7 +59,7 @@ const UserDetailsContent = ({ user }) => {
                 />
               </svg>
               <span className="text-sm sm:text-base text-gray-600">
-                {user.phone || "Not provided"}
+                {user.phoneNumber || "Not provided"}
               </span>
             </div>
             <div className="flex items-center gap-2">

@@ -8,6 +8,7 @@ export const emailConfig = {
   publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
   templates: {
     invitation: "template_7xw18rc",
+    adminInvitation: "template_ef3n5so",
     welcome: "template_welcome",
     completion: "template_completion",
     passwordReset: "template_ah250w3",

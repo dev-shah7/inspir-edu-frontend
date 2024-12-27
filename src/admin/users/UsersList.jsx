@@ -9,81 +9,94 @@ import { IoMdAdd } from "react-icons/io";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import InviteUsersContent from "./InviteUsersContent";
 import UserDetailsContent from "./UserDetailsContent";
+import { userService } from "../../services/api/userService";
+import useAuthStore from "../../store/auth/useAuthStore";
+
+const RolePill = ({ role }) => {
+  const getRoleColor = () => {
+    switch (role.toLowerCase()) {
+      case "admin":
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case "user":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "instructor":
+        return "bg-green-100 text-green-800 border-green-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  return (
+    <span
+      className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${getRoleColor()}`}
+    >
+      {role}
+    </span>
+  );
+};
 
 const UsersList = () => {
   const { openModal } = useModalStore();
+  const { user } = useAuthStore();
   const navigate = useNavigate();
-  
-  // Convert the dummy data into state
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john.doe@example.com",
-      phone: "+1 (555) 123-4567",
-      address: "123 Main St, New York, NY 10001",
-      imageUrl: null
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane.smith@example.com",
-      phone: "+1 (555) 234-5678",
-      address: "456 Park Ave, Los Angeles, CA 90001",
-      imageUrl: null
-    },
-    {
-      id: 3,
-      name: "Michael Johnson",
-      email: "michael.j@example.com"
-    },
-    {
-      id: 4,
-      name: "Sarah Williams",
-      email: "sarah.w@example.com"
-    },
-    {
-      id: 5,
-      name: "Robert Brown",
-      email: "robert.b@example.com"
-    }
-  ]);
-  const isLoading = false; // Keep this as is
-  const fetchUsers = () => {}; // Keep this as is
 
+  const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isOperationLoading, setIsOperationLoading] = useState(false);
 
-  useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        await fetchUsers();
-      } catch (error) {
-        toast.error("Failed to load users");
-      }
-    };
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      const response = await userService.getAllUsers();
 
-    loadUsers();
-  }, [fetchUsers]);
+      console.log(response);
+      if (response.isSuccess === true) {
+        setUsers(response.data);
+      } else {
+        toast.error(response.message);
+        setUsers([]);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch users");
+      console.error("Error fetching users:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const filteredUsers = useMemo(() => {
-    return users.filter((user) =>
-      user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user?.email?.toLowerCase().includes(searchQuery.toLowerCase())
+    if (!users) return [];
+
+    return users?.filter(
+      (user) =>
+        user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user?.email?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery, users]);
 
   const handleInviteUser = () => {
-    openModal("Invite User", <InviteUsersContent />);
+    openModal(
+      "Invite User",
+      <InviteUsersContent companyId={user?.companyId} />
+    );
   };
 
   const handleDeleteUser = async (userId) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       setIsOperationLoading(true);
       try {
-        // Instead of calling the API, we'll just update the local state
-        setUsers(users.filter(user => user.id !== userId));
-        toast.success("User deleted successfully");
+        const response = await userService.deleteUser(userId);
+        if (response.isSuccess) {
+          setUsers(users.filter((user) => user.id !== userId));
+          toast.success("User deleted successfully");
+        } else {
+          toast.error(response.message || "Failed to delete user");
+        }
       } catch (error) {
         toast.error("Failed to delete user");
       } finally {
@@ -97,29 +110,30 @@ const UsersList = () => {
   };
 
   const headers = [
-    { label: "ID", align: "left" },
     { label: "Name", align: "left" },
     { label: "Email", align: "left" },
+    { label: "Roles", align: "left" },
     { label: "Action", align: "center" },
   ];
 
   const renderRow = (user) => (
     <>
       <tr className="hover:bg-gray-50 transition">
-        <td className="py-3 px-4 sm:px-2">{user.id}</td>
         <td className="py-3 px-4 sm:px-2">{user.name || "-"}</td>
         <td className="py-3 px-4 sm:px-2">{user.email || "-"}</td>
+        <td className="py-3 px-4 sm:px-2">
+          <div className="flex flex-wrap gap-1">
+            {user.roles?.map((role, index) => (
+              <RolePill key={index} role={role} />
+            ))}
+          </div>
+        </td>
         <td className="py-3 px-4 sm:px-2 text-center">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 justify-center">
             <CustomButton
               text="User Details"
               className="w-full sm:w-auto text-sm bg-custom-button-green hover:bg-green-700"
               onClick={() => handleUserDetails(user)}
-            />
-            <CustomButton
-              text="Delete"
-              className="w-full sm:w-auto text-sm bg-red-600 hover:bg-red-500"
-              onClick={() => handleDeleteUser(user.id)}
             />
           </div>
         </td>
@@ -162,7 +176,9 @@ const UsersList = () => {
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-1">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-800">All Users</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+                All Users
+              </h1>
               <button
                 onClick={handleInviteUser}
                 className="w-full lg:w-auto px-4 py-2 bg-custom-button-green hover:bg-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring transition flex items-center gap-1 justify-center"
@@ -214,7 +230,9 @@ const UsersList = () => {
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-center py-4 border-t-2 border-custom-border-blue mt-4 gap-4">
-        <div className="text-sm md:text-base text-gray-600">Rows per page: 10</div>
+        <div className="text-sm md:text-base text-gray-600">
+          Rows per page: 10
+        </div>
         <div className="flex items-center gap-4">
           <button
             disabled
@@ -222,7 +240,9 @@ const UsersList = () => {
           >
             <IoIosArrowBack size={20} />
           </button>
-          <span className="text-sm md:text-base text-gray-600 font-medium">1-1</span>
+          <span className="text-sm md:text-base text-gray-600 font-medium">
+            1-1
+          </span>
           <button className="text-sm md:text-base text-blue-500 font-medium hover:text-blue-700">
             <IoIosArrowForward size={20} />
           </button>

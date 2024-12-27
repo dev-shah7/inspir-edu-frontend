@@ -61,7 +61,7 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
               {isUsersMenuOpen && (
                 <div className="ml-4 space-y-2">
                   <Link
-                    to="/users/all"
+                    to="/admin/users"
                     className="block p-2 rounded hover:bg-blue-300"
                   >
                     All Users

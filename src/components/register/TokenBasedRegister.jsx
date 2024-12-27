@@ -192,12 +192,9 @@ const TokenBasedRegister = () => {
           <Button
             text="Sign Up"
             type="submit"
-            disabled={isLoading}
-            className={`w-full px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg ${
-              isLoading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`w-full px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg`}
           >
-            {isLoading ? "Loading..." : "Sign Up"}
+            Sign Up
           </Button>
 
           <div className="text-center text-gray-600 text-sm mt-4">

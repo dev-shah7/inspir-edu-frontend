@@ -49,7 +49,7 @@ const AdminRoutes = () => {
             }
           />
           <Route
-            path="users/all"
+            path="users"
             element={
               <MainContent>
                 <UsersList />

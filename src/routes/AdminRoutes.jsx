@@ -10,7 +10,7 @@ import Questions from "../admin/testQuestions/Questions";
 import Modules from "../admin/modules/Modules";
 import UsersList from "../admin/users/UsersList";
 import EnrolledCourses from "../admin/enrolledCourses/EnrolledCourses";
-import ProfilePage from "../admin/Profile/ProfilePage";
+import ProfilePage from "../admin/tempProfile/ProfilePage";
 
 const AdminRoutes = () => {
   return (
@@ -64,8 +64,8 @@ const AdminRoutes = () => {
                 <EnrolledCourses />
               </MainContent>
             }
-            />
-           <Route
+          />
+          <Route
             path="profile"
             element={
               <MainContent>

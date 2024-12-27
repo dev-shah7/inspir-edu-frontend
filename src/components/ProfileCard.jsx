@@ -17,9 +17,18 @@ const ProfileCard = () => {
   ];
 
   const socialAccounts = [
-    { platform: "LinkedIn", icon: <LuLinkedin className="text-black text-2xl" /> },
-    { platform: "Twitter", icon: <LuTwitter className="text-black text-2xl" /> },
-    { platform: "YouTube", icon: <LuYoutube className="text-black text-2xl" /> },
+    {
+      platform: "LinkedIn",
+      icon: <LuLinkedin className="text-black text-2xl" />,
+    },
+    {
+      platform: "Twitter",
+      icon: <LuTwitter className="text-black text-2xl" />,
+    },
+    {
+      platform: "YouTube",
+      icon: <LuYoutube className="text-black text-2xl" />,
+    },
   ];
 
   const experienceData = [
@@ -75,7 +84,9 @@ const ProfileCard = () => {
             <FiEdit />
           </button>
         </div>
-        <h1 className="text-2xl font-bold text-gray-800 mt-4">Md. Ashaduzzaman</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mt-4">
+          Md. Ashaduzzaman
+        </h1>
         <p className="text-md text-gray-600 mt-1">
           Associate Professor | Financial Education Specialist
         </p>
@@ -148,12 +159,16 @@ const ProfileCard = () => {
               <div
                 key={index}
                 className={`flex justify-between items-center py-2 px-4 ${
-                  index !== socialAccounts.length - 1 ? "border-b border-gray-300 pb-3" : ""
+                  index !== socialAccounts.length - 1
+                    ? "border-b border-gray-300 pb-3"
+                    : ""
                 }`}
               >
                 <div className="flex items-center gap-3">
                   {account.icon}
-                  <span className="text-md text-gray-800">{account.platform}</span>
+                  <span className="text-md text-gray-800">
+                    {account.platform}
+                  </span>
                 </div>
                 <button className="px-4 py-1.5 bg-white border-gray-200 border text-sm font-medium text-gray-700 rounded-full shadow hover:bg-gray-200">
                   Add Username

@@ -10,7 +10,7 @@ import Questions from "../admin/testQuestions/Questions";
 import Modules from "../admin/modules/Modules";
 import UsersList from "../admin/users/UsersList";
 import EnrolledCourses from "../admin/enrolledCourses/EnrolledCourses";
-import ProfilePage from "../admin/tempProfile/ProfilePage";
+import ProfilePage from "../admin/profile/ProfilePage";
 
 const AdminRoutes = () => {
   return (

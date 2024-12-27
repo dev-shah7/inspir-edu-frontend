@@ -10,6 +10,7 @@ const InputField = ({
   onChange,
   onBlur,
   icon: Icon = null, // Optional Icon component
+  disabled = false,
 }) => {
   return (
     <div className="relative">
@@ -33,6 +34,7 @@ const InputField = ({
           value={value}
           onChange={onChange}
           onBlur={onBlur}
+          disabled={disabled}
           className="w-full p-3 pl-4 pr-10 rounded-lg border border-gray-300 bg-white shadow focus:outline-none focus:ring-2 focus:ring-button-blue"
         />
 

@@ -43,10 +43,10 @@ const useAuthStore = create(
         }
       },
 
-      studentSignup: async (signupData) => {
+      tokenBasedSignup: async (signupData) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await authService.studentSignup(signupData);
+          const response = await authService.tokenBasedSignup(signupData);
           set({ isLoading: false, error: null });
           return response;
         } catch (error) {
@@ -123,19 +123,16 @@ const useAuthStore = create(
       },
 
       logout: () => {
-        localStorage.removeItem("auth-storage");
+        localStorage.clear();
 
-        set(
-          {
-            user: null,
-            token: null,
-            isAuthenticated: false,
-            userRole: null,
-            isLoading: false,
-            error: null,
-          },
-          true
-        );
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          userRole: null,
+          isLoading: false,
+          error: null,
+        });
       },
 
       clearError: () => set({ error: null }),

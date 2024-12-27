@@ -7,6 +7,13 @@ const useCourseStore = create((set, get) => ({
   isLoading: false,
   error: null,
 
+  setCurrentCourse: (courseId) => {
+    console.log(courseId, "courseId");
+    const course = get().courses.find((course) => course.id === courseId);
+    console.log(course, "course");
+    set({ currentCourse: course });
+  },
+
   fetchCourses: async () => {
     const hasCourses = get().courses.length > 0;
     if (!hasCourses) {

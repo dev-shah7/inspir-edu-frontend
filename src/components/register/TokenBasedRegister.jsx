@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { FiUser, FiMail, FiLock, FiPhone, FiMapPin } from "react-icons/fi";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import Button from "../../../components/common/Button/Button";
-import InputField from "../../../components/common/InputField/InputField";
-import useAuthStore from "../../../store/auth/useAuthStore";
+import Button from "../common/Button/Button";
+import useAuthStore from "../../store/auth/useAuthStore";
+import InputField from "../common/InputField/InputField";
 
 // Zod Validation Schema for User
 const userSchema = z.object({
@@ -20,12 +20,13 @@ const userSchema = z.object({
     .refine((val) => val === true, "You must agree to the terms"),
 });
 
-const RegisterStudent = () => {
+const TokenBasedRegister = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { studentSignup, isLoading } = useAuthStore();
+  const { token } = useParams();
+  const { tokenBasedSignup, isLoading } = useAuthStore();
 
-  const [invitationToken, setInvitationToken] = useState("Dpl26nynPP"); // add some invitation token from Postman as long as invite User is not working
+  const [invitationToken, setInvitationToken] = useState("");
   const [userFormData, setUserFormData] = useState({
     name: "",
     email: "",
@@ -39,12 +40,22 @@ const RegisterStudent = () => {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const token = searchParams.get("invitationToken");
+    // Set token from URL params
     if (token) {
       setInvitationToken(token);
     }
-  }, [location.search]);
+
+    // Get email from query parameters
+    const searchParams = new URLSearchParams(location.search);
+    const email = searchParams.get("email");
+
+    if (email) {
+      setUserFormData((prev) => ({
+        ...prev,
+        email: email,
+      }));
+    }
+  }, [location, token]);
 
   const validateUserDetails = () => {
     try {
@@ -67,6 +78,7 @@ const RegisterStudent = () => {
       try {
         const payload = {
           name: userFormData.name,
+          email: userFormData.email,
           password: userFormData.password,
           address: userFormData.address,
           phoneNumber: userFormData.phoneNumber,
@@ -76,9 +88,9 @@ const RegisterStudent = () => {
 
         console.log("Payload:", payload);
 
-        await studentSignup(payload);
+        await tokenBasedSignup(payload);
         toast.success("User registered successfully!");
-        navigate('/login');
+        navigate("/login");
       } catch (error) {
         toast.error("Signup failed. Please try again.");
       }
@@ -117,6 +129,7 @@ const RegisterStudent = () => {
             }
             error={errors.email}
             Icon={FiMail}
+            disabled={true}
           />
           <InputField
             type="password"
@@ -172,14 +185,17 @@ const RegisterStudent = () => {
               I agree to the terms of service
             </label>
           </div>
-          {errors.terms && <p className="text-red-500 text-xs">{errors.terms}</p>}
+          {errors.terms && (
+            <p className="text-red-500 text-xs">{errors.terms}</p>
+          )}
 
           <Button
             text="Sign Up"
             type="submit"
             disabled={isLoading}
-            className={`w-full px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg ${isLoading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+            className={`w-full px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             {isLoading ? "Loading..." : "Sign Up"}
           </Button>
@@ -196,4 +212,4 @@ const RegisterStudent = () => {
   );
 };
 
-export default RegisterStudent;
+export default TokenBasedRegister;

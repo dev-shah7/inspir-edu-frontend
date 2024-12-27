@@ -6,7 +6,7 @@ export const authService = {
     return response.data;
   },
 
-  studentSignup: async (signupData) => {
+  tokenBasedSignup: async (signupData) => {
     const response = await api.post("/Auth/register-invited-user", signupData);
     return response.data;
   },

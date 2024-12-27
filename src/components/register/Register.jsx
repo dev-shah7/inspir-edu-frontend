@@ -1,15 +1,15 @@
-import { useLocation } from "react-router";
+import { useLocation, useParams } from "react-router";
 import RegisterForm from "./ResgiterForm";
-import RegisterStudent from "../../student/components/Register/RegisterStudent";
 import { useEffect, useState } from "react";
+import TokenBasedRegister from "./TokenBasedRegister";
 
 const Register = () => {
-  const location = useLocation();
-  const [isStudent, setIsStudent] = useState(false);
+  const { token } = useParams();
+  const [isTokenBased, setIsTokenBased] = useState(false);
 
   useEffect(() => {
-    setIsStudent(location.pathname.includes("student"));
-  }, [location.pathname]);
+    setIsTokenBased(!!token);
+  }, [token]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-light-bg px-4 sm:px-6 md:px-8">
@@ -31,7 +31,11 @@ const Register = () => {
         {/* Right Section - Scrollable (60%) */}
         <div className="w-full lg:w-[60%] flex justify-center items-center lg:h-screen lg:overflow-hidden">
           <div className="w-full lg:max-h-screen lg:overflow-y-auto custom-scrollbar">
-            {isStudent ? <RegisterStudent /> : <RegisterForm />}
+            {isTokenBased ? (
+              <TokenBasedRegister token={token} />
+            ) : (
+              <RegisterForm />
+            )}
           </div>
         </div>
       </div>

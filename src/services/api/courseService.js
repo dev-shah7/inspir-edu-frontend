@@ -44,3 +44,13 @@ export const courseService = {
     return await api.delete(`/Course/delete/${id}`);
   },
 };
+
+export const getCourseById = async (courseId) => {
+  try {
+    const response = await api.get(`/Course/get-by-id/${courseId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching course:", error);
+    throw error;
+  }
+};

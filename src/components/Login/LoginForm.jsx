@@ -66,7 +66,7 @@ const LoginForm = () => {
         });
         setErrors(fieldErrors);
       } else {
-        console.error("Login failed");
+        console.error("Login failed", error);
       }
     }
   };
@@ -129,32 +129,7 @@ const LoginForm = () => {
           </div>
 
           {/* Remember Me and Portal Selection */}
-          <div className="flex items-center justify-between text-sm text-gray-600">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="remember"
-                  className="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label htmlFor="remember" className="ml-2">
-                  Remember me
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isForStudentPortal"
-                  name="isForStudentPortal"
-                  checked={formData.isForStudentPortal}
-                  onChange={handleChange}
-                  className="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label htmlFor="isForStudentPortal" className="ml-2">
-                  Student Portal
-                </label>
-              </div>
-            </div>
+          <div className="flex items-center justify-end text-sm text-gray-600">
             <Link
               to="/forgot-password"
               className="text-blue-500 hover:underline"

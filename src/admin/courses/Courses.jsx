@@ -8,11 +8,13 @@ import useCourseStore from "../store/useCourseStore";
 import Loader from "../../components/common/Loader/Loader";
 import { toast } from "react-hot-toast";
 import { IoIosArrowBack, IoIosArrowForward, IoMdAdd } from "react-icons/io";
+import InviteUsersContent from "../users/InviteUsersContent";
 
 const Courses = () => {
   const navigate = useNavigate();
-  const { openModal } = useModalStore();
-  const { courses, fetchCourses, deleteCourse, isLoading } = useCourseStore();
+  const { openModal, queueModal, closeModal } = useModalStore();
+  const { courses, fetchCourses, deleteCourse, isLoading, setCurrentCourse } =
+    useCourseStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [isOperationLoading, setIsOperationLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -69,6 +71,16 @@ const Courses = () => {
     }
   };
 
+  const handleInviteUsers = (courseId) => {
+    queueModal("Invite Users", <InviteUsersContent courseId={courseId} />);
+    closeModal();
+  };
+
+  const handleViewContent = (courseId) => {
+    setCurrentCourse(courseId);
+    navigate(`/admin/courses/${courseId}/modules`);
+  };
+
   const headers = [
     { label: "Course Name", align: "left" },
     { label: "Deadline", align: "left" },
@@ -81,14 +93,18 @@ const Courses = () => {
     <>
       <tr className="hover:bg-gray-50 transition">
         <td className="py-3 px-2 md:px-4">{course.name}</td>
-        <td className="py-3 px-2 md:px-4">{course.isDeadlineBase ? "Yes" : "No"}</td>
-        <td className="py-3 px-2 md:px-4">{course.defaultDeadlineHrs || "-"}</td>
+        <td className="py-3 px-2 md:px-4">
+          {course.isDeadlineBase ? "Yes" : "No"}
+        </td>
+        <td className="py-3 px-2 md:px-4">
+          {course.defaultDeadlineHrs || "-"}
+        </td>
         <td className="py-3 px-2 md:px-4 text-center">
           <div className="flex flex-col sm:flex-row gap-2 justify-center">
             <CustomButton
               text="View Content"
               className="w-full sm:w-auto text-sm bg-green-800 hover:bg-green-700"
-              onClick={() => navigate(`/admin/courses/${course.id}/modules`)}
+              onClick={() => handleViewContent(course.id)}
             />
             <CustomButton
               text="View Users"
@@ -107,7 +123,7 @@ const Courses = () => {
             <CustomButton
               text="Invite Users"
               className="w-full sm:w-auto text-sm bg-yellow-600 hover:bg-yellow-500"
-              onClick={() => alert("Button Clicked!")}
+              onClick={() => handleInviteUsers(course.id)}
             />
             <CustomButton
               text="Delete"
@@ -155,7 +171,9 @@ const Courses = () => {
       <p className="text-md text-gray-600 mb-4">Courses</p>
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 mb-6">
         <div className="flex-1">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">All Courses</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+            All Courses
+          </h1>
           <p className="text-sm md:text-md text-gray-600 mt-1">
             Welcome to inspireEDU Dashboard
           </p>

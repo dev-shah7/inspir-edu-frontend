@@ -31,6 +31,8 @@ const App = () => {
               )
             }
           />
+
+          {/* Regular signup */}
           <Route
             path="/signup"
             element={
@@ -42,8 +44,9 @@ const App = () => {
             }
           />
 
+          {/* Token-based signup */}
           <Route
-            path="/signup/student"
+            path="/signup/:token"
             element={
               isAuthenticated ? (
                 <Navigate to={userRole === "admin" ? "/admin" : "/student"} />

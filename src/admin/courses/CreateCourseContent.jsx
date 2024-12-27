@@ -72,7 +72,9 @@ const CreateCourseContent = ({ mode = "add", courseId }) => {
         closeModal();
       } else {
         fetchCourses().catch(console.error);
-        queueModal("Add Grading", <GradingContent />);
+        queueModal("Add Grading", <GradingContent />, {
+          hideCloseButton: true,
+        });
         closeModal();
       }
     } catch (error) {

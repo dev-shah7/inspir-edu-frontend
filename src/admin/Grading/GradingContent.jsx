@@ -8,7 +8,7 @@ import { courseService } from "../../services/api/courseService";
 const GradingContent = () => {
   const { closeModal, queueModal } = useModalStore();
   const { currentCourse } = useCourseStore();
-  console.log(currentCourse, "currentCourse");
+
   const {
     register,
     handleSubmit,
@@ -35,12 +35,10 @@ const GradingContent = () => {
 
       await courseService.saveGradingInstructions(gradingData);
 
-      // After successful save, proceed to next step
       queueModal("Proceed To Next", <ProceedToNextStepContent />);
       closeModal();
     } catch (error) {
       console.error("Error saving grading instructions:", error);
-      // You might want to show an error message to the user
     }
   };
 

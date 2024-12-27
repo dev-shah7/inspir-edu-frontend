@@ -315,7 +315,9 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
             <div className="grid grid-cols-12 gap-4 items-center mb-2 font-semibold text-gray-700">
               <div className="col-span-2">Option</div>
               <div className="col-span-6">Input</div>
-              <div className="col-span-2 text-center">Correct</div>
+              <div className="col-span-2 text-center">
+                {questionType === "mcq" ? "Correct" : "Choose all that apply"}
+              </div>
               <div className="col-span-2 text-center">Action</div>
             </div>
             {options.map((option, index) => (
@@ -425,7 +427,7 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
           className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
           onClick={handleSubmit}
         >
-          Create Question
+          {mode === "edit" ? "Update Question" : "Create Question"}
         </button>
         <button
           className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"

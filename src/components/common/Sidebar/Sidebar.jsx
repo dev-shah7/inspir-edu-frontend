@@ -67,7 +67,7 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
                     All Users
                   </Link>
                   <Link
-                    to="/users/enrolled"
+                    to="/admin/enrolled-courses"
                     className="block p-2 rounded hover:bg-blue-300"
                   >
                     Enrolled Users

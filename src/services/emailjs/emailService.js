@@ -46,3 +46,28 @@ export const sendCourseCompletionEmail = async (
     score: score,
   });
 };
+
+export const sendPasswordResetEmail = async (userEmail, resetToken) => {
+  const resetLink = `${
+    window.location.origin
+  }/reset-password?token=${encodeURIComponent(
+    resetToken
+  )}&email=${encodeURIComponent(userEmail)}`;
+
+  const templateParams = {
+    user_email: userEmail,
+    reset_link: resetLink,
+    from_name: "inspirEDU",
+  };
+
+  try {
+    const response = await sendTemplateEmail(
+      emailConfig.templates.passwordReset,
+      templateParams
+    );
+    return response;
+  } catch (error) {
+    console.error("Failed to send password reset email:", error);
+    throw new Error("Failed to send password reset email");
+  }
+};

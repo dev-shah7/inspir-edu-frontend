@@ -10,6 +10,6 @@ export const emailConfig = {
     invitation: "template_7xw18rc",
     welcome: "template_welcome",
     completion: "template_completion",
-    // Add more templates as needed
+    passwordReset: "template_ah250w3",
   },
 };

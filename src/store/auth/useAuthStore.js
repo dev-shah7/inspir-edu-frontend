@@ -136,6 +136,40 @@ const useAuthStore = create(
       },
 
       clearError: () => set({ error: null }),
+
+      forgotPassword: async (data) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await authService.forgotPassword(data);
+          set({ isLoading: false });
+          return response;
+        } catch (error) {
+          set({
+            error: error.response?.data?.message || "Failed to send reset link",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+
+      resetPassword: async (token, email, newPassword) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await authService.resetPassword(
+            token,
+            email,
+            newPassword
+          );
+          set({ isLoading: false });
+          return response;
+        } catch (error) {
+          set({
+            error: error.response?.data?.message || "Failed to reset password",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
     }),
     {
       name: "auth-storage",

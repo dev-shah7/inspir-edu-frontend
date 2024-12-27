@@ -9,6 +9,7 @@ import Loader from "../../components/common/Loader/Loader";
 import { toast } from "react-hot-toast";
 import { IoIosArrowBack, IoIosArrowForward, IoMdAdd } from "react-icons/io";
 import InviteUsersContent from "../users/InviteUsersContent";
+import CourseUsersContent from "./CourseUsersContent";
 
 const Courses = () => {
   const navigate = useNavigate();
@@ -81,6 +82,10 @@ const Courses = () => {
     navigate(`/admin/courses/${courseId}/modules`);
   };
 
+  const handleViewUsers = (courseId) => {
+    openModal("Course Users", <CourseUsersContent courseId={courseId} />);
+  };
+
   const headers = [
     { label: "Course Name", align: "left" },
     { label: "Deadline", align: "left" },
@@ -109,7 +114,7 @@ const Courses = () => {
             <CustomButton
               text="View Users"
               className="w-full sm:w-auto text-sm bg-blue-950 hover:bg-blue-800"
-              onClick={() => alert("Button Clicked!")}
+              onClick={() => handleViewUsers(course.id)}
             />
           </div>
         </td>

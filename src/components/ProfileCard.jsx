@@ -11,10 +11,7 @@ const ProfileCard = () => {
     { type: "text", placeholder: "Address" },
   ];
 
-  const cityStateInputs = [
-    { type: "text", placeholder: "City" },
-    { type: "text", placeholder: "State" },
-  ];
+  const cityStateInputs = [{ type: "text", placeholder: "City" }];
 
   const socialAccounts = [
     {
@@ -85,7 +82,7 @@ const ProfileCard = () => {
           </button>
         </div>
         <h1 className="text-2xl font-bold text-gray-800 mt-4">
-          Md. Ashaduzzaman
+          Syed Maaz Shah
         </h1>
         <p className="text-md text-gray-600 mt-1">
           Associate Professor | Financial Education Specialist
@@ -115,68 +112,6 @@ const ProfileCard = () => {
           <button className="absolute right-2 bottom-4 text-gray-600 hover:text-blue-500">
             <FiEdit size={18} />
           </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 mt-6">
-        <div className="bg-custom-text-area p-4 rounded-lg shadow-sm relative">
-          <h2 className="text-lg font-semibold text-gray-800">Experience</h2>
-          {experienceData.map((exp, index) => (
-            <p key={index} className="text-sm text-gray-600 mt-2">
-              <strong>{exp.role}</strong> <br />
-              {exp.period} | {exp.duration} {exp.type && `| ${exp.type}`}
-            </p>
-          ))}
-          <button className="absolute bottom-2 right-2 text-gray-600 hover:text-blue-500">
-            <FiEdit size={18} />
-          </button>
-        </div>
-
-        <div className="bg-custom-text-area p-4 rounded-lg shadow-sm relative">
-          <h2 className="text-lg font-semibold text-gray-800">Education</h2>
-          {educationData.map((edu, index) => (
-            <p key={index} className="text-sm text-gray-600 mt-2">
-              <strong>{edu.institution}</strong> <br />
-              {edu.degree} | {edu.year}
-            </p>
-          ))}
-          <button className="absolute bottom-2 right-2 text-gray-600 hover:text-blue-500">
-            <FiEdit size={18} />
-          </button>
-        </div>
-      </div>
-
-      <div className="mt-6">
-        <div className="max-w-3xl w-full mx-auto">
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">
-            Verified Accounts
-          </h2>
-          <p className="text-sm text-gray-600 mb-6">
-            Build trust with your network by verifying your social profiles
-          </p>
-          <div className="space-y-6 border-t border-gray-300">
-            {socialAccounts.map((account, index) => (
-              <div
-                key={index}
-                className={`flex justify-between items-center py-2 px-4 ${
-                  index !== socialAccounts.length - 1
-                    ? "border-b border-gray-300 pb-3"
-                    : ""
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  {account.icon}
-                  <span className="text-md text-gray-800">
-                    {account.platform}
-                  </span>
-                </div>
-                <button className="px-4 py-1.5 bg-white border-gray-200 border text-sm font-medium text-gray-700 rounded-full shadow hover:bg-gray-200">
-                  Add Username
-                </button>
-              </div>
-            ))}
-          </div>
-          <div className="border-b border-gray-300 mt-3"></div>
         </div>
       </div>
 

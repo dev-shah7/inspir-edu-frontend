@@ -5,10 +5,14 @@ const useQuestionStore = create((set, get) => ({
   questions: [],
   currentQuestion: null,
   isLoading: false,
+  isFetchingQuestion: false,
   error: null,
 
   fetchQuestionsByModule: async (moduleId) => {
-    set({ isLoading: true });
+    const hasQuestions = get().questions.length > 0;
+    if (!hasQuestions) {
+      set({ isLoading: true });
+    }
 
     try {
       const response = await questionService.getQuestionsByModule(moduleId);
@@ -71,13 +75,18 @@ const useQuestionStore = create((set, get) => ({
   },
 
   fetchQuestionById: async (id) => {
+    set({ isFetchingQuestion: true });
     try {
       const response = await questionService.getQuestionById(id);
-      set({ currentQuestion: response });
+      set({
+        currentQuestion: response,
+        isFetchingQuestion: false,
+      });
       return response;
     } catch (error) {
       set({
         error: error.response?.data?.message || "Failed to fetch question",
+        isFetchingQuestion: false,
       });
       throw error;
     }

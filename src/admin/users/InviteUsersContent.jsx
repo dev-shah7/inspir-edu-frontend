@@ -3,13 +3,18 @@ import useModalStore from "../store/useModalStore";
 import CourseCongratulations from "../congratulations/CourseCongratulations";
 import { toast } from "react-hot-toast";
 import api from "../../services/api/axios";
-import { sendInvitationEmail } from "../../services/emailjs/emailService";
+import {
+  sendInvitationEmail,
+  sendAdminNotificationEmail,
+} from "../../services/emailjs/emailService";
 import { getCourseById } from "../../services/api/courseService";
 import useCourseStore from "../store/useCourseStore";
+import useAuthStore from "../../store/auth/useAuthStore";
 
 const InviteUsersContent = ({ courseId }) => {
   const { closeModal, queueModal } = useModalStore();
   const { currentCourse } = useCourseStore();
+  const { user } = useAuthStore();
   const [email, setEmail] = useState("");
   const [emails, setEmails] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,19 +42,30 @@ const InviteUsersContent = ({ courseId }) => {
       const { data: courseDetails } = await getCourseById(effectiveCourseId);
 
       // Process each email
-      for (const email of emails) {
+      for (const studentEmail of emails) {
         const inviteData = {
-          email,
-          userRole: effectiveCourseId ? 3 : 1, // 3 for student, 1 for admin
-          ...(effectiveCourseId && { courseId: effectiveCourseId }), // Use effectiveCourseId
+          email: studentEmail,
+          userRole: effectiveCourseId ? 3 : 1,
+          ...(effectiveCourseId && { courseId: effectiveCourseId }),
         };
 
         // Save invitation
         const response = await api.post("/Invitation/save", inviteData);
         const { data: token } = response.data;
 
-        // Send email with registration link
-        await sendInvitationEmail(email, token, courseDetails);
+        // Send invitation email to student
+        await sendInvitationEmail(studentEmail, token, courseDetails);
+
+        // Send notification email to admin
+        const adminEmailParams = {
+          from_name: "inspirEDU",
+          student_email: studentEmail,
+          admin_name: user?.name || "Admin",
+          current_date: new Date().toLocaleDateString(),
+          admin_email: user?.email,
+        };
+
+        await sendAdminNotificationEmail(adminEmailParams);
       }
 
       toast.success("Invitations sent successfully!");

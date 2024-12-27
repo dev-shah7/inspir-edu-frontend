@@ -27,6 +27,25 @@ export const sendInvitationEmail = async (email, token, courseDetails) => {
   });
 };
 
+export const sendAdminNotificationEmail = async (params) => {
+  const templateParams = {
+    from_name: params.from_name,
+    student_email: params.student_email,
+    admin_name: params.admin_name,
+    current_date: params.current_date,
+    admin_email: params.admin_email,
+  };
+
+  try {
+    return sendTemplateEmail(
+      emailConfig.templates.adminCourseInvitation,
+      templateParams
+    );
+  } catch (error) {
+    console.error("Error sending admin notification:", error);
+    throw new Error("Failed to send admin notification");
+  }
+};
 // Add more specific email functions as needed
 export const sendWelcomeEmail = async (userEmail, userName) => {
   return sendTemplateEmail(emailConfig.templates.welcome, {

@@ -103,8 +103,13 @@ const getYouTubeEmbedUrl = (url) => {
 
 const CreateModuleContent = ({ mode = "add", moduleId }) => {
   const { closeModal, queueModal } = useModalStore();
-  const { saveModule, fetchModuleById, uploadFile, fetchModulesByCourse } =
-    useModuleStore();
+  const {
+    saveModule,
+    fetchModuleById,
+    uploadFile,
+    fetchModulesByCourse,
+    isFetchingModule,
+  } = useModuleStore();
   const { currentCourse } = useCourseStore();
   const { courseId: courseIdFromParams } = useParams();
 
@@ -114,6 +119,7 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
   console.log("Course ID from params:", courseIdFromParams);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(mode === "edit");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedType, setSelectedType] = useState("Image");
   const [mediaInputType, setMediaInputType] = useState("upload");
@@ -168,9 +174,7 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
     if (mode === "edit" && moduleId) {
       const loadModule = async () => {
         try {
-          setIsLoading(true);
           const moduleData = await fetchModuleById(moduleId);
-          console.log(moduleData, "moduleData");
 
           // Set the media type based on the URL
           if (moduleData.url) {
@@ -188,9 +192,8 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
             releaseDate: moduleData.releaseDate,
           });
         } catch (error) {
-          toast.error("Failed to load module");
-        } finally {
-          setIsLoading(false);
+          console.error("Error loading module:", error);
+          toast.error("Failed to load module data");
         }
       };
       loadModule();
@@ -428,10 +431,35 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
     }
   };
 
+  if (isFetchingModule) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <p className="text-gray-600">Loading module data...</p>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <p className="text-gray-600">
+          {mode === "edit" ? "Updating module..." : "Creating module..."}
+        </p>
+        {uploadProgress > 0 && (
+          <div className="w-64">
+            <div className="bg-gray-200 rounded-full h-2.5">
+              <div
+                className="bg-blue-600 h-2.5 rounded-full"
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+            </div>
+            <p className="text-sm text-gray-600 mt-2">
+              Uploading: {uploadProgress}%
+            </p>
+          </div>
+        )}
       </div>
     );
   }

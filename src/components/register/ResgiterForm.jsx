@@ -140,7 +140,6 @@ const RegisterForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate all steps before final submission
     const step1Valid = await validateStep(1);
     const step2Valid = await validateStep(2);
     const step3Valid = await validateStep(3);

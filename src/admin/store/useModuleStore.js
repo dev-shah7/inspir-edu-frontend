@@ -5,6 +5,7 @@ const useModuleStore = create((set, get) => ({
   modules: [],
   currentModule: null,
   isLoading: false,
+  isFetchingModule: false,
   error: null,
   uploadProgress: 0,
 
@@ -25,7 +26,11 @@ const useModuleStore = create((set, get) => ({
   },
 
   fetchModulesByCourse: async (courseId) => {
-    set({ isLoading: true });
+    // Only set loading if we don't have any modules
+    const hasModules = get().modules.length > 0;
+    if (!hasModules) {
+      set({ isLoading: true });
+    }
 
     try {
       const response = await moduleService.getModulesByCourse(courseId);
@@ -44,15 +49,18 @@ const useModuleStore = create((set, get) => ({
   },
 
   fetchModuleById: async (id) => {
-    set({ isLoading: true, error: null });
+    set({ isFetchingModule: true });
     try {
       const response = await moduleService.getModuleById(id);
-      set({ currentModule: response, isLoading: false });
+      set({
+        currentModule: response,
+        isFetchingModule: false,
+      });
       return response.data;
     } catch (error) {
       set({
         error: error.response?.data?.message || "Failed to fetch module",
-        isLoading: false,
+        isFetchingModule: false,
       });
       throw error;
     }

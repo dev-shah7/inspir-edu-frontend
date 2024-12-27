@@ -12,11 +12,16 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
   const { moduleId: paramModuleId } = useParams();
   const { currentModule } = useModuleStore();
   const { closeModal, queueModal } = useModalStore();
-  const { saveQuestion, fetchQuestionsByModule, fetchQuestionById } =
-    useQuestionStore();
+  const {
+    saveQuestion,
+    fetchQuestionsByModule,
+    fetchQuestionById,
+    isFetchingQuestion,
+  } = useQuestionStore();
 
   const moduleId = paramModuleId || currentModule;
 
+  const [isLoading, setIsLoading] = useState(false);
   const [questionType, setQuestionType] = useState("");
   const [questionText, setQuestionText] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState("");
@@ -382,6 +387,16 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
     }
     return isLoading ? "Creating..." : "Create Question";
   };
+
+  // Add loader for edit mode
+  if (mode === "edit" && isFetchingQuestion) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <p className="text-gray-600">Loading question data...</p>
+      </div>
+    );
+  }
 
   return (
     <>

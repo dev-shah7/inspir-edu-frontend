@@ -11,5 +11,6 @@ export const emailConfig = {
     welcome: "template_welcome",
     completion: "template_completion",
     passwordReset: "template_ah250w3",
+    adminCourseInvitation: "template_8nkruxl",
   },
 };

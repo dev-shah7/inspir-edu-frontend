@@ -10,6 +10,7 @@ const CreateCourseContent = ({ mode = "add", courseId }) => {
   const { closeModal, queueModal } = useModalStore();
   const { saveCourse, fetchCourses } = useCourseStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(mode === "edit");
 
   const {
     register,
@@ -33,6 +34,7 @@ const CreateCourseContent = ({ mode = "add", courseId }) => {
     if (mode === "edit" && courseId) {
       const fetchCourseData = async () => {
         try {
+          setIsFetching(true);
           const response = await courseService.getCourse(courseId);
           const courseData = response.data;
 
@@ -44,7 +46,9 @@ const CreateCourseContent = ({ mode = "add", courseId }) => {
           setValue("type", courseData.type);
         } catch (error) {
           console.error("Error fetching course data:", error);
-          // You might want to show an error message to the user
+          toast.error("Failed to load course data");
+        } finally {
+          setIsFetching(false);
         }
       };
 
@@ -85,10 +89,22 @@ const CreateCourseContent = ({ mode = "add", courseId }) => {
     }
   };
 
+  if (isFetching) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <p className="text-gray-600">Loading course data...</p>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <p className="text-gray-600">
+          {mode === "edit" ? "Updating course..." : "Creating course..."}
+        </p>
       </div>
     );
   }

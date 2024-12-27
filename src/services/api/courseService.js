@@ -43,14 +43,20 @@ export const courseService = {
   deleteCourse: async (id) => {
     return await api.delete(`/Course/delete/${id}`);
   },
-};
 
-export const getCourseById = async (courseId) => {
-  try {
-    const response = await api.get(`/Course/get-by-id/${courseId}`);
+  getCourseById: async (courseId) => {
+    try {
+      const response = await api.get(`/Course/get-by-id/${courseId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching course:", error);
+      throw error;
+    }
+  },
+  getGradingInstructions: async (courseId) => {
+    const response = await api.get(
+      `/Course/get-grading-instructions/${courseId}`
+    );
     return response.data;
-  } catch (error) {
-    console.error("Error fetching course:", error);
-    throw error;
-  }
+  },
 };

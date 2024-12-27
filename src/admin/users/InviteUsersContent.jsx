@@ -8,7 +8,7 @@ import {
   sendAdminNotificationEmail,
   sendInvitationEmailToAdmin,
 } from "../../services/emailjs/emailService";
-import { getCourseById } from "../../services/api/courseService";
+import { courseService } from "../../services/api/courseService";
 import useCourseStore from "../store/useCourseStore";
 import useAuthStore from "../../store/auth/useAuthStore";
 
@@ -20,11 +20,7 @@ const InviteUsersContent = ({ courseId, companyId }) => {
   const [emails, setEmails] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log("Current Course:", currentCourse);
-  console.log("Company ID:", companyId);
-  // Use courseId prop if provided, otherwise use currentCourse.id
   const effectiveCourseId = courseId || currentCourse;
-  console.log("courseId", effectiveCourseId);
 
   const handleAddEmail = () => {
     if (email.trim() && !emails.includes(email)) {
@@ -55,7 +51,7 @@ const InviteUsersContent = ({ courseId, companyId }) => {
         const { data: token } = response.data;
 
         if (effectiveCourseId) {
-          const { data: courseDetails } = await getCourseById(
+          const { data: courseDetails } = await courseService.getCourseById(
             effectiveCourseId
           );
 

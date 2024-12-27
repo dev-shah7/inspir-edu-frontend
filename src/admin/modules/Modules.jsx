@@ -10,6 +10,7 @@ import { toast } from "react-hot-toast";
 import { IoMdAdd } from "react-icons/io";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import ModuleCard from "../common/ModuleCard/ModuleCard";
+import useCourseStore from "../store/useCourseStore";
 
 const Modules = () => {
   const { courseId } = useParams();
@@ -25,6 +26,8 @@ const Modules = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isOperationLoading, setIsOperationLoading] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  const { gradingInstructions, fetchGradingInstructions } = useCourseStore();
 
   useEffect(() => {
     const loadModules = async () => {
@@ -42,6 +45,12 @@ const Modules = () => {
       loadModules();
     }
   }, [courseId, fetchModulesByCourse]);
+
+  useEffect(() => {
+    if (courseId) {
+      fetchGradingInstructions(courseId);
+    }
+  }, [courseId, fetchGradingInstructions]);
 
   const filteredModules = useMemo(() => {
     return modules.filter((module) =>
@@ -193,9 +202,6 @@ const Modules = () => {
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
             />
           </svg>
-          <p className="text-md font-outfit text-gray-800 lg:text-right text-center mr-0 lg:mr-9 mt-2">
-              Passing Percentage: 75%
-          </p>
         </div>
       </div>
       <div className="h-0.5 bg-custom-border-blue mt-1"></div>
@@ -208,7 +214,10 @@ const Modules = () => {
       {renderHeader()}
 
       <div className="w-full mt-4 mb-5">
-        <ModuleCard description="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum." />
+        <ModuleCard
+          instructions={gradingInstructions?.instructions}
+          passingPercentage={gradingInstructions?.passingPercentage}
+        />
       </div>
 
       <div className="flex-1 overflow-x-auto">{renderTableContent()}</div>
@@ -228,7 +237,7 @@ const Modules = () => {
             1-1
           </span>
           <button className="text-sm md:text-base text-blue-500 font-medium hover:text-blue-700">
-              <IoIosArrowForward size={20} />
+            <IoIosArrowForward size={20} />
           </button>
         </div>
       </div>

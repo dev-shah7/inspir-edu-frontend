@@ -1,11 +1,15 @@
 import { create } from "zustand";
 import { courseService } from "../../services/api/courseService";
+import axios from "axios";
 
 const useCourseStore = create((set, get) => ({
   courses: [],
   currentCourse: null,
   isLoading: false,
   error: null,
+  gradingInstructions: null,
+  isLoadingInstructions: false,
+  instructionsError: null,
 
   setCurrentCourse: (courseId) => {
     console.log(courseId, "courseId");
@@ -61,7 +65,9 @@ const useCourseStore = create((set, get) => ({
 
   deleteCourse: async (courseId) => {
     try {
-      await courseService.deleteCourse(courseId);
+      const response = await courseService.deleteCourse(courseId);
+      console.log(response, "response");
+
       set((state) => ({
         courses: state.courses.filter((course) => course.id !== courseId),
       }));
@@ -70,6 +76,24 @@ const useCourseStore = create((set, get) => ({
         error: error.response?.data?.message || "Failed to delete course",
       });
       throw error;
+    }
+  },
+
+  fetchGradingInstructions: async (courseId) => {
+    set({ isLoadingInstructions: true, instructionsError: null });
+    try {
+      const response = await courseService.getGradingInstructions(courseId);
+      console.log(response, "response");
+      set({
+        gradingInstructions: response.data,
+        isLoadingInstructions: false,
+      });
+    } catch (error) {
+      console.error("Failed to fetch grading instructions:", error);
+      set({
+        instructionsError: error.message,
+        isLoadingInstructions: false,
+      });
     }
   },
 

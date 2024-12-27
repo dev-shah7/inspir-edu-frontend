@@ -1,13 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import useModalStore from "../store/useModalStore";
 import ProceedToNextStepContent from "../proceedToNextSection/ProceedToNextStepContent";
 import useCourseStore from "../store/useCourseStore";
 import { courseService } from "../../services/api/courseService";
+import Loader from "../../components/common/Loader/Loader";
+import { toast } from "react-hot-toast";
 
 const GradingContent = () => {
   const { closeModal, queueModal } = useModalStore();
   const { currentCourse } = useCourseStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -22,11 +25,12 @@ const GradingContent = () => {
 
   const onSubmit = async (data) => {
     try {
+      setIsSubmitting(true);
+
       if (!currentCourse) {
         throw new Error("Course not found");
       }
 
-      console.log(currentCourse, "currentCourse");
       const gradingData = {
         courseId: currentCourse,
         instructions: data.instructions,
@@ -34,13 +38,25 @@ const GradingContent = () => {
       };
 
       await courseService.saveGradingInstructions(gradingData);
-
+      toast.success("Grading instructions saved successfully");
       queueModal("Proceed To Next", <ProceedToNextStepContent />);
       closeModal();
     } catch (error) {
       console.error("Error saving grading instructions:", error);
+      toast.error("Failed to save grading instructions");
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  if (isSubmitting) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <p className="text-gray-600">Saving grading instructions...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="my-6">

@@ -88,6 +88,8 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
 
   const handleSubmit = async () => {
     try {
+      setIsLoading(true);
+
       if (!moduleId) {
         toast.error("Module ID is required");
         return;
@@ -150,6 +152,8 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
       closeModal();
     } catch (error) {
       toast.error(error.message || "Failed to save question");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -390,12 +394,13 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
     return isLoading ? "Creating..." : "Create Question";
   };
 
-  // Add loader for edit mode
-  if (mode === "edit" && isFetchingQuestion) {
+  if (isLoading || (mode === "edit" && isFetchingQuestion)) {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-        <p className="text-gray-600">Loading question data...</p>
+        <p className="text-gray-600">
+          {mode === "edit" ? "Loading question data..." : "Saving question..."}
+        </p>
       </div>
     );
   }

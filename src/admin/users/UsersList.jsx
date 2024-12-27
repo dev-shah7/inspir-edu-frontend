@@ -165,9 +165,23 @@ const UsersList = () => {
     </div>
   );
 
-  if (isLoading && users.length === 0) {
-    return <Loader />;
-  }
+  const renderTableContent = () => {
+    if (isLoading) {
+      return (
+        <div className="w-full h-[400px] flex items-center justify-center">
+          <Loader />
+        </div>
+      );
+    }
+
+    return filteredUsers.length > 0 ? (
+      <div className="min-w-full">
+        <Table headers={headers} data={filteredUsers} renderRow={renderRow} />
+      </div>
+    ) : (
+      renderEmptyState()
+    );
+  };
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-120px)] px-4 md:px-6">
@@ -215,19 +229,7 @@ const UsersList = () => {
         <div className="h-0.5 bg-custom-border-blue mt-1"></div>
       </div>
 
-      <div className="flex-1 overflow-x-auto">
-        {filteredUsers.length > 0 ? (
-          <div className="min-w-full">
-            <Table
-              headers={headers}
-              data={filteredUsers}
-              renderRow={renderRow}
-            />
-          </div>
-        ) : (
-          renderEmptyState()
-        )}
-      </div>
+      <div className="flex-1 overflow-x-auto">{renderTableContent()}</div>
 
       <div className="flex flex-col sm:flex-row justify-between items-center py-4 border-t-2 border-custom-border-blue mt-4 gap-4">
         <div className="text-sm md:text-base text-gray-600">

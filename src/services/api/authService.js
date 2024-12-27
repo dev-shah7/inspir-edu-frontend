@@ -6,6 +6,11 @@ export const authService = {
     return response.data;
   },
 
+  studentSignup: async (signupData) => {
+    const response = await api.post("/Auth/register-invited-user", signupData);
+    return response.data;
+  },
+
   getSubscriptionPlans: async () => {
     try {
       const response = await api.get("/Auth/all-subscription-plans");

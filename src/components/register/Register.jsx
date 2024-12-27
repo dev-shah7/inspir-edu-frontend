@@ -1,6 +1,16 @@
+import { useLocation } from "react-router";
 import RegisterForm from "./ResgiterForm";
+import RegisterStudent from "../../student/components/Register/RegisterStudent";
+import { useEffect, useState } from "react";
 
 const Register = () => {
+  const location = useLocation();
+  const [isStudent, setIsStudent] = useState(false);
+
+  useEffect(() => {
+    setIsStudent(location.pathname.includes("student"));
+  }, [location.pathname]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-light-bg px-4 sm:px-6 md:px-8">
       <div className="w-full max-w-7xl flex flex-col lg:flex-row items-stretch lg:space-x-8">
@@ -21,7 +31,7 @@ const Register = () => {
         {/* Right Section - Scrollable (60%) */}
         <div className="w-full lg:w-[60%] flex justify-center items-center lg:h-screen lg:overflow-hidden">
           <div className="w-full lg:max-h-screen lg:overflow-y-auto custom-scrollbar">
-            <RegisterForm />
+            {isStudent ? <RegisterStudent /> : <RegisterForm />}
           </div>
         </div>
       </div>

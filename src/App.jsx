@@ -42,6 +42,17 @@ const App = () => {
             }
           />
 
+          <Route
+            path="/signup/student"
+            element={
+              isAuthenticated ? (
+                <Navigate to={userRole === "admin" ? "/admin" : "/student"} />
+              ) : (
+                <Resgister />
+              )
+            }
+          />
+
           {/* Redirect Based on Role */}
           <Route
             path="/"

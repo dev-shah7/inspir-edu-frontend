@@ -66,43 +66,63 @@ const RegisterForm = () => {
 
   const { signup, isLoading, error } = useAuthStore();
 
-  const validateStep = (step) => {
+  const validateStep = async (step) => {
     console.log("Validating step:", step);
+    setErrors({}); // Clear previous errors
+
     try {
       switch (step) {
         case 1:
-          userSchema.parse(userFormData);
+          const userResult = userSchema.safeParse(userFormData);
+          if (!userResult.success) {
+            const fieldErrors = {};
+            userResult.error.errors.forEach((error) => {
+              fieldErrors[error.path[0]] = error.message;
+            });
+            setErrors(fieldErrors);
+            return false;
+          }
           return true;
+
         case 2:
-          companySchema.parse(companyFormData);
+          const companyResult = companySchema.safeParse(companyFormData);
+          if (!companyResult.success) {
+            const fieldErrors = {};
+            companyResult.error.errors.forEach((error) => {
+              fieldErrors[error.path[0]] = error.message;
+            });
+            setErrors(fieldErrors);
+            return false;
+          }
           return true;
+
         case 3:
           if (!selectedPlan) {
             setErrors({ plan: "Please select a subscription plan" });
             return false;
           }
           return true;
+
         default:
           return false;
       }
     } catch (err) {
-      console.log("Validation error:", err);
-      const fieldErrors = {};
-      err.errors.forEach((error) => {
-        fieldErrors[error.path[0]] = error.message;
-      });
-      setErrors(fieldErrors);
+      console.error("Validation error:", err);
       return false;
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     console.log("Current Step before next:", currentStep);
-    if (validateStep(currentStep)) {
+    const isValid = await validateStep(currentStep);
+
+    if (isValid) {
       const nextStep = currentStep + 1;
       console.log("Moving to step:", nextStep);
       setCurrentStep(nextStep);
       setErrors({});
+    } else {
+      console.log("Validation failed for step:", currentStep);
     }
   };
 
@@ -119,7 +139,13 @@ const RegisterForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateStep(currentStep)) {
+
+    // Validate all steps before final submission
+    const step1Valid = await validateStep(1);
+    const step2Valid = await validateStep(2);
+    const step3Valid = await validateStep(3);
+
+    if (step1Valid && step2Valid && step3Valid) {
       try {
         const finalData = {
           userDetail: userFormData,
@@ -135,16 +161,19 @@ const RegisterForm = () => {
           error.response?.data?.message || "Signup failed. Please try again."
         );
       }
+    } else {
+      toast.error("Please complete all required fields correctly.");
     }
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted, current step:", currentStep);
+
     if (currentStep === 3) {
-      handleSubmit(e);
+      await handleSubmit(e);
     } else {
-      handleNext();
+      await handleNext();
     }
   };
 
@@ -298,17 +327,19 @@ const RegisterForm = () => {
               text={currentStep === 3 ? "Complete Signup" : "Next"}
               type="submit"
               disabled={isLoading}
-              className={`px-6 py-2 ${currentStep === 3
-                ? "bg-green-500 hover:bg-green-600"
-                : "bg-blue-500 hover:bg-blue-600"
-                } text-white rounded-lg ${isLoading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+              className={`px-6 py-2 ${
+                currentStep === 3
+                  ? "bg-green-500 hover:bg-green-600"
+                  : "bg-blue-500 hover:bg-blue-600"
+              } text-white rounded-lg ${
+                isLoading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
               {isLoading
                 ? "Loading..."
                 : currentStep === 3
-                  ? "Complete Signup"
-                  : "Next"}
+                ? "Complete Signup"
+                : "Next"}
             </Button>
           </div>
 

@@ -23,13 +23,17 @@ const Modules = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isOperationLoading, setIsOperationLoading] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     const loadModules = async () => {
       try {
+        setIsInitialLoad(true);
         await fetchModulesByCourse(courseId);
       } catch (error) {
         toast.error("Failed to load modules");
+      } finally {
+        setIsInitialLoad(false);
       }
     };
 
@@ -130,7 +134,7 @@ const Modules = () => {
     </div>
   );
 
-  if (modulesLoading && modules.length === 0) {
+  if (modulesLoading || isInitialLoad) {
     return <Loader />;
   }
 
@@ -141,7 +145,9 @@ const Modules = () => {
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-1">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-800">All Modules</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+                All Modules
+              </h1>
               <button
                 onClick={handleCreateModule}
                 className="w-full lg:w-auto px-4 py-2 bg-custom-button-green hover:bg-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring transition flex items-center gap-1 justify-center"
@@ -194,7 +200,9 @@ const Modules = () => {
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-center py-4 border-t-2 border-custom-border-blue mt-4 gap-4">
-        <div className="text-sm md:text-base text-gray-600">Rows per page: 10</div>
+        <div className="text-sm md:text-base text-gray-600">
+          Rows per page: 10
+        </div>
         <div className="flex items-center gap-4">
           <button
             disabled
@@ -202,9 +210,11 @@ const Modules = () => {
           >
             <IoIosArrowBack size={20} />
           </button>
-          <span className="text-sm md:text-base text-gray-600 font-medium">1-1</span>
+          <span className="text-sm md:text-base text-gray-600 font-medium">
+            1-1
+          </span>
           <button className="text-sm md:text-base text-blue-500 font-medium hover:text-blue-700">
-              <IoIosArrowRoundForward size={20} />
+            <IoIosArrowRoundForward size={20} />
           </button>
         </div>
       </div>

@@ -8,10 +8,7 @@ const useQuestionStore = create((set, get) => ({
   error: null,
 
   fetchQuestionsByModule: async (moduleId) => {
-    const hasQuestions = get().questions.length > 0;
-    if (!hasQuestions) {
-      set({ isLoading: true });
-    }
+    set({ isLoading: true });
 
     try {
       const response = await questionService.getQuestionsByModule(moduleId);

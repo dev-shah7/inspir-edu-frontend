@@ -12,7 +12,6 @@ import { AiOutlineEye } from "react-icons/ai";
 import QuestionCard from "../../components/QuestionCard";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
-
 const Questions = () => {
   const { moduleId } = useParams();
   const { openModal } = useModalStore();
@@ -23,13 +22,17 @@ const Questions = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isOperationLoading, setIsOperationLoading] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     const loadQuestions = async () => {
       try {
+        setIsInitialLoad(true);
         await fetchQuestionsByModule(moduleId);
       } catch (error) {
         toast.error("Failed to load questions");
+      } finally {
+        setIsInitialLoad(false);
       }
     };
 
@@ -155,7 +158,9 @@ const Questions = () => {
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-1">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">All Questions</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+              All Questions
+            </h1>
             <div className="flex flex-col lg:flex-row gap-2">
               <button
                 onClick={handleCreateQuestion}
@@ -167,11 +172,13 @@ const Questions = () => {
               <button
                 onClick={handlePreviewClick}
                 className={`w-full lg:w-auto px-4 py-2 ${
-                  isPreviewMode ? 'bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
+                  isPreviewMode
+                    ? "bg-gray-600"
+                    : "bg-blue-500 hover:bg-blue-600"
                 } text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring focus:ring-blue-300 transition flex items-center justify-center gap-2`}
               >
                 <AiOutlineEye className="text-md" />
-                {isPreviewMode ? 'Exit Preview' : 'Question Preview'}
+                {isPreviewMode ? "Exit Preview" : "Question Preview"}
               </button>
             </div>
           </div>
@@ -208,17 +215,22 @@ const Questions = () => {
 
   const renderPreviewMode = () => (
     <div className="grid grid-cols-1 gap-6 mb-6">
-      <QuestionCard questions={filteredQuestions} onClose={handlePreviewClick}/>
+      <QuestionCard
+        questions={filteredQuestions}
+        onClose={handlePreviewClick}
+      />
     </div>
   );
 
-  if (isLoading && questions.length === 0) {
+  if (isLoading || isInitialLoad) {
     return <Loader />;
   }
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-120px)] px-4 md:px-6">
-      <p className="text-md text-gray-600 mb-4">Courses / Modules / Questions</p>
+      <p className="text-md text-gray-600 mb-4">
+        Courses / Modules / Questions
+      </p>
       {renderHeader()}
 
       <div className="flex-1 overflow-x-auto">
@@ -248,7 +260,9 @@ const Questions = () => {
           >
             <IoIosArrowBack size={20} />
           </button>
-          <span className="text-sm md:text-base text-gray-600 font-medium">1-1</span>
+          <span className="text-sm md:text-base text-gray-600 font-medium">
+            1-1
+          </span>
           <button className="text-sm md:text-base text-blue-500 font-medium hover:text-blue-700">
             <IoIosArrowForward size={20} />
           </button>

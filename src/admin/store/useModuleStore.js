@@ -25,11 +25,7 @@ const useModuleStore = create((set, get) => ({
   },
 
   fetchModulesByCourse: async (courseId) => {
-    // Only set loading if we don't have any modules
-    const hasModules = get().modules.length > 0;
-    if (!hasModules) {
-      set({ isLoading: true });
-    }
+    set({ isLoading: true });
 
     try {
       const response = await moduleService.getModulesByCourse(courseId);

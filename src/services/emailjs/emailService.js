@@ -54,25 +54,6 @@ export const sendAdminNotificationEmail = async (params) => {
     throw new Error("Failed to send admin notification");
   }
 };
-// Add more specific email functions as needed
-export const sendWelcomeEmail = async (userEmail, userName) => {
-  return sendTemplateEmail(emailConfig.templates.welcome, {
-    user_email: userEmail,
-    user_name: userName,
-  });
-};
-
-export const sendCourseCompletionEmail = async (
-  userEmail,
-  courseName,
-  score
-) => {
-  return sendTemplateEmail(emailConfig.templates.completion, {
-    user_email: userEmail,
-    course_name: courseName,
-    score: score,
-  });
-};
 
 export const sendPasswordResetEmail = async (userEmail, resetToken) => {
   const resetLink = `${
@@ -97,4 +78,8 @@ export const sendPasswordResetEmail = async (userEmail, resetToken) => {
     console.error("Failed to send password reset email:", error);
     throw new Error("Failed to send password reset email");
   }
+};
+
+export const sendSupportEmail = async (formData) => {
+  return sendTemplateEmail(emailConfig.templates.support, formData);
 };

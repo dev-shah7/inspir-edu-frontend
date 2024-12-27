@@ -11,6 +11,7 @@ import Modules from "../admin/modules/Modules";
 import UsersList from "../admin/users/UsersList";
 import EnrolledCourses from "../admin/enrolledCourses/EnrolledCourses";
 import ProfilePage from "../admin/profile/ProfilePage";
+import Support from "../components/common/Support/Support";
 
 const AdminRoutes = () => {
   return (
@@ -70,6 +71,14 @@ const AdminRoutes = () => {
             element={
               <MainContent>
                 <ProfilePage />
+              </MainContent>
+            }
+          />
+          <Route
+            path="/support"
+            element={
+              <MainContent>
+                <Support />
               </MainContent>
             }
           />

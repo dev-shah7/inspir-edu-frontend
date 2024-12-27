@@ -1,9 +1,13 @@
+import { useState } from "react";
 import Logo from "../../../assets/Logo-Blue.png";
 import PropTypes from "prop-types";
 import useAuthStore from "../../../store/auth/useAuthStore";
+import { useNavigate } from "react-router-dom";
 
 const Header = ({ isSidebarOpen, setSidebarOpen, userRole }) => {
   const logout = useAuthStore((state) => state.logout);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -11,6 +15,14 @@ const Header = ({ isSidebarOpen, setSidebarOpen, userRole }) => {
       // Redirect will happen automatically through PrivateRoute when auth state changes
     } catch (error) {
       console.error("Logout failed:", error);
+    }
+  };
+
+  const handleSupport = () => {
+    if (userRole === "admin") {
+      navigate("/admin/support");
+    } else {
+      navigate("/student/support");
     }
   };
 
@@ -50,12 +62,55 @@ const Header = ({ isSidebarOpen, setSidebarOpen, userRole }) => {
         </div>
       </div>
 
-      <button
-        onClick={handleLogout}
-        className="px-4 py-2 bg-[#1A73E8] text-white rounded-lg hover:bg-blue-600 transition-colors"
-      >
-        Logout
-      </button>
+      <div className="flex items-center space-x-4">
+        <button
+          onClick={handleSupport}
+          className="px-4 py-2 bg-white text-[#1A73E8] font-medium rounded-lg hover:bg-[#1A73E8] hover:text-white transition-all duration-300 border-2 border-[#1A73E8] shadow-sm"
+        >
+          Support
+        </button>
+
+        <div className="h-10 w-[1px] bg-[#1A73E8]"></div>
+
+        <div className="relative">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center hover:bg-gray-400 transition-colors"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-gray-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+          </button>
+
+          {isDropdownOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-10">
+              <a
+                href="/profile"
+                className="block px-4 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer"
+              >
+                My Profile
+              </a>
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+              >
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </header>
   );
 };

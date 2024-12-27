@@ -48,12 +48,14 @@ const AdminRoutes = () => {
               </MainContent>
             }
           />
-            <Route
+          <Route
             path="users/all"
             element={
               <MainContent>
                 <UsersList />
-          <Route path="users" element={<h2>Admin Users</h2>} />
+              </MainContent>
+            }
+          />
           <Route
             path="enrolled-courses"
             element={

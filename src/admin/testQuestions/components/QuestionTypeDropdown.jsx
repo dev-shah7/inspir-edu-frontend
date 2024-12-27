@@ -5,7 +5,7 @@ const QuestionTypeDropdown = ({ value, onChange }) => {
     { value: "short-answer", label: "Short Answer" },
     { value: "long-answer", label: "Long Answer" },
     { value: "mcq", label: "Multiple Choice" },
-    { value: "checkbox", label: "Checkbox" },
+    { value: "checkbox", label: "Choose all that apply" },
     { value: "true-false", label: "True/False" },
     { value: "yes-no", label: "Yes/No" },
   ];

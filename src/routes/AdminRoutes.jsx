@@ -8,6 +8,7 @@ import Courses from "../admin/courses/Courses";
 import MainContent from "../admin/MainContent";
 import Questions from "../admin/testQuestions/Questions";
 import Modules from "../admin/modules/Modules";
+import EnrolledCourses from "../admin/enrolledCourses/EnrolledCourses";
 
 const AdminRoutes = () => {
   return (
@@ -47,6 +48,14 @@ const AdminRoutes = () => {
             }
           />
           <Route path="users" element={<h2>Admin Users</h2>} />
+          <Route
+            path="enrolled-courses"
+            element={
+              <MainContent>
+                <EnrolledCourses />
+              </MainContent>
+            }
+          />
         </Route>
       </Route>
     </Routes>

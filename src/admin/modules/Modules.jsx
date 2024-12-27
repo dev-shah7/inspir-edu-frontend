@@ -127,77 +127,83 @@ const Modules = () => {
       </p>
       <button
         onClick={handleCreateModule}
-        className="px-6 py-2 mt-0 bg-custom-button-green hover:bg-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring transition flex items-center gap-1"
+        className="px-6 py-2 mt-4 bg-custom-button-green hover:bg-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring transition flex items-center gap-1"
       >
         <IoMdAdd className="text-xl" /> Create Modules
       </button>
     </div>
   );
 
-  if (modulesLoading || isInitialLoad) {
-    return <Loader />;
-  }
+  const renderTableContent = () => {
+    if (modulesLoading || isInitialLoad) {
+      return (
+        <div className="w-full h-[400px] flex items-center justify-center">
+          <Loader />
+        </div>
+      );
+    }
+
+    return filteredModules.length > 0 ? (
+      <div className="min-w-full">
+        <Table headers={headers} data={filteredModules} renderRow={renderRow} />
+      </div>
+    ) : (
+      renderEmptyState()
+    );
+  };
+
+  const renderHeader = () => (
+    <div className="flex flex-col mb-6">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-1">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+              All Modules
+            </h1>
+            <button
+              onClick={handleCreateModule}
+              className="w-full lg:w-auto px-4 py-2 bg-custom-button-green hover:bg-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring transition flex items-center gap-1 justify-center"
+            >
+              <IoMdAdd className="text-md" /> Create Modules
+            </button>
+          </div>
+          <p className="text-md text-gray-600">Course Name</p>
+        </div>
+        <div className="relative w-full lg:w-64 lg:mt-8">
+          <input
+            type="text"
+            placeholder="Search modules..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition"
+          />
+          <svg
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
+      </div>
+      <div className="h-0.5 bg-custom-border-blue mt-1"></div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-120px)] px-4 md:px-6">
       <p className="text-md text-gray-600 mb-4">Courses / Modules</p>
-      <div className="flex flex-col mb-6">
-        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-1">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-                All Modules
-              </h1>
-              <button
-                onClick={handleCreateModule}
-                className="w-full lg:w-auto px-4 py-2 bg-custom-button-green hover:bg-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring transition flex items-center gap-1 justify-center"
-              >
-                <IoMdAdd className="text-md" /> Create Modules
-              </button>
-            </div>
-            <p className="text-md text-gray-600">Course Name</p>
-          </div>
-          <div className="relative w-full lg:w-64 lg:mt-8">
-            <input
-              type="text"
-              placeholder="Search modules..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition"
-            />
-            <svg
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </div>
-        </div>
-        <div className="h-0.5 bg-custom-border-blue mt-1"></div>
-      </div>
+      {renderHeader()}
 
-      <div className="flex-1 overflow-x-auto">
-        {filteredModules.length > 0 ? (
-          <div className="min-w-full">
-            <Table
-              headers={headers}
-              data={filteredModules}
-              renderRow={renderRow}
-            />
-          </div>
-        ) : (
-          renderEmptyState()
-        )}
-      </div>
+      <div className="flex-1 overflow-x-auto">{renderTableContent()}</div>
 
       <div className="flex flex-col sm:flex-row justify-between items-center py-4 border-t-2 border-custom-border-blue mt-4 gap-4">
         <div className="text-sm md:text-base text-gray-600">

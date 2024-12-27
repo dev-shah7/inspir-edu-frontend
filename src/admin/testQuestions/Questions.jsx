@@ -222,9 +222,29 @@ const Questions = () => {
     </div>
   );
 
-  if (isLoading || isInitialLoad) {
-    return <Loader />;
-  }
+  const renderContent = () => {
+    if (isLoading || isInitialLoad) {
+      return (
+        <div className="w-full h-[400px] flex items-center justify-center">
+          <Loader />
+        </div>
+      );
+    }
+
+    return isPreviewMode ? (
+      renderPreviewMode()
+    ) : filteredQuestions.length > 0 ? (
+      <div className="min-w-full">
+        <Table
+          headers={headers}
+          data={filteredQuestions}
+          renderRow={renderRow}
+        />
+      </div>
+    ) : (
+      renderEmptyState()
+    );
+  };
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-120px)] px-4 md:px-6">
@@ -233,21 +253,7 @@ const Questions = () => {
       </p>
       {renderHeader()}
 
-      <div className="flex-1 overflow-x-auto">
-        {isPreviewMode ? (
-          renderPreviewMode()
-        ) : filteredQuestions.length > 0 ? (
-          <div className="min-w-full">
-            <Table
-              headers={headers}
-              data={filteredQuestions}
-              renderRow={renderRow}
-            />
-          </div>
-        ) : (
-          renderEmptyState()
-        )}
-      </div>
+      <div className="flex-1 overflow-x-auto">{renderContent()}</div>
 
       <div className="flex flex-col sm:flex-row justify-between items-center py-4 border-t-2 border-custom-border-blue mt-4 gap-4">
         <div className="text-sm md:text-base text-gray-600">

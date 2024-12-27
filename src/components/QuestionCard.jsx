@@ -20,6 +20,46 @@ const QuestionCard = ({ questions, onClose }) => {
     }
   };
 
+  const renderCorrectAnswer = (question) => {
+    // For Short/Long Answer questions
+    if (question.type === 0 || question.type === 1) {
+      return (
+        <div className="mt-4 p-3 bg-green-50 rounded-md border border-green-200">
+          <p className="text-sm font-semibold text-green-700">
+            Correct Answer:
+          </p>
+          <p className="text-md text-green-600 mt-1">
+            {question.correctAnswer}
+          </p>
+        </div>
+      );
+    }
+
+    // For Multiple Choice, True/False, Yes/No, and Checkbox questions
+    if (question.questionOptions && question.questionOptions.length > 0) {
+      const correctOptions = question.questionOptions
+        .filter((opt) => opt.isCorrect)
+        .map((opt) => opt.option);
+
+      return (
+        <div className="mt-4 p-3 bg-green-50 rounded-md border border-green-200">
+          <p className="text-sm font-semibold text-green-700">
+            Correct Answer{correctOptions.length > 1 ? "s" : ""}:
+          </p>
+          <ul className="list-disc list-inside mt-1">
+            {correctOptions.map((option, idx) => (
+              <li key={idx} className="text-md text-green-600">
+                {option}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div className="bg-blue-50 rounded-lg shadow-md p-8">
       <div className="space-y-8">
@@ -27,9 +67,12 @@ const QuestionCard = ({ questions, onClose }) => {
           <div key={question.id} className="mb-6">
             {/* Question Header */}
             <div className="flex justify-between items-center mb-1">
-               <h2 className="text-md font-outfit text-gray-800 mb-0">
-                    Question {index + 1}: 
-               </h2>
+              <h2 className="text-md font-outfit text-gray-800 mb-0">
+                Question {index + 1}:
+              </h2>
+              <span className="text-sm text-gray-600 bg-blue-100 px-3 py-1 rounded-full">
+                {getQuestionTypeName(question.type)}
+              </span>
             </div>
 
             <h3 className="text-md font-outfit text-gray-800 mb-3 mt-0">
@@ -50,6 +93,7 @@ const QuestionCard = ({ questions, onClose }) => {
                       name={`question-${question.id}`}
                       id={`question-${question.id}-option-${optionIndex}`}
                       className="w-5 h-5 text-blue-600 ring-blue-500 focus:ring-blue-500 border-4 border-custom-border-blue rounded"
+                      disabled
                     />
                     <label
                       htmlFor={`question-${question.id}-option-${optionIndex}`}
@@ -62,37 +106,43 @@ const QuestionCard = ({ questions, onClose }) => {
               ) : question.type === 3 || question.type === 4 ? (
                 // True/False or Yes/No
                 <div className="space-y-3">
-                  {(question.type === 3 ? ["True", "False"] : ["Yes", "No"]).map(
-                    (option, optionIndex) => (
-                      <div
-                        key={optionIndex}
-                        className="flex items-center gap-3 text-gray-700"
+                  {(question.type === 3
+                    ? ["True", "False"]
+                    : ["Yes", "No"]
+                  ).map((option, optionIndex) => (
+                    <div
+                      key={optionIndex}
+                      className="flex items-center gap-3 text-gray-700"
+                    >
+                      <input
+                        type="radio"
+                        name={`question-${question.id}`}
+                        id={`question-${question.id}-option-${optionIndex}`}
+                        className="w-5 h-5 text-md text-blue-600 focus:ring-blue-500 border-2 border-blue-500 rounded-full"
+                        disabled
+                      />
+                      <label
+                        htmlFor={`question-${question.id}-option-${optionIndex}`}
+                        className="text-md"
                       >
-                        <input
-                          type="radio"
-                          name={`question-${question.id}`}
-                          id={`question-${question.id}-option-${optionIndex}`}
-                          className="w-5 h-5 text-md text-blue-600 focus:ring-blue-500 border-2 border-blue-500 rounded-full"
-                        />
-                        <label
-                          htmlFor={`question-${question.id}-option-${optionIndex}`}
-                          className="text-md"
-                        >
-                          {option}
-                        </label>
-                      </div>
-                    )
-                  )}
+                        {option}
+                      </label>
+                    </div>
+                  ))}
                 </div>
               ) : (
                 // Short or Long Answer
                 <>
-                  <span className="text-sm">Answer: (Short Answer)</span>
+                  <span className="text-sm">
+                    Answer: ({getQuestionTypeName(question.type)})
+                  </span>
                   <div className="mt-2">
                     <textarea
                       className="w-full p-4 border border-gray-300 rounded-md bg-gray-50"
                       rows={question.type === 0 ? 2 : 4}
                       maxLength={80}
+                      disabled
+                      placeholder="Enter your answer here..."
                     />
                     <p className="text-sm text-gray-400 mt-1">
                       Answer maximum 80 words
@@ -101,6 +151,9 @@ const QuestionCard = ({ questions, onClose }) => {
                 </>
               )}
             </div>
+
+            {/* Render Correct Answer */}
+            {renderCorrectAnswer(question)}
           </div>
         ))}
       </div>

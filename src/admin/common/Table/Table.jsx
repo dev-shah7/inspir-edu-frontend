@@ -3,14 +3,14 @@ import PropTypes from "prop-types";
 
 const Table = ({ headers, data, renderRow }) => {
   return (
-    <div className="overflow-x-auto mt-8">
+    <div className="overflow-x-auto">
       <table className="min-w-full text-md">
         <thead className="text-gray-800">
           <tr>
             {headers.map((header, index) => (
               <th
                 key={index}
-                className={`p-4 ${
+                className={`py-2 px-3 ${
                   header.align === "center" ? "text-center" : "text-left"
                 } font-outfit text-lg`}
               >

@@ -29,6 +29,7 @@ export default {
         "custom-div-blue": "#B5D5FF",
         "custom-border-blue": "#C9E2FF",
         "gradient-blue": "#7DCAFA",
+        "custom-button-green": "#19A04D"
       },
       backgroundImage: {
         "card-blue-gradient":

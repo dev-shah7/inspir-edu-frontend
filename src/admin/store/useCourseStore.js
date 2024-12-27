@@ -11,7 +11,7 @@ const useCourseStore = create((set, get) => ({
     console.log(courseId, "courseId");
     const course = get().courses.find((course) => course.id === courseId);
     console.log(course, "course");
-    set({ currentCourse: course });
+    set({ currentCourse: course.id });
   },
 
   fetchCourses: async () => {

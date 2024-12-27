@@ -1,4 +1,6 @@
 import PropTypes from "prop-types";
+import { useState } from "react";
+import { FiEye, FiEyeOff } from "react-icons/fi"; // Import eye icons
 
 const InputField = ({
   label = "",
@@ -9,9 +11,20 @@ const InputField = ({
   name,
   onChange,
   onBlur,
-  icon: Icon = null, // Optional Icon component
+  icon: Icon = null,
   disabled = false,
+  error,
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Determine if this is a password field
+  const isPassword = type === "password";
+
+  // Toggle password visibility
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div className="relative">
       {/* Label */}
@@ -28,38 +41,67 @@ const InputField = ({
       <div className="relative flex items-center">
         <input
           id={label.replace(/\s+/g, "").toLowerCase()}
-          type={type}
+          type={isPassword ? (showPassword ? "text" : "password") : type}
           name={name}
           placeholder={placeholder}
           value={value}
           onChange={onChange}
           onBlur={onBlur}
           disabled={disabled}
-          className="w-full p-3 pl-4 pr-10 rounded-lg border border-gray-300 bg-white shadow focus:outline-none focus:ring-2 focus:ring-button-blue"
+          className={`w-full p-3 pl-4 ${
+            isPassword ? "pr-20" : "pr-10"
+          } rounded-lg border border-gray-300 bg-white shadow focus:outline-none focus:ring-2 focus:ring-button-blue ${
+            error ? "border-red-500" : ""
+          }`}
         />
 
-        {/* Optional Icon */}
-        {Icon && (
-          <span className="absolute right-3 top-3 text-gray-400">
+        {/* Show both icons for password fields */}
+        {isPassword && (
+          <button
+            type="button"
+            onClick={togglePasswordVisibility}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1"
+          >
+            {showPassword ? (
+              <FiEyeOff size={20} className="text-gray-400" />
+            ) : (
+              <FiEye size={20} className="text-gray-400" />
+            )}
+          </button>
+        )}
+
+        {/* Optional Icon (show only for non-password fields or to the left of eye icon) */}
+        {Icon && !isPassword && (
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <Icon size={20} />
+          </span>
+        )}
+        {Icon && isPassword && (
+          <span className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400">
             <Icon size={20} />
           </span>
         )}
       </div>
+
+      {/* Error Message */}
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
   );
 };
 
 // PropTypes for props validation
 InputField.propTypes = {
-  label: PropTypes.string, // Label must be a string
-  placeholder: PropTypes.string, // Placeholder text must be a string
-  name: PropTypes.string, // Name must be a string
-  type: PropTypes.oneOf(["text", "email", "password", "number"]), // Type must be a valid input type
-  required: PropTypes.bool, // Required flag must be a boolean
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]), // Value can be a string or number
-  onChange: PropTypes.func.isRequired, // onChange handler must be a function
-  onBlur: PropTypes.func, // onBlur handler must be a function
-  icon: PropTypes.elementType, // Icon must be a valid React component
+  label: PropTypes.string,
+  placeholder: PropTypes.string,
+  name: PropTypes.string,
+  type: PropTypes.oneOf(["text", "email", "password", "number", "tel"]),
+  required: PropTypes.bool,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  onChange: PropTypes.func.isRequired,
+  onBlur: PropTypes.func,
+  icon: PropTypes.elementType,
+  disabled: PropTypes.bool,
+  error: PropTypes.string,
 };
 
 export default InputField;

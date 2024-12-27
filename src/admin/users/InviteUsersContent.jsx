@@ -3,8 +3,7 @@ import useModalStore from "../store/useModalStore";
 import CourseCongratulations from "../congratulations/CourseCongratulations";
 import { toast } from "react-hot-toast";
 import api from "../../services/api/axios";
-import emailjs from "@emailjs/browser";
-import { emailConfig } from "../../services/emailjs/emailConfig";
+import { sendInvitationEmail } from "../../services/emailjs/emailService";
 import { getCourseById } from "../../services/api/courseService";
 import useCourseStore from "../store/useCourseStore";
 
@@ -15,28 +14,14 @@ const InviteUsersContent = ({ courseId }) => {
   const [emails, setEmails] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  console.log("Current Course:", currentCourse);
   // Use courseId prop if provided, otherwise use currentCourse.id
-  const effectiveCourseId = courseId || currentCourse?.id;
+  const effectiveCourseId = courseId || currentCourse;
 
   const handleAddEmail = () => {
     if (email.trim() && !emails.includes(email)) {
       setEmails([...emails, email.trim()]);
       setEmail("");
-    }
-  };
-
-  const sendInvitationEmail = async (email, token, courseDetails) => {
-    try {
-      const registrationUrl = `${window.location.origin}/signup/${token}?email=${email}`;
-
-      await emailjs.send(emailConfig.serviceId, "template_7xw18rc", {
-        user_email: email,
-        course_name: courseDetails.name,
-        register_link: registrationUrl,
-      });
-    } catch (error) {
-      console.error("Failed to send email:", error);
-      throw new Error("Failed to send invitation email");
     }
   };
 

@@ -5,4 +5,11 @@ emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
 
 export const emailConfig = {
   serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID,
+  publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+  templates: {
+    invitation: "template_7xw18rc",
+    welcome: "template_welcome",
+    completion: "template_completion",
+    // Add more templates as needed
+  },
 };

@@ -7,6 +7,7 @@ import CreateCourseContent from "./CreateCourseContent";
 import useCourseStore from "../store/useCourseStore";
 import Loader from "../../components/common/Loader/Loader";
 import { toast } from "react-hot-toast";
+import { IoIosArrowBack, IoIosArrowForward, IoMdAdd } from "react-icons/io";
 
 const Courses = () => {
   const navigate = useNavigate();
@@ -14,6 +15,8 @@ const Courses = () => {
   const { courses, fetchCourses, deleteCourse, isLoading } = useCourseStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [isOperationLoading, setIsOperationLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
 
   useEffect(() => {
     const loadCourses = async () => {
@@ -31,6 +34,18 @@ const Courses = () => {
       course?.name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery, courses]);
+
+  const paginatedCourses = useMemo(() => {
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    return filteredCourses.slice(startIndex, endIndex);
+  }, [filteredCourses, currentPage]);
+
+  const totalPages = Math.ceil(filteredCourses.length / rowsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   const handleCreateCourse = () => {
     openModal("Add Course", <CreateCourseContent />);
@@ -65,58 +80,55 @@ const Courses = () => {
   const renderRow = (course) => (
     <>
       <tr className="hover:bg-gray-50 transition">
-        <td className="p-4">{course.name}</td>
-        <td className="p-4">{course.isDeadlineBase ? "Yes" : "No"}</td>
-        <td className="p-4">{course.defaultDeadlineHrs || "-"}</td>
-        <td className="p-4 text-center">
-          <div className="flex gap-2 justify-center">
+        <td className="py-3 px-2 md:px-4">{course.name}</td>
+        <td className="py-3 px-2 md:px-4">{course.isDeadlineBase ? "Yes" : "No"}</td>
+        <td className="py-3 px-2 md:px-4">{course.defaultDeadlineHrs || "-"}</td>
+        <td className="py-3 px-2 md:px-4 text-center">
+          <div className="flex flex-col sm:flex-row gap-2 justify-center">
             <CustomButton
               text="View Content"
-              className="w-auto bg-green-800 hover:bg-green-700"
+              className="w-full sm:w-auto text-sm bg-green-800 hover:bg-green-700"
               onClick={() => navigate(`/admin/courses/${course.id}/modules`)}
             />
             <CustomButton
               text="View Users"
-              className="w-auto bg-blue-950 hover:bg-blue-800"
+              className="w-full sm:w-auto text-sm bg-blue-950 hover:bg-blue-800"
               onClick={() => alert("Button Clicked!")}
             />
           </div>
         </td>
-        <td className="p-4 text-center">
-          <div className="flex gap-2 justify-center">
+        <td className="py-2 px-2 md:px-4 text-center">
+          <div className="flex flex-col sm:flex-row gap-2 justify-center">
             <CustomButton
               text="Edit"
-              className="w-auto bg-black hover:bg-gray-600"
+              className="w-full sm:w-auto text-sm bg-black hover:bg-gray-600"
               onClick={() => handleEditCourse(course.id)}
             />
             <CustomButton
               text="Invite Users"
-              className="w-auto bg-yellow-600 hover:bg-yellow-500"
+              className="w-full sm:w-auto text-sm bg-yellow-600 hover:bg-yellow-500"
               onClick={() => alert("Button Clicked!")}
             />
             <CustomButton
               text="Delete"
-              className="w-auto bg-red-600 hover:bg-red-500"
+              className="w-full sm:w-auto text-sm bg-red-600 hover:bg-red-500"
               onClick={() => handleDeleteCourse(course.id)}
             />
           </div>
         </td>
       </tr>
-      <tr>
-        <td colSpan={headers.length}>
-          <div className="h-0.5 bg-gradient-to-r from-custom-border-blue to-transparent"></div>
-        </td>
-      </tr>
+      {paginatedCourses.indexOf(course) !== paginatedCourses.length - 1 && (
+        <tr>
+          <td colSpan={headers.length}>
+            <div className="h-0.5 bg-custom-border-blue"></div>
+          </td>
+        </tr>
+      )}
     </>
   );
 
   const renderEmptyState = () => (
     <div className="flex flex-col items-center justify-center py-12">
-      {/* <img
-        src={noDataGif}
-        alt="No courses found"
-        className="w-64 h-64 object-contain mb-4"
-      /> */}
       <h3 className="text-xl font-semibold text-gray-700 mb-2">
         No Courses Found
       </h3>
@@ -127,9 +139,9 @@ const Courses = () => {
 
       <button
         onClick={handleCreateCourse}
-        className="px-6 py-2 mt-6 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 hover:shadow-lg focus:outline-none focus:ring focus:ring-blue-300 transition"
+        className="px-6 py-2 mt-6 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 hover:shadow-lg focus:outline-none focus:ring focus:ring-blue-300 transition flex items-center gap-1"
       >
-        Create Course
+        <IoMdAdd className="text-xl" /> Create Course
       </button>
     </div>
   );
@@ -139,71 +151,104 @@ const Courses = () => {
   }
 
   return (
-    <>
-      <p className="text-md text-gray-600 mb-8">Courses</p>
-      <div className="bg-white rounded-lg shadow-md">
-        <div className="p-6 border-b">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="mt-4 text-3xl font-bold text-gray-800">
-                All Courses
-              </h1>
-              <p className="text-md text-gray-600 mt-1">
-                Welcome to inspireEDU Dashboard
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search courses..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-64 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition"
-                />
-                <svg
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  width="20"
-                  height="20"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
-              <button
-                onClick={handleCreateCourse}
-                className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 hover:shadow-lg focus:outline-none focus:ring focus:ring-blue-300 transition"
-              >
-                Create Course
-              </button>
-            </div>
+    <div className="flex flex-col min-h-[calc(100vh-120px)] px-4 md:px-6">
+      <p className="text-md text-gray-600 mb-4">Courses</p>
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 mb-6">
+        <div className="flex-1">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">All Courses</h1>
+          <p className="text-sm md:text-md text-gray-600 mt-1">
+            Welcome to inspireEDU Dashboard
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+          <div className="relative flex-grow sm:flex-grow-0">
+            <input
+              type="text"
+              placeholder="Search courses..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full sm:w-64 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition"
+            />
+            <svg
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
           </div>
+          <button
+            onClick={handleCreateCourse}
+            className="w-full sm:w-auto px-4 py-2 bg-custom-button-green hover:bg-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring focus:ring-green-700 transition flex items-center gap-1 justify-center"
+          >
+            <IoMdAdd className="text-md" /> Create Course
+          </button>
+        </div>
+      </div>
+      <div className="h-0.5 bg-custom-border-blue mb-1"></div>
 
-          {filteredCourses.length > 0 ? (
+      <div className="flex-1 overflow-x-auto">
+        {filteredCourses.length > 0 ? (
+          <div className="min-w-full">
             <Table
               headers={headers}
-              data={filteredCourses}
+              data={paginatedCourses}
               renderRow={renderRow}
             />
-          ) : (
-            renderEmptyState()
-          )}
-        </div>
-
-        {isOperationLoading && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
           </div>
+        ) : (
+          renderEmptyState()
         )}
       </div>
-    </>
+
+      {/* Updated Pagination */}
+      <div className="flex flex-col sm:flex-row justify-between items-center py-4 border-t-2 border-custom-border-blue mt-4 gap-4">
+        <div className="text-sm md:text-base text-gray-600">
+          Rows per page: {rowsPerPage}
+        </div>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`text-sm md:text-base text-blue-500 font-medium ${
+              currentPage === 1
+                ? "text-gray-400 cursor-not-allowed"
+                : "hover:text-blue-700"
+            }`}
+          >
+            <IoIosArrowBack size={20} />
+          </button>
+          <span className="text-sm md:text-base text-gray-600 font-medium">
+            {currentPage}-{totalPages}
+          </span>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`text-sm md:text-base text-blue-500 font-medium ${
+              currentPage === totalPages
+                ? "text-gray-400 cursor-not-allowed"
+                : "hover:text-blue-700"
+            }`}
+          >
+            <IoIosArrowForward size={20} />
+          </button>
+        </div>
+      </div>
+
+      {isOperationLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+        </div>
+      )}
+    </div>
   );
 };
 

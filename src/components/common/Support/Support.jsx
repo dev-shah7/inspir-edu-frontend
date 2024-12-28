@@ -101,22 +101,6 @@ const Support = () => {
     e.preventDefault();
     if (!isFormValid()) return;
 
-    // emailjs
-    //   .send(
-    //     "service_kq8hf5c",
-    //     "template_qg8vkqk",
-    //     formData,
-    //     "FuqNV8mUCsn7GdGTO"
-    //   )
-    //   .then(
-    //     (result) => {
-    //       console.log(result.text);
-    //       setEmailSent(true);
-    //     },
-    //     (error) => {
-    //       console.log(error.text);
-    //     }
-    //   );
     try {
       await sendSupportEmail(formData);
       setEmailSent(true);

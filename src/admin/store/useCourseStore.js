@@ -12,9 +12,7 @@ const useCourseStore = create((set, get) => ({
   instructionsError: null,
 
   setCurrentCourse: (courseId) => {
-    console.log(courseId, "courseId");
     const course = get().courses.find((course) => course.id === courseId);
-    console.log(course, "course");
     set({ currentCourse: course.id });
   },
 
@@ -44,7 +42,6 @@ const useCourseStore = create((set, get) => ({
     try {
       const response = await courseService.saveCourse(courseData);
 
-      console.log(response, "response");
       set((state) => ({
         courses: courseData.id
           ? state.courses.map((course) =>
@@ -66,7 +63,6 @@ const useCourseStore = create((set, get) => ({
   deleteCourse: async (courseId) => {
     try {
       const response = await courseService.deleteCourse(courseId);
-      console.log(response, "response");
 
       set((state) => ({
         courses: state.courses.filter((course) => course.id !== courseId),
@@ -83,7 +79,6 @@ const useCourseStore = create((set, get) => ({
     set({ isLoadingInstructions: true, instructionsError: null });
     try {
       const response = await courseService.getGradingInstructions(courseId);
-      console.log(response, "response");
       set({
         gradingInstructions: response.data,
         isLoadingInstructions: false,

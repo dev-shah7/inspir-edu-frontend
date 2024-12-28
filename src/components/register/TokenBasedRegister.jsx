@@ -86,8 +86,6 @@ const TokenBasedRegister = () => {
           invitationToken,
         };
 
-        console.log("Payload:", payload);
-
         await tokenBasedSignup(payload);
         toast.success("User registered successfully!");
         navigate("/login");

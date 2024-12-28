@@ -22,8 +22,6 @@ const InviteUsersContent = ({ courseId, companyId, withCourse = false }) => {
 
   const effectiveCourseId = courseId || currentCourse;
 
-  console.log(companyId, "companyId");
-  console.log(effectiveCourseId, "effectiveCourseId");
   const handleAddEmail = () => {
     if (email.trim() && !emails.includes(email)) {
       setEmails([...emails, email.trim()]);
@@ -72,8 +70,6 @@ const InviteUsersContent = ({ courseId, companyId, withCourse = false }) => {
 
           await sendAdminNotificationEmail(adminEmailParams);
         } else {
-          console.log(token, "token");
-          console.log(response, "response");
           await sendInvitationEmailToAdmin(studentEmail, token);
         }
       }

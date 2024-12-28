@@ -70,7 +70,6 @@ const RegisterForm = () => {
   const { signup, isLoading, error } = useAuthStore();
 
   const validateStep = async (step) => {
-    console.log("Validating step:", step);
     setErrors({}); // Clear previous errors
 
     try {
@@ -116,12 +115,10 @@ const RegisterForm = () => {
   };
 
   const handleNext = async () => {
-    console.log("Current Step before next:", currentStep);
     const isValid = await validateStep(currentStep);
 
     if (isValid) {
       const nextStep = currentStep + 1;
-      console.log("Moving to step:", nextStep);
       setCurrentStep(nextStep);
       setErrors({});
     } else {
@@ -130,10 +127,8 @@ const RegisterForm = () => {
   };
 
   const handleBack = () => {
-    console.log("Handling back button, current step:", currentStep);
     if (currentStep > 1) {
       setCurrentStep((prev) => {
-        console.log("Setting step from", prev, "to", prev - 1);
         return prev - 1;
       });
       setErrors({});
@@ -170,7 +165,6 @@ const RegisterForm = () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted, current step:", currentStep);
 
     if (currentStep === 3) {
       await handleSubmit(e);
@@ -260,7 +254,6 @@ const RegisterForm = () => {
   );
 
   const renderStepContent = () => {
-    console.log("Rendering Step:", currentStep);
     switch (currentStep) {
       case 1:
         return renderUserForm();
@@ -273,7 +266,6 @@ const RegisterForm = () => {
           />
         );
       case 3:
-        console.log("Rendering Subscription Plan Form");
         return (
           <div className="w-full">
             <SubscriptionPlanForm
@@ -316,7 +308,6 @@ const RegisterForm = () => {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  console.log("Back button clicked");
                   handleBack();
                 }}
                 className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"

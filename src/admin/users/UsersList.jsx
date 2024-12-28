@@ -50,7 +50,6 @@ const UsersList = () => {
       setIsLoading(true);
       const response = await userService.getAllUsers();
 
-      console.log(response);
       if (response.isSuccess === true) {
         setUsers(response.data);
       } else {

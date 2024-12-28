@@ -1,7 +1,6 @@
 import React from "react";
 
 const UserDetailsContent = ({ user }) => {
-  console.log(user);
   return (
     <div className="flex flex-col w-[80%] font-outfit p-4 mx-auto">
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center p-4 bg-white rounded-lg shadow-sm">

@@ -34,7 +34,6 @@ export const authService = {
   forgotPassword: async (email) => {
     try {
       const response = await api.post("/Auth/forgot-password", { email });
-      console.log(response);
 
       // Send password reset email
       if (response.data.data) {

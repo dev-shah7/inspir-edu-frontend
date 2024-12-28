@@ -115,9 +115,6 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
 
   const courseId = currentCourse || courseIdFromParams;
 
-  console.log("Current Course:", currentCourse);
-  console.log("Course ID from params:", courseIdFromParams);
-
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(mode === "edit");
   const [uploadProgress, setUploadProgress] = useState(0);

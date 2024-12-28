@@ -1,4 +1,4 @@
-const CourseIntro = () => {
+const CourseIntro = ({ description }) => {
   return (
     <div className="mb-8">
       <h2 className="text-xl font-semibold mb-4">About this Course</h2>

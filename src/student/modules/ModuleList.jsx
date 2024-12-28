@@ -1,9 +1,11 @@
 import { useNavigate } from "react-router";
 import ProgressBar from "../components/common/ProgressBar";
 import Module from "./Module";
+import useCourseStore from "../store/useCourseStore";
 
 const ModuleList = () => {
   const navigate = useNavigate();
+  const { currentCourse } = useCourseStore();
   const modules = [
     {
       number: 1,
@@ -76,8 +78,8 @@ const ModuleList = () => {
       </div>
 
       <div className="space-y-4">
-        {modules.map((module, index) => (
-          <Module key={index} module={module} />
+        {currentCourse?.userModules.map((module, index) => (
+          <Module key={index} module={module} position={index} />
         ))}
       </div>
     </div>

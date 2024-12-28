@@ -20,9 +20,8 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
 
   return (
     <aside
-      className={`h-[80vh] bg-blue-200 w-64 p-4 mt-4 ml-4 rounded-3xl shadow-2xl transform transition-transform duration-300 md:static md:translate-x-0 ${
-        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      }`}
+      className={`h-[80vh] bg-blue-200 w-64 p-4 mt-4 ml-4 rounded-3xl shadow-2xl transform transition-transform duration-300 md:static md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
     >
       <nav className="space-y-4">
         <button
@@ -53,9 +52,8 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
                 </div>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className={`h-5 w-5 transition-transform duration-300 ease-in-out ${
-                    isUsersMenuOpen ? "rotate-90" : ""
-                  }`}
+                  className={`h-5 w-5 transition-transform duration-300 ease-in-out ${isUsersMenuOpen ? "rotate-90" : ""
+                    }`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -69,9 +67,8 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
                 </svg>
               </button>
               <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  isUsersMenuOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0"
-                }`}
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${isUsersMenuOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0"
+                  }`}
               >
                 <div className="ml-4 mt-2 space-y-1 border-l-2 border-blue-300 pl-4">
                   <button
@@ -100,22 +97,22 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
 
         {userRole === "student" && (
           <div>
-            <button
-              onClick={() => handleNavigation("/student/courses")}
-              className="flex items-center w-full space-x-2 p-2 rounded hover:bg-blue-300 text-left"
+            <Link
+              to="/student/myCourses"
+              className="flex items-center space-x-2 p-2 rounded hover:bg-blue-300"
             >
               <span>My Courses</span>
-            </button>
+            </Link>
             <button
               onClick={() => handleNavigation("/student/progress")}
               className="flex items-center w-full space-x-2 p-2 rounded hover:bg-blue-300 text-left"
             >
               <span>My Progress</span>
             </button>
-          </div>
+          </div >
         )}
-      </nav>
-    </aside>
+      </nav >
+    </aside >
   );
 };
 

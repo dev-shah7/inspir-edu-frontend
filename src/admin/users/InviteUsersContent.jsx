@@ -22,6 +22,8 @@ const InviteUsersContent = ({ courseId, companyId }) => {
 
   const effectiveCourseId = courseId || currentCourse;
 
+  console.log(companyId, "companyId");
+  console.log(effectiveCourseId, "effectiveCourseId");
   const handleAddEmail = () => {
     if (email.trim() && !emails.includes(email)) {
       setEmails([...emails, email.trim()]);
@@ -44,6 +46,7 @@ const InviteUsersContent = ({ courseId, companyId }) => {
           email: studentEmail,
           userRole: effectiveCourseId ? 3 : 1,
           ...(effectiveCourseId && { courseId: effectiveCourseId }),
+          ...(companyId && { companyId: companyId }),
         };
 
         // Save invitation

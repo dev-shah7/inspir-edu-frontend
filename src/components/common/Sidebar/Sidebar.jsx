@@ -1,12 +1,22 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { FiUsers } from "react-icons/fi";
 import { IoBookOutline } from "react-icons/io5";
 import { LuLayoutDashboard } from "react-icons/lu";
+import useCourseStore from "../../../admin/store/useCourseStore";
 
 const Sidebar = ({ isSidebarOpen, userRole }) => {
   const [isUsersMenuOpen, setUsersMenuOpen] = useState(false);
+  const clearCurrentCourse = useCourseStore(
+    (state) => state.clearCurrentCourse
+  );
+  const navigate = useNavigate();
+
+  const handleNavigation = (path) => {
+    clearCurrentCourse();
+    navigate(path);
+  };
 
   return (
     <aside
@@ -15,23 +25,23 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
       }`}
     >
       <nav className="space-y-4">
-        <Link
-          to="/"
-          className="flex items-center space-x-2 p-2 rounded hover:bg-blue-300"
+        <button
+          onClick={() => handleNavigation("/")}
+          className="flex items-center w-full space-x-2 p-2 rounded hover:bg-blue-300 text-left"
         >
           <LuLayoutDashboard className="h-5 w-5 mr-2" />
           <span>Dashboard</span>
-        </Link>
+        </button>
 
         {userRole === "admin" && (
           <>
-            <Link
-              to="/admin/courses"
-              className="flex items-center space-x-2 p-2 rounded hover:bg-blue-300"
+            <button
+              onClick={() => handleNavigation("/admin/courses")}
+              className="flex items-center w-full space-x-2 p-2 rounded hover:bg-blue-300 text-left"
             >
               <IoBookOutline className="h-5 w-5 mr-2" />
               <span>Courses</span>
-            </Link>
+            </button>
             <div className="relative">
               <button
                 onClick={() => setUsersMenuOpen(!isUsersMenuOpen)}
@@ -64,24 +74,24 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
                 }`}
               >
                 <div className="ml-4 mt-2 space-y-1 border-l-2 border-blue-300 pl-4">
-                  <Link
-                    to="/admin/users"
-                    className="block p-2 rounded-lg hover:bg-blue-300 transition-colors duration-200 hover:translate-x-1 transform"
+                  <button
+                    onClick={() => handleNavigation("/admin/users")}
+                    className="block w-full p-2 rounded-lg hover:bg-blue-300 transition-colors duration-200 hover:translate-x-1 transform text-left"
                   >
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <span>All Users</span>
                     </div>
-                  </Link>
-                  <Link
-                    to="/admin/enrolled-courses"
-                    className="block p-2 rounded-lg hover:bg-blue-300 transition-colors duration-200 hover:translate-x-1 transform"
+                  </button>
+                  <button
+                    onClick={() => handleNavigation("/admin/enrolled-courses")}
+                    className="block w-full p-2 rounded-lg hover:bg-blue-300 transition-colors duration-200 hover:translate-x-1 transform text-left"
                   >
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <span>Enrolled Users</span>
                     </div>
-                  </Link>
+                  </button>
                 </div>
               </div>
             </div>
@@ -90,18 +100,18 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
 
         {userRole === "student" && (
           <div>
-            <Link
-              to="/student/courses"
-              className="flex items-center space-x-2 p-2 rounded hover:bg-blue-300"
+            <button
+              onClick={() => handleNavigation("/student/courses")}
+              className="flex items-center w-full space-x-2 p-2 rounded hover:bg-blue-300 text-left"
             >
               <span>My Courses</span>
-            </Link>
-            <Link
-              to="/student/progress"
-              className="flex items-center space-x-2 p-2 rounded hover:bg-blue-300"
+            </button>
+            <button
+              onClick={() => handleNavigation("/student/progress")}
+              className="flex items-center w-full space-x-2 p-2 rounded hover:bg-blue-300 text-left"
             >
               <span>My Progress</span>
-            </Link>
+            </button>
           </div>
         )}
       </nav>

@@ -119,21 +119,21 @@ const Header = ({ isSidebarOpen, setSidebarOpen, userRole }) => {
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-10">
-              <button
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-20">
+              <div
                 onClick={handleProfileClick}
-                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer flex items-center space-x-2"
+                className="flex items-center space-x-2 px-4 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer"
               >
                 <FaUser className="text-[#1A73E8]" />
                 <span>My Profile</span>
-              </button>
-              <button
+              </div>
+              <div
                 onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 flex items-center space-x-2"
+                className="flex items-center space-x-2 px-4 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer"
               >
                 <FaSignOutAlt className="text-red-500" />
                 <span>Logout</span>
-              </button>
+              </div>
             </div>
           )}
         </div>

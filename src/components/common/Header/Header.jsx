@@ -78,11 +78,14 @@ const Header = ({ isSidebarOpen, setSidebarOpen, userRole }) => {
           <img src={Logo} alt="logo" />
         </div>
 
-        <div className="h-10 w-[1px] bg-[#1A73E8]"></div>
+        <div className="hidden md:block h-10 w-[1px] bg-[#1A73E8]"></div>
 
-        <div className="flex items-center space-x-4">
-          <span className="text-lg font-semibold">
-            {userRole === "admin" ? "Admin Panel" : "Student Portal"}
+        <div className="hidden md:flex items-center space-x-4">
+          <span className="text-xl flex items-center font-semibold text-[#1A73E8]">
+            {userRole === "admin" ? "Admin Portal" : "Student Portal"}
+            <span className="text-sm font-medium text-gray-600 ml-2">
+              | Welcome back
+            </span>
           </span>
         </div>
       </div>

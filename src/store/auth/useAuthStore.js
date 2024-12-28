@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { authService } from "../../services/api/authService";
+import { companyService } from "../../services/api/companyService";
 import { plansDetails } from "../../assets/plansDetails";
 
 /**
@@ -22,6 +23,7 @@ const useAuthStore = create(
       token: null,
       isAuthenticated: false,
       userRole: null,
+      companyDetails: null,
       subscriptionPlans: [],
       isLoading: false,
       error: null,
@@ -76,13 +78,30 @@ const useAuthStore = create(
           const token = data.token;
           localStorage.setItem("token", token);
 
-          set({
-            user: userData,
-            token: token,
-            isLoading: false,
-            isAuthenticated: true,
-            userRole: data.roles[0].toLowerCase(),
-          });
+          try {
+            const companyResponse = await companyService.getCompanyDetails(
+              data.companyId
+            );
+            const companyData = companyResponse.data.data;
+
+            set({
+              user: userData,
+              token: token,
+              isLoading: false,
+              isAuthenticated: true,
+              userRole: data.roles[0].toLowerCase(),
+              companyDetails: companyData,
+            });
+          } catch (companyError) {
+            console.error("Failed to fetch company details:", companyError);
+            set({
+              user: userData,
+              token: token,
+              isLoading: false,
+              isAuthenticated: true,
+              userRole: data.roles[0].toLowerCase(),
+            });
+          }
 
           return response;
         } catch (error) {
@@ -90,6 +109,18 @@ const useAuthStore = create(
             error: error.response?.data?.message || "Login failed",
             isLoading: false,
           });
+          throw error;
+        }
+      },
+
+      updateCompanyDetails: async (companyId) => {
+        try {
+          const response = await companyService.getCompanyDetails(companyId);
+          const companyData = response.data.data;
+          set({ companyDetails: companyData });
+          return companyData;
+        } catch (error) {
+          console.error("Failed to update company details:", error);
           throw error;
         }
       },
@@ -130,6 +161,7 @@ const useAuthStore = create(
           token: null,
           isAuthenticated: false,
           userRole: null,
+          companyDetails: null,
           isLoading: false,
           error: null,
         });

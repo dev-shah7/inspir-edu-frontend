@@ -74,8 +74,8 @@ const useModuleStore = create((set, get) => ({
       set((state) => ({
         modules: moduleData.id
           ? state.modules.map((module) =>
-              module.id === moduleData.id ? response : module
-            )
+            module.id === moduleData.id ? response : module
+          )
           : [...state.modules, response],
         currentModule: response.data,
       }));
@@ -100,6 +100,32 @@ const useModuleStore = create((set, get) => ({
       set({
         error: error.response?.data?.message || "Failed to delete module",
       });
+      throw error;
+    }
+  },
+
+  submitModule: async (id) => {
+    set({ isLoading: true });
+    try {
+      const response = await moduleService.submitModule(id);
+      set({ isLoading: false });
+      return response;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to save module", isLoading: false
+      });
+      throw error;
+    }
+  },
+
+  startUserModule: async (moduleId) => {
+    set({ isLoading: true });
+    try {
+      const response = await moduleService.startUserModule(moduleId);
+      set({ isLoading: false });
+      return response;
+    } catch (error) {
+      set({ isLoading: false });
       throw error;
     }
   },

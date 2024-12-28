@@ -64,6 +64,11 @@ export const studentCourseService = {
     return response.data;
   },
 
+  submitCourse: async (courseId) => {
+    const response = await api.post(`/UserCourse/submit/${courseId}`, {});
+    return response.data;
+  },
+
   deleteCourse: async (id) => {
     return await api.delete(`/Course/delete/${id}`);
   },

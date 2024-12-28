@@ -21,6 +21,8 @@ const Course = ({ course, status }) => {
     try {
       await enrollCourse(course);
       toast.success("Course is enrolled successfully");
+      navigate(`/student/courses/${course.id}/overview`);
+
     } catch (error) {
       console.error("Failed to enroll in course:", error);
       toast.error("Failed to enroll in course. Please try again.");
@@ -56,6 +58,7 @@ const Course = ({ course, status }) => {
           />
         );
       case 2:
+      case 3:
         return (
           <Button
             text="View"

@@ -2,6 +2,7 @@ export const UserCourseStatus = {
   0: "Pending",
   1: "Enrolled",
   2: "Completed",
+  3: "Finished",
 };
 
 export const CourseType =

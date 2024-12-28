@@ -11,7 +11,7 @@ const CompanyInfoForm = ({ formData, setFormData, errors }) => {
         value={formData.name}
         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         error={errors.name}
-        Icon={FaBuilding}
+        icon={FaBuilding}
       />
 
       <InputField
@@ -19,7 +19,7 @@ const CompanyInfoForm = ({ formData, setFormData, errors }) => {
         placeholder="Company Logo URL"
         value={formData.logo}
         onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-        Icon={FiImage}
+        icon={FiImage}
       />
 
       <InputField
@@ -28,7 +28,7 @@ const CompanyInfoForm = ({ formData, setFormData, errors }) => {
         value={formData.address}
         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
         error={errors.address}
-        Icon={FiMapPin}
+        icon={FiMapPin}
       />
 
       <InputField
@@ -39,7 +39,7 @@ const CompanyInfoForm = ({ formData, setFormData, errors }) => {
           setFormData({ ...formData, representativeName: e.target.value })
         }
         error={errors.representativeName}
-        Icon={FiUser}
+        icon={FiUser}
       />
 
       <InputField
@@ -50,7 +50,7 @@ const CompanyInfoForm = ({ formData, setFormData, errors }) => {
           setFormData({ ...formData, phoneNumber: e.target.value })
         }
         error={errors.phoneNumber}
-        Icon={FiPhone}
+        icon={FiPhone}
       />
     </div>
   );

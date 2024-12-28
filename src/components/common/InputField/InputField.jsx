@@ -49,38 +49,43 @@ const InputField = ({
           onBlur={onBlur}
           disabled={disabled}
           className={`w-full p-3 pl-4 ${
-            isPassword ? "pr-20" : "pr-10"
+            Icon || isPassword ? "pr-12" : "pr-4"
           } rounded-lg border border-gray-300 bg-white shadow focus:outline-none focus:ring-2 focus:ring-button-blue ${
             error ? "border-red-500" : ""
           }`}
         />
 
-        {/* Show both icons for password fields */}
-        {isPassword && (
-          <button
-            type="button"
-            onClick={togglePasswordVisibility}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1"
-          >
-            {showPassword ? (
-              <FiEyeOff size={20} className="text-gray-400" />
-            ) : (
-              <FiEye size={20} className="text-gray-400" />
-            )}
-          </button>
-        )}
+        {/* Icon positioning */}
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center">
+          {/* Regular icon (if not password field) */}
+          {Icon && !isPassword && (
+            <span className="px-3 text-gray-400">
+              <Icon size={20} />
+            </span>
+          )}
 
-        {/* Optional Icon (show only for non-password fields or to the left of eye icon) */}
-        {Icon && !isPassword && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-            <Icon size={20} />
-          </span>
-        )}
-        {Icon && isPassword && (
-          <span className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400">
-            <Icon size={20} />
-          </span>
-        )}
+          {/* Password field icons */}
+          {isPassword && (
+            <>
+              {Icon && (
+                <span className="px-3 text-gray-400">
+                  <Icon size={20} />
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="px-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+              >
+                {showPassword ? (
+                  <FiEyeOff size={20} />
+                ) : (
+                  <FiEye size={20} />
+                )}
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Error Message */}

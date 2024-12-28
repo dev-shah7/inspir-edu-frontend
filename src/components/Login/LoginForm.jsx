@@ -6,6 +6,7 @@ import InputField from "../common/InputField/InputField";
 import Button from "../common/Button/Button";
 import { FiSend } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import { MdOutlineEmail } from "react-icons/md";
 
 // Zod validation schema - Only validate on submit, not during input
 const loginSchema = z.object({
@@ -104,6 +105,7 @@ const LoginForm = () => {
               value={formData.email}
               onChange={handleChange}
               onBlur={(e) => validateField("email", e.target.value)}
+              icon={MdOutlineEmail}
             />
 
             {errors.email && (

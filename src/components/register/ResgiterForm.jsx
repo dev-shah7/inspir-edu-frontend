@@ -16,6 +16,9 @@ import CompanyInfoForm from "./CompanyInfoForm";
 import SubscriptionPlanForm from "./SubscriptionPlanForm";
 import useAuthStore from "../../store/auth/useAuthStore";
 import { toast } from "react-hot-toast";
+import { MdOutlineEmail } from "react-icons/md";
+import { LuUser } from "react-icons/lu";
+import { PiCityLight } from "react-icons/pi";
 
 // Zod Validation Schema
 const userSchema = z.object({
@@ -186,7 +189,7 @@ const RegisterForm = () => {
           setUserFormData({ ...userFormData, name: e.target.value })
         }
         error={errors.name}
-        Icon={FiUser}
+        icon={LuUser}
       />
       <InputField
         type="email"
@@ -196,7 +199,7 @@ const RegisterForm = () => {
           setUserFormData({ ...userFormData, email: e.target.value })
         }
         error={errors.email}
-        Icon={FiMail}
+        icon={MdOutlineEmail}
       />
       <InputField
         type="password"
@@ -206,7 +209,7 @@ const RegisterForm = () => {
           setUserFormData({ ...userFormData, password: e.target.value })
         }
         error={errors.password}
-        Icon={FiLock}
+        icon={FiLock}
       />
       <InputField
         type="tel"
@@ -216,7 +219,7 @@ const RegisterForm = () => {
           setUserFormData({ ...userFormData, phoneNumber: e.target.value })
         }
         error={errors.phoneNumber}
-        Icon={FiPhone}
+        icon={FiPhone}
       />
       <InputField
         type="text"
@@ -226,7 +229,7 @@ const RegisterForm = () => {
           setUserFormData({ ...userFormData, address: e.target.value })
         }
         error={errors.address}
-        Icon={FiMapPin}
+        icon={FiMapPin}
       />
       <InputField
         type="text"
@@ -236,7 +239,7 @@ const RegisterForm = () => {
           setUserFormData({ ...userFormData, city: e.target.value })
         }
         error={errors.city}
-        Icon={FiMapPin}
+        icon={PiCityLight}
       />
       <div className="flex items-center text-sm text-gray-600">
         <input

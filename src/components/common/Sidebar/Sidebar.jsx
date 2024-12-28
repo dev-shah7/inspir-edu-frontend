@@ -1,6 +1,9 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router";
+import { FiUsers } from "react-icons/fi";
+import { IoBookOutline } from "react-icons/io5";
+import { LuLayoutDashboard } from "react-icons/lu";
 
 const Sidebar = ({ isSidebarOpen, userRole }) => {
   const [isUsersMenuOpen, setUsersMenuOpen] = useState(false);
@@ -16,14 +19,7 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
           to="/"
           className="flex items-center space-x-2 p-2 rounded hover:bg-blue-300"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path d="M10 3a1 1 0 00-.894.553L5.382 11H4a1 1 0 000 2h2a1 1 0 00.894-.553L9.618 5H16a1 1 0 100-2h-6a1 1 0 00-.894.553L10 3z" />
-          </svg>
+          <LuLayoutDashboard className="h-5 w-5 mr-2" />
           <span>Dashboard</span>
         </Link>
 
@@ -33,6 +29,7 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
               to="/admin/courses"
               className="flex items-center space-x-2 p-2 rounded hover:bg-blue-300"
             >
+              <IoBookOutline className="h-5 w-5 mr-2" />
               <span>Courses</span>
             </Link>
             <div>
@@ -40,7 +37,10 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
                 onClick={() => setUsersMenuOpen(!isUsersMenuOpen)}
                 className="flex justify-between items-center w-full p-2 rounded hover:bg-blue-300"
               >
-                <span>Users</span>
+                <div className="flex items-center">
+                  <FiUsers className="h-5 w-5 mr-4" />
+                  <span>Users</span>
+                </div>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className={`h-5 w-5 transition-transform ${

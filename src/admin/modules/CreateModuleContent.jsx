@@ -6,6 +6,7 @@ import useCourseStore from "../store/useCourseStore";
 import { toast } from "react-hot-toast";
 import InputField from "../../components/common/InputField/InputField";
 import AddQuestionContent from "../questions/AddQuestionContent";
+import { useForm } from "react-hook-form";
 
 // Dummy data structure (replace with your actual data source)
 export const dummyModules = [
@@ -132,6 +133,17 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
 
   // Add state to track if we want to replace existing media
   const [replaceMedia, setReplaceMedia] = useState(false);
+
+  const {
+    register,
+    formState: { errors },
+    setValue,
+    trigger
+  } = useForm({
+    defaultValues: {
+      moduleName: formData.name || "",
+    }
+  });
 
   // Determine media type from URL
   const getMediaTypeFromUrl = (url) => {
@@ -372,10 +384,24 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
   // Update handleSubmit to handle media replacement
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Trigger validation
+    const isValid = await trigger();
+    if (!isValid) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       let fileUrl = formData.url;
+
+      // Add validation for media requirement
+      if (!selectedFile && !mediaUrl && !formData.url) {
+        toast.error("Please add media content");
+        setIsLoading(false);
+        return;
+      }
 
       if (replaceMedia || mode === "add") {
         if (selectedFile) {
@@ -473,15 +499,28 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
 
         {/* Module Name */}
         <div>
-          <InputField
-            label="Module name"
-            value={formData.name}
+          <label className="block mb-2 text-md font-light text-[#031F42]">
+            Module Name
+          </label>
+          <input
             type="text"
             name="name"
-            onChange={handleInputChange}
+            {...register("moduleName", {
+              required: "Module name is required"
+            })}
+            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+              errors.moduleName ? 'border-red-500' : ''
+            }`}
             placeholder="Enter module name"
-            required
+            onChange={(e) => {
+              handleInputChange(e);
+              setValue("moduleName", e.target.value);
+            }}
+            value={formData.moduleName}
           />
+          {errors.moduleName && (
+            <p className="text-sm text-red-500 mt-1">{errors.moduleName.message}</p>
+          )}
         </div>
 
         {/* Description */}
@@ -496,7 +535,6 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
             className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             rows="4"
             placeholder="Enter description"
-            required
           />
         </div>
 

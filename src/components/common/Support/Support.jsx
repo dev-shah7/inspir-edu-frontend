@@ -69,8 +69,20 @@ const Support = () => {
     message: false,
   });
 
+  const countWords = (text) => {
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    if (name === 'message') {
+      const wordCount = countWords(value);
+      if (wordCount > 500) {
+        return;
+      }
+    }
+
     setFormData({
       ...formData,
       [name]: value,
@@ -218,11 +230,21 @@ const Support = () => {
                     }`}
                     placeholder="How can we help you?"
                   />
-                  {errors.message && (
-                    <p className="mt-1 text-sm text-red-500">
-                      Message is required
+                  <div className="mt-1 flex justify-between items-center">
+                    <div className="space-y-1">
+                      {errors.message && (
+                        <p className="text-sm text-red-500">
+                          Message is required
+                        </p>
+                      )}
+                      <p className="text-sm text-gray-500">
+                        Max word limit 500
+                      </p>
+                    </div>
+                    <p className={`text-sm ${countWords(formData.message) > 450 ? 'text-orange-500' : 'text-gray-500'}`}>
+                      {countWords(formData.message)}/500 words
                     </p>
-                  )}
+                  </div>
                 </div>
 
                 <button

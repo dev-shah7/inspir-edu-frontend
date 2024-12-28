@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import useModalStore from "../store/useModalStore";
 import CourseCongratulations from "../congratulations/CourseCongratulations";
 import { toast } from "react-hot-toast";
@@ -16,16 +17,27 @@ const InviteUsersContent = ({ courseId, companyId, withCourse = false }) => {
   const { closeModal, queueModal } = useModalStore();
   const { currentCourse } = useCourseStore();
   const { user } = useAuthStore();
-  const [email, setEmail] = useState("");
   const [emails, setEmails] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const {
+    register,
+    setValue,
+    formState: { errors },
+    watch,
+  } = useForm({
+    defaultValues: {
+      email: "",
+    },
+  });
+
+  const email = watch("email");
   const effectiveCourseId = courseId || currentCourse;
 
   const handleAddEmail = () => {
-    if (email.trim() && !emails.includes(email)) {
+    if (email?.trim() && !emails.includes(email)) {
       setEmails([...emails, email.trim()]);
-      setEmail("");
+      setValue("email", "");
     }
   };
 
@@ -106,12 +118,19 @@ const InviteUsersContent = ({ courseId, companyId, withCourse = false }) => {
         <input
           id="email"
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          {...register("email", {
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: "Invalid email address",
+            },
+          })}
           onKeyPress={handleKeyPress}
           placeholder="Enter email"
           className="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
         />
+        {errors.email && (
+          <p className="text-md text-red-500">{errors.email.message}</p>
+        )}
       </div>
       <div className="flex justify-center space-x-4 mb-4">
         <button

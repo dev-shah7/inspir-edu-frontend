@@ -59,4 +59,28 @@ export const courseService = {
     );
     return response.data;
   },
+
+  getCourseInvitations: async (courseId) => {
+    try {
+      const response = await api.get(
+        `/Invitation/get-all?courseId=${courseId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching course invitations:", error);
+      throw error;
+    }
+  },
+
+  getEnrolledDetail: async (courseId, userId) => {
+    try {
+      const response = await api.get(
+        `/Course/get-enrolled-detail/${courseId}?userId=${userId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error in getEnrolledDetail:", error);
+      throw error;
+    }
+  },
 };

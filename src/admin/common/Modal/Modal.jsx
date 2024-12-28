@@ -10,7 +10,7 @@ const Modal = () => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-25 flex justify-center items-center z-50">
-      <div className="bg-[#ECF5FF] w-[40rem] max-h-[80vh] rounded-xl shadow-lg relative flex flex-col">
+      <div className="bg-[#ECF5FF] min-w-[40rem] max-w-[60rem] max-h-[80vh] rounded-xl shadow-lg relative flex flex-col">
         <div className="p-8 pb-4 ">
           {!hideCloseButton && (
             <button

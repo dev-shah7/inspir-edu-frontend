@@ -12,7 +12,7 @@ import { courseService } from "../../services/api/courseService";
 import useCourseStore from "../store/useCourseStore";
 import useAuthStore from "../../store/auth/useAuthStore";
 
-const InviteUsersContent = ({ courseId, companyId }) => {
+const InviteUsersContent = ({ courseId, companyId, withCourse = false }) => {
   const { closeModal, queueModal } = useModalStore();
   const { currentCourse } = useCourseStore();
   const { user } = useAuthStore();
@@ -80,7 +80,7 @@ const InviteUsersContent = ({ courseId, companyId }) => {
 
       toast.success("Invitations sent successfully!");
 
-      if (effectiveCourseId) {
+      if (effectiveCourseId && withCourse) {
         queueModal("Congratulations!", <CourseCongratulations />);
       }
       closeModal();

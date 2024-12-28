@@ -11,7 +11,7 @@ const AddMoreModulesContent = () => {
   };
 
   const handleClose = () => {
-    queueModal("Invite Users", <InviteUsersContent />);
+    queueModal("Invite Users", <InviteUsersContent withCourse={true} />);
     closeModal();
   };
 

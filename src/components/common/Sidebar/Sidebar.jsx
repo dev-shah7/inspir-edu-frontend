@@ -32,10 +32,10 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
               <IoBookOutline className="h-5 w-5 mr-2" />
               <span>Courses</span>
             </Link>
-            <div>
+            <div className="relative">
               <button
                 onClick={() => setUsersMenuOpen(!isUsersMenuOpen)}
-                className="flex justify-between items-center w-full p-2 rounded hover:bg-blue-300"
+                className="flex justify-between items-center w-full p-2 rounded hover:bg-blue-300 transition-colors duration-200"
               >
                 <div className="flex items-center">
                   <FiUsers className="h-5 w-5 mr-4" />
@@ -43,7 +43,7 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
                 </div>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className={`h-5 w-5 transition-transform ${
+                  className={`h-5 w-5 transition-transform duration-300 ease-in-out ${
                     isUsersMenuOpen ? "rotate-90" : ""
                   }`}
                   fill="none"
@@ -58,22 +58,32 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
                   />
                 </svg>
               </button>
-              {isUsersMenuOpen && (
-                <div className="ml-4 space-y-2">
+              <div
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                  isUsersMenuOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="ml-4 mt-2 space-y-1 border-l-2 border-blue-300 pl-4">
                   <Link
                     to="/admin/users"
-                    className="block p-2 rounded hover:bg-blue-300"
+                    className="block p-2 rounded-lg hover:bg-blue-300 transition-colors duration-200 hover:translate-x-1 transform"
                   >
-                    All Users
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span>All Users</span>
+                    </div>
                   </Link>
                   <Link
                     to="/admin/enrolled-courses"
-                    className="block p-2 rounded hover:bg-blue-300"
+                    className="block p-2 rounded-lg hover:bg-blue-300 transition-colors duration-200 hover:translate-x-1 transform"
                   >
-                    Enrolled Users
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span>Enrolled Users</span>
+                    </div>
                   </Link>
                 </div>
-              )}
+              </div>
             </div>
           </>
         )}

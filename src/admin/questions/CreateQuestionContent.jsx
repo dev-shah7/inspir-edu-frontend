@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import QuestionTypeDropdown from "./components/QuestionTypeDropdown";
 import useModalStore from "../store/useModalStore";
 import useQuestionStore from "../store/useQuestionStore";
@@ -23,10 +24,24 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [questionType, setQuestionType] = useState("");
-  const [questionText, setQuestionText] = useState("");
-  const [correctAnswer, setCorrectAnswer] = useState("");
   const [options, setOptions] = useState([{ key: Date.now(), value: "" }]);
   const [selectedCheckboxes, setSelectedCheckboxes] = useState(new Set());
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      questionText: "",
+      correctAnswer: "",
+    }
+  });
+
+  const questionText = watch("questionText");
+  const correctAnswer = watch("correctAnswer");
 
   useEffect(() => {
     const loadQuestion = async () => {
@@ -39,11 +54,11 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
             question.type
           );
           setQuestionType(frontendType);
-          setQuestionText(question.question);
+          setValue("questionText", question.question);
 
           if (question.type === 0 || question.type === 1) {
             // Short or Long answer
-            setCorrectAnswer(question.correctAnswer);
+            setValue("correctAnswer", question.correctAnswer);
           } else if (question.type === 2 || question.type === 5) {
             // MCQ or Checkbox
             // Format options
@@ -55,7 +70,6 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
 
             if (question.questionOptions.some((opt) => opt.isCorrect)) {
               if (question.type === 5) {
-                // Changed from questionType to question.type
                 const selected = new Set();
                 question.questionOptions.forEach((opt, idx) => {
                   if (opt.isCorrect) selected.add(idx);
@@ -65,7 +79,7 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
                 const correctIndex = question.questionOptions.findIndex(
                   (opt) => opt.isCorrect
                 );
-                setCorrectAnswer(correctIndex.toString());
+                setValue("correctAnswer", correctIndex.toString());
               }
             }
           } else if (question.type === 3 || question.type === 4) {
@@ -73,7 +87,7 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
               (opt) => opt.isCorrect
             );
             if (correctOption) {
-              setCorrectAnswer(correctOption.option.toLowerCase());
+              setValue("correctAnswer", correctOption.option.toLowerCase());
             }
           }
         } catch (error) {
@@ -84,19 +98,14 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
     };
 
     loadQuestion();
-  }, [mode, questionId, fetchQuestionById, closeModal]);
+  }, [mode, questionId, fetchQuestionById, closeModal, setValue]);
 
-  const handleSubmit = async () => {
+  const onSubmit = async (formData) => {
     try {
       setIsLoading(true);
 
       if (!moduleId) {
         toast.error("Module ID is required");
-        return;
-      }
-
-      if (!questionText) {
-        toast.error("Please enter a question");
         return;
       }
 
@@ -110,13 +119,24 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
 
       // Validate options for non-text questions
       if (!isTextQuestion) {
-        if (questionType === "mcq" && !correctAnswer) {
+        if (questionType === "mcq" && !formData.correctAnswer) {
           toast.error("Please select a correct answer for MCQ");
           return;
         }
 
+        if (questionType === "checkbox") {
+          if (options.length < 2) {
+            toast.error("Please add at least 2 options for checkbox questions");
+            return;
+          }
+          if (selectedCheckboxes.size === 0) {
+            toast.error("Please select at least one correct answer");
+            return;
+          }
+        }
+
         if (questionType === "true-false" || questionType === "yes-no") {
-          if (!correctAnswer) {
+          if (!formData.correctAnswer) {
             toast.error(
               `Please select the correct ${
                 questionType === "true-false" ? "True/False" : "Yes/No"
@@ -133,7 +153,7 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
       const questionData = {
         id: mode === "edit" ? parseInt(questionId) : 0,
         moduleId: parseInt(moduleId),
-        question: questionText,
+        question: formData.questionText,
         type: questionType,
         correctAnswer: getCorrectAnswer(),
         options: getOptions(),
@@ -289,11 +309,23 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
             <div className="col-span-12">
               <input
                 type="text"
-                value={correctAnswer}
-                onChange={(e) => setCorrectAnswer(e.target.value)}
+                {...register("correctAnswer", {
+                  required: "Answer is required",
+                  minLength: {
+                    value: 1,
+                    message: "Answer must not be empty"
+                  },
+                  maxLength: {
+                    value: 500,
+                    message: "Answer must not exceed 500 characters"
+                  }
+                })}
                 placeholder="Enter your answer"
                 className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              {errors.correctAnswer && (
+                <p className="text-sm text-red-500 mt-1">{errors.correctAnswer.message}</p>
+              )}
             </div>
           </div>
         );
@@ -304,11 +336,23 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
             <div className="col-span-12">
               <textarea
                 rows="4"
-                value={correctAnswer}
-                onChange={(e) => setCorrectAnswer(e.target.value)}
+                {...register("correctAnswer", {
+                  required: "Answer is required",
+                  minLength: {
+                    value: 2,
+                    message: "Answer must be at least 2 characters"
+                  },
+                  maxLength: {
+                    value: 2000,
+                    message: "Answer must not exceed 2000 characters"
+                  }
+                })}
                 placeholder="Write a detailed answer"
                 className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               ></textarea>
+              {errors.correctAnswer && (
+                <p className="text-sm text-red-500 mt-1">{errors.correctAnswer.message}</p>
+              )}
             </div>
           </div>
         );
@@ -406,42 +450,55 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
   }
 
   return (
-    <>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <div className="mb-4">
         <QuestionTypeDropdown value={questionType} onChange={setQuestionType} />
       </div>
       <div className="mb-4">
         <label
-          htmlFor="question"
+          htmlFor="questionText"
           className="block mb-2 text-sm font-medium text-gray-700"
         >
           Question
         </label>
         <input
           type="text"
-          id="question"
-          value={questionText}
-          onChange={(e) => setQuestionText(e.target.value)}
+          id="questionText"
+          {...register("questionText", {
+            required: "Question text is required",
+            minLength: {
+              value: 3,
+              message: "Question must be at least 3 characters"
+            },
+            maxLength: {
+              value: 1000,
+              message: "Question must not exceed 1000 characters"
+            }
+          })}
           placeholder="What is the topic of this session?"
           className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        {errors.questionText && (
+          <p className="text-sm text-red-500 mt-1">{errors.questionText.message}</p>
+        )}
       </div>
       <div className="mb-6">{renderAnswerInput()}</div>
       <div className="flex justify-center space-x-4">
         <button
+          type="submit"
           className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-          onClick={handleSubmit}
         >
           {mode === "edit" ? "Update Question" : "Create Question"}
         </button>
         <button
+          type="button"
           className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
           onClick={closeModal}
         >
           Cancel
         </button>
       </div>
-    </>
+    </form>
   );
 };
 

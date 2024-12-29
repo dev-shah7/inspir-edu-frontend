@@ -10,6 +10,7 @@ import QuestionsList from "../student/questions/QuestionsList";
 import CongratulationsBanner from "../student/components/common/CongratulationsBanner";
 import Support from "../components/common/Support/Support";
 import CourseResult from '../student/result/CourseResult';
+import ProfileCard from "../components/common/Profile/Profile";
 
 const StudentRoutes = () => {
   return (
@@ -41,6 +42,10 @@ const StudentRoutes = () => {
               </CourseContent>
             }
           />
+            <Route
+            path="/profile"
+            element={<ProfileCard />}
+            />
           <Route path="/support" element={<Support />} />
         </Route>
       </Route>

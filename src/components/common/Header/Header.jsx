@@ -48,7 +48,12 @@ const Header = ({ isSidebarOpen, setSidebarOpen, userRole }) => {
   const handleProfileClick = () => {
     setIsDropdownOpen(false);
     clearCurrentCourse();
-    navigate("/admin/profile");
+    if (userRole === "admin") {
+      navigate("/admin/profile");
+    } else {
+      console.log("student");
+      navigate("/student/profile");
+    }
   };
 
   return (

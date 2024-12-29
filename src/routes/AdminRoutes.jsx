@@ -10,8 +10,8 @@ import Questions from "../admin/questions/Questions";
 import Modules from "../admin/modules/Modules";
 import UsersList from "../admin/users/UsersList";
 import EnrolledCourses from "../admin/enrolledCourses/EnrolledCourses";
-import ProfilePage from "../admin/profile/ProfilePage";
 import Support from "../components/common/Support/Support";
+import ProfileCard from "../components/common/Profile/Profile";
 
 const AdminRoutes = () => {
   return (
@@ -70,7 +70,7 @@ const AdminRoutes = () => {
             path="profile"
             element={
               <MainContent>
-                <ProfilePage />
+                <ProfileCard />
               </MainContent>
             }
           />

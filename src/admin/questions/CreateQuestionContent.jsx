@@ -37,7 +37,7 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
     defaultValues: {
       questionText: "",
       correctAnswer: "",
-    }
+    },
   });
 
   const questionText = watch("questionText");
@@ -281,7 +281,7 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
                 name="correctOption"
                 value={value.toLowerCase()}
                 checked={correctAnswer === value.toLowerCase()}
-                onChange={(e) => setCorrectAnswer(e.target.value)}
+                onChange={(e) => setValue("correctAnswer", e.target.value)}
                 className="form-radio h-5 w-5 text-blue-600"
               />
             </div>
@@ -313,18 +313,20 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
                   required: "Answer is required",
                   minLength: {
                     value: 1,
-                    message: "Answer must not be empty"
+                    message: "Answer must not be empty",
                   },
                   maxLength: {
                     value: 500,
-                    message: "Answer must not exceed 500 characters"
-                  }
+                    message: "Answer must not exceed 500 characters",
+                  },
                 })}
                 placeholder="Enter your answer"
                 className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {errors.correctAnswer && (
-                <p className="text-sm text-red-500 mt-1">{errors.correctAnswer.message}</p>
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.correctAnswer.message}
+                </p>
               )}
             </div>
           </div>
@@ -340,18 +342,20 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
                   required: "Answer is required",
                   minLength: {
                     value: 2,
-                    message: "Answer must be at least 2 characters"
+                    message: "Answer must be at least 2 characters",
                   },
                   maxLength: {
                     value: 2000,
-                    message: "Answer must not exceed 2000 characters"
-                  }
+                    message: "Answer must not exceed 2000 characters",
+                  },
                 })}
                 placeholder="Write a detailed answer"
                 className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               ></textarea>
               {errors.correctAnswer && (
-                <p className="text-sm text-red-500 mt-1">{errors.correctAnswer.message}</p>
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.correctAnswer.message}
+                </p>
               )}
             </div>
           </div>
@@ -389,7 +393,9 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
                       type="radio"
                       name="correctOption"
                       checked={correctAnswer === index.toString()}
-                      onChange={() => setCorrectAnswer(index.toString())}
+                      onChange={() =>
+                        setValue("correctAnswer", index.toString())
+                      }
                       className="form-radio h-5 w-5 text-blue-600"
                     />
                   ) : (
@@ -468,18 +474,20 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
             required: "Question text is required",
             minLength: {
               value: 3,
-              message: "Question must be at least 3 characters"
+              message: "Question must be at least 3 characters",
             },
             maxLength: {
               value: 1000,
-              message: "Question must not exceed 1000 characters"
-            }
+              message: "Question must not exceed 1000 characters",
+            },
           })}
           placeholder="What is the topic of this session?"
           className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         {errors.questionText && (
-          <p className="text-sm text-red-500 mt-1">{errors.questionText.message}</p>
+          <p className="text-sm text-red-500 mt-1">
+            {errors.questionText.message}
+          </p>
         )}
       </div>
       <div className="mb-6">{renderAnswerInput()}</div>

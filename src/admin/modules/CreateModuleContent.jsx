@@ -8,26 +8,6 @@ import InputField from "../../components/common/InputField/InputField";
 import AddQuestionContent from "../questions/AddQuestionContent";
 import { useForm } from "react-hook-form";
 
-// Dummy data structure (replace with your actual data source)
-export const dummyModules = [
-  {
-    id: 1,
-    moduleType: "Document",
-    mediaInputType: "upload",
-    mediaUrl: "",
-    moduleName: "Introduction to React",
-    description: "Learn the basics of React",
-  },
-  {
-    id: 2,
-    moduleType: "Video",
-    mediaInputType: "url",
-    mediaUrl: "https://example.com/video",
-    moduleName: "Advanced React Concepts",
-    description: "Deep dive into React hooks",
-  },
-];
-
 const MediaPreview = ({ type, file, url }) => {
   if (!file && !url) return null;
 
@@ -141,7 +121,7 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
     trigger,
   } = useForm({
     defaultValues: {
-      moduleName: formData.name || "",
+      name: formData.name || "",
     },
   });
   // Update the type options array
@@ -505,7 +485,7 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
           <input
             type="text"
             name="name"
-            {...register("moduleName", {
+            {...register("name", {
               required: "Module name is required",
             })}
             className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 ${

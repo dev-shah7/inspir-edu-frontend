@@ -2,6 +2,7 @@ import React from "react";
 
 const QuestionTypeDropdown = ({ value, onChange }) => {
   const questionTypes = [
+    { value: "", label: "Select Question Type" },
     { value: "short-answer", label: "Short Answer" },
     { value: "long-answer", label: "Long Answer" },
     { value: "mcq", label: "Multiple Choice" },
@@ -25,7 +26,11 @@ const QuestionTypeDropdown = ({ value, onChange }) => {
         className="p-3 border rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white appearance-none text-gray-800"
       >
         {questionTypes.map((option) => (
-          <option key={option.value} value={option.value}>
+          <option
+            key={option.value}
+            value={option.value}
+            disabled={option.value === ""}
+          >
             {option.label}
           </option>
         ))}

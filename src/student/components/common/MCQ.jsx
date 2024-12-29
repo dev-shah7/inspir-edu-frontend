@@ -10,8 +10,8 @@ const MCQ = ({ question, options, userAnswer, submitted, onAnswerChange }) => {
           <div key={option.id}>
             <div className="flex items-center space-x-3">
               <input
-                type="radio" // Use radio instead of checkbox
-                name={`mcq-${question}`} // Group by question to allow only one selection
+                type="radio"
+                name={`mcq-${question}`}
                 className={`form-radio h-5 w-5 ${submitted
                   ? userAnswer === option.id
                     ? option.isCorrect
@@ -21,18 +21,14 @@ const MCQ = ({ question, options, userAnswer, submitted, onAnswerChange }) => {
                   : "text-button-blue"
                   }`}
                 disabled={submitted}
-                checked={userAnswer === option.id} // Reflect current selection
-                onChange={() => onAnswerChange(option.id)} // Update selected option
+                checked={userAnswer === option.id}
+                onChange={() => onAnswerChange(option.id)}
               />
               <span
                 className={`${submitted
-                  ? userAnswer === option.id
-                    ? option.isCorrect
-                      ? "text-button-green"
-                      : "text-red-500"
-                    : option.isCorrect
-                      ? "text-button-green"
-                      : "text-gray-800"
+                  ? option.isCorrect
+                    ? "text-button-green"
+                    : "text-gray-800"
                   : "text-gray-800"
                   }`}
               >

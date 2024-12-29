@@ -60,5 +60,10 @@ export const moduleService = {
     return response.data;
   },
 
+  getModuleStatus: async (moduleId) => {
+    const response = await api.get(`/UserModule/get-by/${moduleId}`);
+    return response.data;
+  },
+
 
 };

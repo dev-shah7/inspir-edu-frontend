@@ -6,6 +6,7 @@ const useCourseStore = create((set, get) => ({
   currentCourse: null,
   isLoading: false,
   error: null,
+  courseSubmissionResult: null,
 
   fetchStudentCourses: async () => {
     const hasCourses = get().courses.length > 0;
@@ -54,16 +55,20 @@ const useCourseStore = create((set, get) => ({
   },
 
   getEnrolledCourse: async (courseId) => {
+    set({
+      isLoading: true,
+    });
     try {
       const response = await studentCourseService.getEnrolledCourse(courseId);
       console.log(response, "response");
       set((state) => ({
         currentCourse: response.data,
+        isLoading: false,
       }));
       return response;
     } catch (error) {
       set({
-        error: error.response?.data?.message || "Failed to enroll the course",
+        error: error.response?.data?.message || "Failed to enroll the course", isLoading: false
       });
       throw error;
     }
@@ -94,11 +99,14 @@ const useCourseStore = create((set, get) => ({
       console.log(response, "response");
       set({
         isLoading: false,
+        courseSubmissionResult: response.data,
       });
       return response;
     } catch (error) {
       set({
-        error: error.response?.data?.message || "Failed to enroll the course", isLoading: false
+        error: error.response?.data?.message || "Failed to enroll the course",
+        isLoading: false,
+        courseSubmissionResult: null,
       });
       throw error;
     }
@@ -107,6 +115,7 @@ const useCourseStore = create((set, get) => ({
 
   clearError: () => set({ error: null }),
   clearCurrentCourse: () => set({ currentCourse: null }),
+  clearSubmissionResult: () => set({ courseSubmissionResult: null }),
 }));
 
 export default useCourseStore;

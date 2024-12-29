@@ -118,7 +118,7 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(mode === "edit");
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [selectedType, setSelectedType] = useState("Image");
+  const [selectedType, setSelectedType] = useState("Pdf");
   const [mediaInputType, setMediaInputType] = useState("upload");
   const [selectedFile, setSelectedFile] = useState(null);
   const [mediaUrl, setMediaUrl] = useState("");
@@ -132,6 +132,13 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
 
   // Add state to track if we want to replace existing media
   const [replaceMedia, setReplaceMedia] = useState(false);
+
+  // Update the type options array
+  const moduleTypes = [
+    { label: "PDF", value: "Pdf", icon: "337/337946" },
+    { label: "Image", value: "Image", icon: "1000/1000917" },
+    { label: "Video", value: "Video", icon: "1384/1384060" },
+  ];
 
   // Determine media type from URL
   const getMediaTypeFromUrl = (url) => {
@@ -222,16 +229,14 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
     // Show type selection even in edit mode
     return (
       <div>
-        {/* Type Selection Buttons - Now available in edit mode too */}
         <div className="mb-6">
           <div className="flex justify-center space-x-6">
-            {["Document", "Image", "Video"].map((type) => (
+            {moduleTypes.map(({ label, value, icon }) => (
               <button
-                key={type}
+                key={value}
                 type="button"
                 onClick={() => {
-                  setSelectedType(type);
-                  // Reset media state when changing type
+                  setSelectedType(value);
                   setMediaInputType("upload");
                   setSelectedFile(null);
                   setMediaUrl("");
@@ -240,23 +245,17 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
                   }
                 }}
                 className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${
-                  selectedType === type
+                  selectedType === value
                     ? "border-blue-500 bg-blue-50"
                     : "border-gray-300 bg-gray-100 opacity-50"
                 } hover:shadow-md transition`}
               >
                 <img
-                  src={`https://cdn-icons-png.flaticon.com/512/${
-                    type === "Document"
-                      ? "337/337946"
-                      : type === "Image"
-                      ? "1000/1000917"
-                      : "1384/1384060"
-                  }.png`}
-                  alt={type}
+                  src={`https://cdn-icons-png.flaticon.com/512/${icon}.png`}
+                  alt={label}
                   className="w-12"
                 />
-                <p className="text-sm mt-2">{type}</p>
+                <p className="text-sm mt-2">{label}</p>
               </button>
             ))}
           </div>
@@ -322,7 +321,7 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
                       ? "image/*"
                       : selectedType === "Video"
                       ? "video/*"
-                      : ".pdf,.doc,.docx,.txt"
+                      : ".pdf"
                   }
                   className="w-full p-2 border rounded-md focus:outline-none"
                 />
@@ -395,6 +394,7 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
         position: formData.position,
         releaseDate: formData.releaseDate,
         courseId: parseInt(courseId),
+        moduleType: getModuleTypeNumber(selectedType),
       };
 
       // Save module first
@@ -415,16 +415,17 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
     }
   };
 
+  // Update the getModuleTypeNumber function to match backend enum
   const getModuleTypeNumber = (type) => {
     switch (type) {
-      case "Document":
-        return 0;
-      case "Image":
-        return 1;
       case "Video":
+        return 1;
+      case "Pdf":
         return 2;
+      case "Image":
+        return 3;
       default:
-        return 0;
+        return 2; // Default to PDF
     }
   };
 

@@ -8,6 +8,7 @@ import {
   sendInvitationEmail,
   sendAdminNotificationEmail,
   sendInvitationEmailToAdmin,
+  sendInvitationEmailToAlreadyRegistered,
 } from "../../services/emailjs/emailService";
 import { courseService } from "../../services/api/courseService";
 import useCourseStore from "../store/useCourseStore";
@@ -61,15 +62,31 @@ const InviteUsersContent = ({ courseId, companyId, withCourse = false }) => {
 
         // Save invitation
         const response = await api.post("/Invitation/save", inviteData);
-        const { data: token } = response.data;
-
+        const {
+          data: { invitationToken, alreadyRegistered },
+        } = response.data;
+        console.log(invitationToken, alreadyRegistered);
         if (effectiveCourseId) {
           const { data: courseDetails } = await courseService.getCourseById(
             effectiveCourseId
           );
 
-          // Send invitation email to student
-          await sendInvitationEmail(studentEmail, token, courseDetails);
+          if (alreadyRegistered) {
+            // Send email to already registered user with correct parameters
+            await sendInvitationEmailToAlreadyRegistered({
+              from_name: user?.name || "Course Admin",
+              course_name: courseDetails.name,
+              user_email: studentEmail,
+            });
+            toast.success("Invitation sent to registered user!");
+          } else {
+            await sendInvitationEmail(
+              studentEmail,
+              invitationToken,
+              courseDetails
+            );
+            toast.success("Invitations sent successfully!");
+          }
 
           // Send notification email to admin
           const adminEmailParams = {
@@ -82,11 +99,9 @@ const InviteUsersContent = ({ courseId, companyId, withCourse = false }) => {
 
           await sendAdminNotificationEmail(adminEmailParams);
         } else {
-          await sendInvitationEmailToAdmin(studentEmail, token);
+          await sendInvitationEmailToAdmin(studentEmail, invitationToken);
         }
       }
-
-      toast.success("Invitations sent successfully!");
 
       if (effectiveCourseId && withCourse) {
         queueModal("Congratulations!", <CourseCongratulations />);

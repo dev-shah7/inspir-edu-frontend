@@ -14,5 +14,6 @@ export const emailConfig = {
     passwordReset: "template_ah250w3",
     adminCourseInvitation: "template_8nkruxl",
     support: "template_qg8vkqk",
+    invitationAlreadyRegistered: "template_v4dveuc",
   },
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import useQuestionStore from "../../admin/store/useQuestionStore";
 import Loader from "../../components/common/Loader/Loader";
 import LongQuestion from "../components/common/LongQuestion";
@@ -12,59 +12,99 @@ import { QuestionType } from "../../helpers/enums";
 import useAnswerStore from "../store/useAnswerStore";
 import toast from "react-hot-toast";
 import useModuleStore from "../../admin/store/useModuleStore";
+import useCourseStore from "../store/useCourseStore";
 
 const QuestionsList = () => {
+  const navigate = useNavigate();
   const [formState, setFormState] = useState({});
   const [currentIndex, setCurrentIndex] = useState(0); // Track the current question index
   const { moduleId } = useParams();
   const { fetchQuestionsByModule, questions, isLoading } = useQuestionStore();
-  const { saveAnswer } = useAnswerStore();
-  const { submitModule, currentModule } = useModuleStore();
+  const { saveAnswer, fetchAnswers, userAnswers } = useAnswerStore();
+  const { submitModule, currentModule, getModuleStatus, moduleStatus, isFetchingModule } = useModuleStore();
+  const { currentCourse } = useCourseStore();
+
+  console.log("current Module: ", currentModule);
 
   useEffect(() => {
     if (moduleId) {
       fetchQuestionsByModule(moduleId);
+      getModuleStatus(currentCourse.courseId);
+      fetchAnswers(moduleId);
     }
   }, [moduleId]);
 
   useEffect(() => {
-    if (questions) {
+    if (questions && userAnswers) {
       const initialState = {};
       questions.forEach((q) => {
-        initialState[q.id] = {
-          answer: "",
-          optionId: null,
-        };
+        const userAnswer = userAnswers.find((ua) => ua.questionId === q.id);
+
+        if (userAnswer) {
+          // Populate based on question type
+          initialState[q.id] = {
+            answer: userAnswer.answer || "",
+            optionId: userAnswer.optionId || null,
+            optionIds: userAnswer.optionIds || [],
+          };
+        } else {
+          // Default state if no userAnswer exists
+          initialState[q.id] = {
+            answer: "",
+            optionId: null,
+            optionIds: [],
+          };
+        }
       });
       setFormState(initialState);
     }
-  }, [questions]);
+  }, [questions, userAnswers]);
 
   const handleSubmit = async () => {
     try {
       await submitModule(moduleId);
       toast.success("Your answers have been submitted!");
+      navigate(`/student/courses/${moduleId}/modules`);
     } catch (error) {
       console.error("Error submitting the answers:", error);
       toast.error("Failed to submit your answers. Please try again.");
     }
   };
 
+  const handleAnswerChange = async (questionId, value, optionId = null, optionIds = null) => {
+    const question = questions.find((q) => q.id === questionId);
 
-  const handleAnswerChange = async (questionId, value, optionId = null) => {
+    let data = {
+      questionId,
+      answer: "",
+      optionId: null,
+      optionIds: null,
+    };
+
+    if (question.type === QuestionType.MultiSelectMCQs) {
+      // Handle multi-select case
+      data.optionIds = optionIds || [];
+    } else if (question.type === QuestionType.Short || question.type === QuestionType.Long) {
+      // Short/Long answer case
+      data.answer = value || "";
+      data.optionIds = null;
+      data.optionId = null;
+    } else {
+      // Single-select case
+      data.optionId = optionId;
+      data.optionIds = null;
+      data.answer = "";
+    }
+
+    // Update formState
     setFormState((prev) => ({
       ...prev,
       [questionId]: {
-        answer: value,
-        optionId,
+        answer: data.answer,
+        optionId: data.optionId,
+        optionIds: data.optionIds,
       },
     }));
-
-    const data = {
-      questionId,
-      answer: value || "",
-      optionId,
-    };
 
     try {
       await saveAnswer(data);
@@ -75,7 +115,14 @@ const QuestionsList = () => {
   };
 
   const handleNext = () => {
-    if (formState[questions[currentIndex].id]?.optionId || formState[questions[currentIndex].id]?.answer) {
+    const currentQuestion = questions[currentIndex];
+    const currentAnswer = formState[currentQuestion.id];
+
+    if (
+      (currentQuestion.type === QuestionType.MultiSelectMCQs && currentAnswer?.optionIds?.length > 0) || // Multi-select: Ensure optionIds has selections
+      (currentQuestion.type === QuestionType.Short || currentQuestion.type === QuestionType.Long) && currentAnswer?.answer || // Short/Long: Ensure answer exists
+      currentAnswer?.optionId // Single-select: Ensure optionId exists
+    ) {
       setCurrentIndex((prev) => prev + 1);
     } else {
       toast.error("Please answer the question before proceeding.");
@@ -86,7 +133,7 @@ const QuestionsList = () => {
     setCurrentIndex((prev) => Math.max(prev - 1, 0));
   };
 
-  if (isLoading) {
+  if (isLoading && isFetchingModule) {
     return <Loader />;
   }
 
@@ -101,7 +148,7 @@ const QuestionsList = () => {
               question={currentQuestion.question}
               options={currentQuestion.questionOptions}
               userAnswer={formState[currentQuestion.id]?.optionId} // Pass single selected option
-              submitted={false} // Add this if applicable
+              submitted={moduleStatus == 2 || moduleStatus == 3}
               onAnswerChange={(optionId) =>
                 handleAnswerChange(currentQuestion.id, "", optionId) // Update with selected option ID
               }
@@ -112,6 +159,7 @@ const QuestionsList = () => {
               question={currentQuestion.question}
               options={currentQuestion.questionOptions}
               userAnswer={formState[currentQuestion.id]?.optionId}
+              submitted={moduleStatus == 2 || moduleStatus == 3}
               onAnswerChange={(optionId) =>
                 handleAnswerChange(currentQuestion.id, "", optionId)
               }
@@ -122,6 +170,7 @@ const QuestionsList = () => {
               question={currentQuestion.question}
               options={currentQuestion.questionOptions}
               userAnswer={formState[currentQuestion.id]?.optionId}
+              submitted={moduleStatus == 2 || moduleStatus == 3}
               onAnswerChange={(optionId) =>
                 handleAnswerChange(currentQuestion.id, "", optionId)
               }
@@ -132,16 +181,21 @@ const QuestionsList = () => {
               question={currentQuestion.question}
               placeholder="Type your answer..."
               userAnswer={formState[currentQuestion.id]?.answer}
+              submitted={moduleStatus == 2 || moduleStatus == 3}
+              correctAnswer={currentQuestion.correctAnswer}
               onAnswerChange={(value) =>
                 handleAnswerChange(currentQuestion.id, value, null)
               }
             />
           )}
+          {console.log("moduleStatus: ", moduleStatus)}
           {currentQuestion.type === QuestionType.Long && (
             <LongQuestion
               question={currentQuestion.question}
               placeholder="Type your detailed answer..."
               userAnswer={formState[currentQuestion.id]?.answer}
+              submitted={moduleStatus == 2 || moduleStatus == 3}
+              correctAnswer={currentQuestion.correctAnswer}
               onAnswerChange={(value) =>
                 handleAnswerChange(currentQuestion.id, value, null)
               }
@@ -151,14 +205,16 @@ const QuestionsList = () => {
             <MultipleSelection
               question={currentQuestion.question}
               options={currentQuestion.questionOptions}
-              userAnswers={formState[currentQuestion.id]?.answer}
+              userAnswers={formState[currentQuestion.id]?.optionIds || []} // Pass selected option IDs
+              submitted={moduleStatus == 2 || moduleStatus == 3}
               onAnswerChange={(optionId, isChecked) =>
                 handleAnswerChange(
                   currentQuestion.id,
+                  null,
+                  null,
                   isChecked
-                    ? [...(formState[currentQuestion.id]?.answer || []), optionId]
-                    : formState[currentQuestion.id]?.answer.filter((id) => id !== optionId),
-                  null
+                    ? [...(formState[currentQuestion.id]?.optionIds || []), optionId]
+                    : formState[currentQuestion.id]?.optionIds.filter((id) => id !== optionId)
                 )
               }
             />
@@ -175,12 +231,14 @@ const QuestionsList = () => {
           Previous
         </button>
         {currentIndex === questions.length - 1 ? (
-          <button
-            onClick={handleSubmit}
-            className="bg-green-500 text-white px-4 py-2 rounded-md"
-          >
-            Submit
-          </button>
+          moduleStatus == 0 || moduleStatus == 1 && (
+            <button
+              onClick={handleSubmit}
+              className="bg-green-500 text-white px-4 py-2 rounded-md"
+            >
+              Submit
+            </button>
+          )
         ) : (
           <button
             onClick={handleNext}
@@ -190,73 +248,8 @@ const QuestionsList = () => {
           </button>
         )}
       </div>
-
     </div>
   );
 };
 
 export default QuestionsList;
-
-// const questions = [
-//   {
-//     id: 1,
-//     type: "multiple",
-//     question:
-//       "Which of the following statements about marketing and advertising are true? Select all that apply.",
-//     options: [
-//       { text: "Advertising is an important part of marketing", correct: true },
-//       { text: "Advertising and Marketing are different words for the same thing", correct: false },
-//       { text: "Advertising is where the largest portion of the money spent on marketing goes", correct: false },
-//       { text: "If you have a good product, people will automatically find you and buy your product", correct: true },
-//     ],
-//     userAnswers: [0, 1, 2, 3], // Mock user answers
-//   },
-//   {
-//     id: 2,
-//     type: "trueFalse",
-//     question:
-//       "Lorem ipsum dolor sit amet consectetur. In pretium a ornare amet cum cras ut aliquam.",
-//     options: [
-//       { text: "True", correct: true },
-//       { text: "False", correct: false },
-//     ],
-//     userAnswer: 0, // Mock user answer
-//   },
-//   {
-//     id: 3,
-//     type: "yesNo",
-//     question:
-//       "Lorem ipsum dolor sit amet consectetur. In pretium a ornare amet cum cras ut aliquam.",
-//     options: [
-//       { text: "Yes", correct: false },
-//       { text: "No", correct: true },
-//     ],
-//     userAnswer: 0, // Mock user answer
-//   },
-//   {
-//     id: 4,
-//     type: "short",
-//     question: "What is the topic of this session?",
-//     placeholder: "Answer maximum 80 words",
-//     userAnswer: "This is the user's answer.",
-//   },
-//   {
-//     id: 5,
-//     type: "long",
-//     question: "What is the topic of this session?",
-//     placeholder: "Answer maximum 200 words",
-//     userAnswer: "This is the user's long answer.",
-//   },
-//   {
-//     id: 6,
-//     type: "multipleSelection",
-//     question: "Select the following items that apply to digital marketing:",
-//     options: [
-//       { text: "Social media platforms", correct: true },
-//       { text: "SEO and SEM", correct: true },
-//       { text: "Content marketing", correct: true },
-//       { text: "Traditional TV ads", correct: false },
-//     ],
-//     userAnswers: [0, 1, 3], // Mock user answers
-//   },
-// ];

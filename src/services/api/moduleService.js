@@ -44,6 +44,7 @@ export const moduleService = {
       position: moduleData.position || 0,
       releaseDate: moduleData.releaseDate || new Date().toISOString(),
       courseId: moduleData.courseId,
+      type: moduleData.moduleType,
     };
 
     const response = await api.post("/Module/save", formattedData);
@@ -60,5 +61,8 @@ export const moduleService = {
     return response.data;
   },
 
-
+  getModuleStatus: async (moduleId) => {
+    const response = await api.get(`/UserModule/get-by/${moduleId}`);
+    return response.data;
+  },
 };

@@ -22,3 +22,13 @@ export const QuestionType = {
   YesNo: 4,
   MultiSelectMCQs: 5,
 };
+export const ResultStatus = {
+  Pass: 1,
+  Fail: 2,
+};
+
+export const CourseEnrollmentStatus = {
+  Started: 1,
+  DeadlineCrossed: 2,
+  Completed: 3,
+};

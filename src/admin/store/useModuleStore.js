@@ -8,6 +8,7 @@ const useModuleStore = create((set, get) => ({
   isFetchingModule: false,
   error: null,
   uploadProgress: 0,
+  moduleStatus: null,
 
   uploadFile: async (file, moduleType, onProgress) => {
     try {
@@ -126,6 +127,18 @@ const useModuleStore = create((set, get) => ({
       return response;
     } catch (error) {
       set({ isLoading: false });
+      throw error;
+    }
+  },
+
+  getModuleStatus: async (moduleId) => {
+    set({ isFetchingModule: true });
+    try {
+      const response = await moduleService.getModuleStatus(moduleId);
+      set({ isFetchingModule: false, moduleStatus: response?.data?.status });
+      return response;
+    } catch (error) {
+      set({ isFetchingModule: false });
       throw error;
     }
   },

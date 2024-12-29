@@ -33,13 +33,9 @@ const TrueFalseQuestion = ({
               />
               <span
                 className={`${submitted
-                  ? option.id === userAnswer
-                    ? option.isCorrect
-                      ? "text-button-green"
-                      : "text-red-500"
-                    : option.isCorrect
-                      ? "text-button-green"
-                      : "text-gray-800"
+                  ? option.isCorrect
+                    ? "text-button-green"
+                    : "text-gray-800"
                   : "text-gray-800"
                   }`}
               >

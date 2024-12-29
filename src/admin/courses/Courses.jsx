@@ -173,13 +173,13 @@ const Courses = () => {
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-120px)] px-4 md:px-6">
-      <p className="text-md text-gray-600 mb-4">Courses</p>
+      <p className="text-lg text-gray-600 mb-4">Courses</p>
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 mb-6">
         <div className="flex-1">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-800">
             All Courses
           </h1>
-          <p className="text-sm md:text-md text-gray-600 mt-1">
+          <p className="text-md md:text-md text-gray-600 mt-1">
             Welcome to inspireEDU Dashboard
           </p>
         </div>

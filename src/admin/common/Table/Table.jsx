@@ -12,7 +12,7 @@ const Table = ({ headers, data, renderRow }) => {
                 key={index}
                 className={`py-2 px-3 ${
                   header.align === "center" ? "text-center" : "text-left"
-                } font-outfit text-lg`}
+                } font-outfit text-xl`}
               >
                 {header.label}
               </th>

@@ -167,7 +167,7 @@ const Modules = () => {
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-1">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-800">
               All Modules
             </h1>
             <button
@@ -177,7 +177,7 @@ const Modules = () => {
               <IoMdAdd className="text-md" /> Create Modules
             </button>
           </div>
-          <p className="text-md text-gray-600">Course Name</p>
+          <p className="text-lg text-gray-600">Course Name</p>
         </div>
         <div className="relative w-full lg:w-64 lg:mt-8">
           <input

@@ -158,7 +158,7 @@ const Questions = () => {
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-1">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-800">
               All Questions
             </h1>
             <div className="flex flex-col lg:flex-row gap-2">
@@ -182,7 +182,7 @@ const Questions = () => {
               </button>
             </div>
           </div>
-          <p className="text-md text-gray-600">Module Name</p>
+          <p className="text-lg text-gray-600">Module Name</p>
         </div>
         <div className="relative w-full lg:w-64 lg:mt-8">
           <input

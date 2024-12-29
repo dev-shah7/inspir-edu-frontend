@@ -97,11 +97,13 @@ const UserDetailsContent = ({ user, courseId, userId }) => {
                   <div className="flex mb-2 items-center justify-between">
                     <div>
                       <span className="text-xs font-semibold inline-block text-blue-600">
-                        {Math.round(
-                          (enrollmentData.analytics.totalCompleted /
-                            enrollmentData.analytics.totalModules) *
-                            100
-                        )}
+                        {enrollmentData.analytics.totalModules === 0
+                          ? "0"
+                          : Math.round(
+                              (enrollmentData.analytics.totalCompleted /
+                                enrollmentData.analytics.totalModules) *
+                                100
+                            )}
                         %
                       </span>
                     </div>

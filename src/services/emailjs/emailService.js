@@ -27,6 +27,21 @@ export const sendInvitationEmail = async (email, token, courseDetails) => {
   });
 };
 
+export const sendInvitationEmailToAlreadyRegistered = async (params) => {
+  const templateParams = {
+    from_name: params.from_name,
+    to_name: params.to_name,
+    course_name: params.course_name,
+    login_page_url: `${window.location.origin}/login`,
+    user_email: params.user_email,
+  };
+
+  return sendTemplateEmail(
+    emailConfig.templates.invitationAlreadyRegistered,
+    templateParams
+  );
+};
+
 export const sendInvitationEmailToAdmin = async (email, token) => {
   const registrationUrl = `${window.location.origin}/signup/${token}?email=${email}`;
 

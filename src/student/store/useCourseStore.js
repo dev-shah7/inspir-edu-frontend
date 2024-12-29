@@ -85,6 +85,25 @@ const useCourseStore = create((set, get) => ({
     }
   },
 
+  submitCourse: async (courseId) => {
+    set({
+      isLoading: true,
+    });
+    try {
+      const response = await studentCourseService.submitCourse(courseId);
+      console.log(response, "response");
+      set({
+        isLoading: false,
+      });
+      return response;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to enroll the course", isLoading: false
+      });
+      throw error;
+    }
+  },
+
 
   clearError: () => set({ error: null }),
   clearCurrentCourse: () => set({ currentCourse: null }),

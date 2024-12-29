@@ -13,40 +13,40 @@ const YesNoQuestion = ({
     <div>
       <h2 className="font-bold text-lg mb-4">{question}</h2>
       <div className="space-y-2">
-        {options?.map((option, idx) => (
-          <div key={idx}>
+        {options?.map((option) => (
+          <div key={option.id}>
             <div className="flex items-center space-x-3">
               <input
                 type="radio"
                 name={name}
                 className={`form-radio h-5 w-5 ${submitted
-                    ? idx === userAnswer
-                      ? option.isCorrect
-                        ? "text-button-green"
-                        : "text-red-500"
-                      : "text-button-blue"
+                  ? option.id === userAnswer
+                    ? option.isCorrect
+                      ? "text-button-green"
+                      : "text-red-500"
                     : "text-button-blue"
+                  : "text-button-blue"
                   }`}
-                disabled={submitted} // Disable after submission
-                checked={idx === userAnswer} // Reflect current selection
-                onChange={() => onAnswerChange(idx)} // Trigger state update
+                disabled={submitted}
+                checked={option.id === userAnswer}
+                onChange={() => onAnswerChange(option.id)}
               />
               <span
                 className={`${submitted
-                    ? idx === userAnswer
-                      ? option.isCorrect
-                        ? "text-button-green"
-                        : "text-red-500"
-                      : option.isCorrect
-                        ? "text-button-green"
-                        : "text-gray-800"
-                    : "text-gray-800"
+                  ? option.id === userAnswer
+                    ? option.isCorrect
+                      ? "text-button-green"
+                      : "text-red-500"
+                    : option.isCorrect
+                      ? "text-button-green"
+                      : "text-gray-800"
+                  : "text-gray-800"
                   }`}
               >
                 {option.option}
               </span>
             </div>
-            {submitted && idx === userAnswer && (
+            {submitted && option.id === userAnswer && (
               option.isCorrect ? <CorrectTag /> : <IncorrectTag />
             )}
           </div>

@@ -1,9 +1,28 @@
 import { useNavigate } from "react-router";
 import ProgressBar from "../components/common/ProgressBar";
 import { ModuleStatus } from "../../helpers/enums";
+import useModuleStore from '../../admin/store/useModuleStore';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 const Module = ({ module, position }) => {
   const navigate = useNavigate();
+  const { startUserModule, isLoading } = useModuleStore();
+
+  const handleStartModule = async () => {
+    if (module.status === 0) {
+      try {
+        await startUserModule(module.moduleId);
+        navigate(`/student/modules/${module.moduleId}/media`);
+      } catch (error) {
+        toast.error('Failed to start module. Please try again.');
+      }
+    }
+    else {
+      navigate(`/student/modules/${module.moduleId}/media`);
+    }
+  };
+
   return (
     <div
       className={`flex flex-col xl:flex-row items-center xl:justify-between sm:justify-center p-4 rounded-lg shadow-md bg-light-bg ${module.active ? "text-black" : "text-gray-400"
@@ -77,9 +96,17 @@ const Module = ({ module, position }) => {
             ? 'bg-button-blue text-white'
             : 'bg-gray-200 text-gray-400'
             }`}
-          onClick={() => navigate(`/student/modules/${module.moduleId}/media`)}
+          onClick={handleStartModule}
+          disabled={isLoading}
         >
-          Study Plan
+          {isLoading ? (
+            <div className='flex items-center justify-center'>
+              <div className='w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin'></div>
+              <span className='ml-2'>Loading...</span>
+            </div>
+          ) : (
+            'Study Plan'
+          )}
         </button>
         <br />
         {module.quizTestScore < 70 && (

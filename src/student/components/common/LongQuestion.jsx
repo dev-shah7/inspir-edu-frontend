@@ -12,7 +12,7 @@ const LongQuestion = ({
         className="w-full h-32 border border-gray-300 rounded-md p-3 focus:outline-button-blue"
         placeholder={placeholder}
         disabled={submitted} // Disable after submission
-        value={userAnswer || ""} // Controlled input reflecting current state
+        value={userAnswer || ""} // Reflect current state
         onChange={(e) => onAnswerChange(e.target.value)} // Notify parent of changes
       ></textarea>
     </div>

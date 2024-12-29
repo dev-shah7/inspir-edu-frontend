@@ -49,4 +49,16 @@ export const moduleService = {
     const response = await api.post("/Module/save", formattedData);
     return response.data;
   },
+
+  submitModule: async (id) => {
+    const response = await api.post(`/UserModule/submit/${id}`, {});
+    return response.data;
+  },
+
+  startUserModule: async (moduleId) => {
+    const response = await api.post(`/UserModule/start/${moduleId}`);
+    return response.data;
+  },
+
+
 };

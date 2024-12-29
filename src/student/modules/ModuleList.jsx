@@ -2,10 +2,11 @@ import { useNavigate } from "react-router";
 import ProgressBar from "../components/common/ProgressBar";
 import Module from "./Module";
 import useCourseStore from "../store/useCourseStore";
+import Loader from "../../components/common/Loader/Loader";
 
 const ModuleList = () => {
   const navigate = useNavigate();
-  const { currentCourse } = useCourseStore();
+  const { currentCourse, submitCourse, isLoading } = useCourseStore();
   const modules = [
     {
       number: 1,
@@ -42,6 +43,20 @@ const ModuleList = () => {
     },
   ];
 
+  const handleCourseSubmission = async () => {
+    try {
+      await submitCourse(currentCourse.courseId);
+      navigate(`/student/courses/success`);
+    } catch (error) {
+      console.error("Error submitting the course:", error);
+      toast.error("Failed to submit the course. Please try again.");
+    }
+  };
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
   return (
     <div className="p-6">
       <div className="flex flex-col lg:flex-row lg:justify-between items-center bg-light-bg shadow-md rounded-lg p-6 mb-6 gap-6">
@@ -71,7 +86,7 @@ const ModuleList = () => {
             ? "bg-button-blue text-white"
             : "bg-gray-200 text-gray-400"
             }`}
-          onClick={() => navigate(`/student/courses/success`)}
+          onClick={handleCourseSubmission}
         >
           Submit
         </button>

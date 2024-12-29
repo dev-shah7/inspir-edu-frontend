@@ -83,4 +83,26 @@ export const courseService = {
       throw error;
     }
   },
+
+  getEnrolledCoursesByUser: async (userId) => {
+    try {
+      const response = await api.get(`/Enrollment/get-all?userId=${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error in getEnrolledCoursesByUser:", error);
+      throw error;
+    }
+  },
+
+  getEnrollmentDetails: async (courseId, userId) => {
+    try {
+      const response = await api.get(
+        `/Enrollment/get-all-detail/${courseId}?userId=${userId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error in getEnrollmentDetails:", error);
+      throw error;
+    }
+  },
 };

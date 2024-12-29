@@ -1,128 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Select from "react-select";
 import { IoCheckmarkCircle, IoTimeOutline } from "react-icons/io5";
 import { MdPending } from "react-icons/md";
-
-// Hardcoded data
-const MOCK_USERS = [
-  { id: 1, firstName: "John", lastName: "Doe", email: "john@example.com" },
-  { id: 2, firstName: "Jane", lastName: "Smith", email: "jane@example.com" },
-  { id: 3, firstName: "Mike", lastName: "Johnson", email: "mike@example.com" },
-];
-
-const MOCK_COURSES = [
-  {
-    id: 1,
-    name: "Introduction to React",
-    description: "Learn the basics of React development",
-    enrolledUsers: [1, 2],
-    modules: [
-      {
-        id: 1,
-        name: "React Fundamentals",
-        status: "completed",
-        completedDate: "2024-02-15",
-        score: 95,
-        totalQuestions: 10,
-        correctAnswers: 9,
-      },
-      {
-        id: 2,
-        name: "Components & Props",
-        status: "in_progress",
-        lastAccessed: "2024-03-10",
-        progress: 60,
-      },
-      {
-        id: 3,
-        name: "State & Lifecycle",
-        status: "pending",
-      },
-    ],
-    enrollmentDate: "2024-01-15",
-    lastAccessed: "2024-03-10",
-  },
-  {
-    id: 2,
-    name: "Advanced JavaScript",
-    description: "Master JavaScript concepts and patterns",
-    enrolledUsers: [1, 3],
-    modules: [
-      {
-        id: 1,
-        name: "JavaScript Fundamentals",
-        status: "completed",
-        completedDate: "2024-02-15",
-        score: 90,
-        totalQuestions: 10,
-        correctAnswers: 8,
-      },
-      {
-        id: 2,
-        name: "Advanced Concepts",
-        status: "in_progress",
-        lastAccessed: "2024-03-10",
-        progress: 50,
-      },
-      {
-        id: 3,
-        name: "Node.js Integration",
-        status: "pending",
-      },
-    ],
-    enrollmentDate: "2024-01-15",
-    lastAccessed: "2024-03-10",
-  },
-  {
-    id: 3,
-    name: "Node.js Fundamentals",
-    description: "Server-side development with Node.js",
-    enrolledUsers: [2],
-    modules: [
-      {
-        id: 1,
-        name: "Node.js Basics",
-        status: "completed",
-        completedDate: "2024-02-15",
-        score: 90,
-        totalQuestions: 10,
-        correctAnswers: 8,
-      },
-      {
-        id: 2,
-        name: "Express.js",
-        status: "in_progress",
-        lastAccessed: "2024-03-10",
-        progress: 40,
-      },
-      {
-        id: 3,
-        name: "MongoDB",
-        status: "pending",
-      },
-    ],
-    enrollmentDate: "2024-01-15",
-    lastAccessed: "2024-03-10",
-  },
-];
+import { userService } from "../../services/api/userService";
+import { courseService } from "../../services/api/courseService";
+import { toast } from "react-hot-toast";
+import Loader from "../../components/common/Loader/Loader";
 
 const ModuleStatusBadge = ({ status }) => {
   const getBadgeStyle = () => {
     switch (status) {
-      case "completed":
+      case 2: // Completed
         return "bg-emerald-100 text-emerald-800 border-emerald-200";
-      case "in_progress":
+      case 1: // Started
         return "bg-indigo-100 text-indigo-800 border-indigo-200";
-      default:
+      case 3: // Pending
         return "bg-amber-50 text-amber-800 border-amber-200";
+      case 4: // Finished
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      default: // Not Started
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   const getIcon = () => {
     switch (status) {
-      case "completed":
+      case 2: // Completed
         return <IoCheckmarkCircle className="w-4 h-4" />;
-      case "in_progress":
+      case 1: // Started
         return <IoTimeOutline className="w-4 h-4" />;
       default:
         return <MdPending className="w-4 h-4" />;
@@ -131,12 +36,16 @@ const ModuleStatusBadge = ({ status }) => {
 
   const getLabel = () => {
     switch (status) {
-      case "completed":
+      case 2:
         return "Completed";
-      case "in_progress":
-        return "In Progress";
-      default:
+      case 1:
+        return "Started";
+      case 3:
         return "Pending";
+      case 4:
+        return "Finished";
+      default:
+        return "Not Started";
     }
   };
 
@@ -158,7 +67,7 @@ const ModuleDetails = ({ module }) => {
         <ModuleStatusBadge status={module.status} />
       </div>
 
-      {module.status === "completed" && (
+      {module.status === 2 && (
         <div className="mt-2 space-y-1">
           <p className="text-sm text-gray-600">
             <span className="font-medium">Completed:</span>{" "}
@@ -174,7 +83,7 @@ const ModuleDetails = ({ module }) => {
         </div>
       )}
 
-      {module.status === "in_progress" && (
+      {module.status === 1 && (
         <div className="mt-2 space-y-2">
           <p className="text-sm text-gray-600">
             <span className="font-medium">Last Accessed:</span>{" "}
@@ -195,7 +104,7 @@ const ModuleDetails = ({ module }) => {
         </div>
       )}
 
-      {module.status === "pending" && (
+      {(module.status === 0 || module.status === 3) && (
         <p className="text-sm text-gray-500 mt-2">Not started yet</p>
       )}
     </div>
@@ -205,100 +114,232 @@ const ModuleDetails = ({ module }) => {
 const EnrolledCourses = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [enrollmentDetails, setEnrollmentDetails] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(false);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
-  const userOptions = MOCK_USERS.map((user) => ({
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setIsLoading(true);
+        const response = await userService.getAllUsers();
+        if (response.isSuccess) {
+          setUsers(response.data);
+        } else {
+          toast.error("Failed to fetch users");
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        toast.error("Failed to fetch users");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    const fetchEnrolledCourses = async () => {
+      if (!selectedUser?.value) return;
+
+      try {
+        setIsLoadingCourses(true);
+        const response = await courseService.getEnrolledCoursesByUser(
+          selectedUser.value
+        );
+        console.log(response);
+        if (response.isSuccess) {
+          setEnrolledCourses(response.data);
+        } else {
+          toast.error("Failed to fetch enrolled courses");
+        }
+      } catch (error) {
+        console.error("Error fetching enrolled courses:", error);
+        toast.error("Failed to fetch enrolled courses");
+      } finally {
+        setIsLoadingCourses(false);
+      }
+    };
+
+    fetchEnrolledCourses();
+  }, [selectedUser]);
+
+  useEffect(() => {
+    const fetchEnrollmentDetails = async () => {
+      if (!selectedCourse?.value) return;
+
+      try {
+        setIsLoadingDetails(true);
+        const response = await courseService.getEnrollmentDetails(
+          selectedCourse.value,
+          selectedUser.value
+        );
+        if (response.isSuccess) {
+          const userEnrollment = response.data.find(
+            (enrollment) => enrollment.userId === selectedUser.value
+          );
+          if (userEnrollment) {
+            setEnrollmentDetails(userEnrollment);
+          } else {
+            toast.error("No enrollment details found for this user");
+          }
+        } else {
+          toast.error("Failed to fetch enrollment details");
+        }
+      } catch (error) {
+        console.error("Error fetching enrollment details:", error);
+        toast.error("Failed to fetch enrollment details");
+      } finally {
+        setIsLoadingDetails(false);
+      }
+    };
+
+    fetchEnrollmentDetails();
+  }, [selectedUser, selectedCourse]);
+
+  const userOptions = users.map((user) => ({
     value: user.id,
-    label: `${user.firstName} ${user.lastName} (${user.email})`,
+    label: `${user.name} (${user.email})`,
   }));
 
-  // Filter courses based on selected user
-  const availableCourses = selectedUser
-    ? MOCK_COURSES.filter((course) =>
-        course.enrolledUsers.includes(selectedUser.value)
-      )
-    : [];
-
-  const courseOptions = availableCourses.map((course) => ({
-    value: course.id,
-    label: course.name,
+  const courseOptions = enrolledCourses.map((course) => ({
+    value: course.course.id,
+    label: course.course.name,
   }));
 
   const handleUserChange = (option) => {
     setSelectedUser(option);
-    setSelectedCourse(null); // Reset course selection when user changes
+    setSelectedCourse(null);
+    setEnrollmentDetails(null);
   };
 
   const renderCourseDetails = () => {
-    if (!selectedCourse) return null;
-
-    const course = MOCK_COURSES.find((c) => c.id === selectedCourse.value);
-    if (!course) return null;
-
-    const completedModules = course.modules.filter(
-      (m) => m.status === "completed"
-    ).length;
+    if (!selectedCourse || !enrollmentDetails) return null;
 
     return (
       <div className="mt-8 space-y-6">
         {/* Course Overview */}
         <div className="bg-gradient-to-br from-white to-indigo-50 p-6 rounded-lg shadow-md border border-gray-200">
-          <h2 className="text-2xl font-bold mb-4 text-indigo-900">{course.name}</h2>
+          <h2 className="text-2xl font-bold mb-4 text-indigo-900">
+            {enrollmentDetails.courseName}
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h3 className="text-lg font-semibold mb-2 text-indigo-800">Course Details</h3>
-              <p className="text-gray-700 mb-4">{course.description}</p>
+              <h3 className="text-lg font-semibold mb-2 text-indigo-800">
+                Course Progress
+              </h3>
               <div className="mt-4 bg-white p-4 rounded-lg shadow-sm">
                 <h4 className="font-medium text-gray-700 mb-2">
-                  Overall Progress
+                  Performance Overview
                 </h4>
-                <div className="w-full bg-gray-100 rounded-full h-3">
-                  <div
-                    className="bg-gradient-to-r from-blue-200 to-blue-500 h-3 rounded-full transition-all duration-300"
-                    style={{
-                      width: `${(completedModules / course.modules.length) * 100}%`,
-                    }}
-                  ></div>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Total Questions:</span>{" "}
+                      {enrollmentDetails.totalQuestions}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Correct Answers:</span>{" "}
+                      {enrollmentDetails.totalCorrectAnswers} /{" "}
+                      {enrollmentDetails.totalAnswers}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Success Rate:</span>{" "}
+                      {enrollmentDetails.percentage}%
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Average Score:</span>{" "}
+                      {enrollmentDetails.avgPercentage}%
+                    </p>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-3">
+                    <div
+                      className="bg-gradient-to-r from-blue-200 to-blue-500 h-3 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${enrollmentDetails.percentage}%`,
+                      }}
+                    ></div>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">
-                  {completedModules} of {course.modules.length} modules completed
-                </p>
               </div>
             </div>
             <div className="bg-white p-4 rounded-lg shadow-sm">
-              <h3 className="text-lg font-semibold mb-2 text-indigo-800">Enrollment Details</h3>
+              <h3 className="text-lg font-semibold mb-2 text-indigo-800">
+                Enrollment Details
+              </h3>
               <div className="space-y-2">
                 <p className="text-gray-700">
-                  <span className="font-medium">Enrolled Date:</span>{" "}
-                  {new Date(course.enrollmentDate).toLocaleDateString()}
+                  <span className="font-medium">Student Email:</span>{" "}
+                  {enrollmentDetails.studentEmail}
                 </p>
                 <p className="text-gray-700">
-                  <span className="font-medium">Last Accessed:</span>{" "}
-                  {new Date(course.lastAccessed).toLocaleDateString()}
+                  <span className="font-medium">Enrolled Date:</span>{" "}
+                  {new Date(
+                    enrollmentDetails.enrollmentDate
+                  ).toLocaleDateString()}
+                </p>
+                <p className="text-gray-700">
+                  <span className="font-medium">Deadline:</span>{" "}
+                  {enrollmentDetails.deadLineDate
+                    ? new Date(
+                        enrollmentDetails.deadLineDate
+                      ).toLocaleDateString()
+                    : "No deadline set"}
+                </p>
+                <p className="text-gray-700">
+                  <span className="font-medium">Status:</span>{" "}
+                  <span
+                    className={`${
+                      enrollmentDetails.courseEnrollmentStatus === 1
+                        ? "text-green-600"
+                        : "text-yellow-600"
+                    }`}
+                  >
+                    {enrollmentDetails.courseEnrollmentStatus === 1
+                      ? "Active"
+                      : "Pending"}
+                  </span>
+                </p>
+                <p className="text-gray-700">
+                  <span className="font-medium">Result Status:</span>{" "}
+                  <span
+                    className={`${
+                      enrollmentDetails.resultStatus === 1
+                        ? "text-green-600"
+                        : "text-yellow-600"
+                    }`}
+                  >
+                    {enrollmentDetails.resultStatus === 1
+                      ? "Passed"
+                      : "In Progress"}
+                  </span>
                 </p>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Modules List */}
-        <div className="bg-gradient-to-br from-gray-50 to-indigo-50 p-6 rounded-lg border border-gray-200">
-          <h3 className="text-xl font-semibold mb-4 text-indigo-900">Course Modules</h3>
-          <div className="grid grid-cols-1 gap-4">
-            {course.modules.map((module) => (
-              <ModuleDetails key={module.id} module={module} />
-            ))}
           </div>
         </div>
       </div>
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader />
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-3xl font-bold text-black">Enrolled Courses</h1>
-      </div> 
-       <div className="h-0.5 bg-custom-border-blue mb-4"></div>
+      </div>
+      <div className="h-0.5 bg-custom-border-blue mb-4"></div>
 
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -314,6 +355,7 @@ const EnrolledCourses = () => {
               placeholder="Select a user..."
               className="basic-single"
               classNamePrefix="select"
+              isLoading={isLoading}
             />
           </div>
 
@@ -326,9 +368,12 @@ const EnrolledCourses = () => {
               onChange={setSelectedCourse}
               options={courseOptions}
               isDisabled={!selectedUser}
+              isLoading={isLoadingCourses}
               isClearable
               placeholder={
-                selectedUser ? "Select a course..." : "Please select a user first"
+                selectedUser
+                  ? "Select a course..."
+                  : "Please select a user first"
               }
               className="basic-single"
               classNamePrefix="select"
@@ -337,9 +382,15 @@ const EnrolledCourses = () => {
         </div>
       </div>
 
-      {renderCourseDetails()}
+      {isLoadingDetails ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader />
+        </div>
+      ) : (
+        renderCourseDetails()
+      )}
 
-      {selectedUser && availableCourses.length === 0 && (
+      {selectedUser && enrolledCourses.length === 0 && !isLoadingCourses && (
         <div className="mt-8 text-center p-8 bg-white rounded-lg border border-gray-200 shadow-sm">
           <p className="text-gray-600 text-lg">
             No enrolled courses found for this user.

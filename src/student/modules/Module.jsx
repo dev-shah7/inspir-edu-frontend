@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router";
 import ProgressBar from "../components/common/ProgressBar";
+import { ModuleStatus } from "../../helpers/enums";
 
-const Module = ({ module }) => {
+const Module = ({ module, position }) => {
   const navigate = useNavigate();
   return (
     <div
@@ -10,33 +11,33 @@ const Module = ({ module }) => {
     >
       <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
         <div
-          className={`rounded-lg p-3 flex items-center justify-center flex-col ${module.active ? "bg-gradient-blue text-black" : "bg-gray-200"
+          className={`rounded-lg p-3 flex items-center justify-center flex-col ${true ? "bg-gradient-blue text-black" : "bg-gray-200"
             }`}
         >
           <p className="text-lg">Module</p>
-          <p className="text-4xl font-bold">{module.number}</p>
+          <p className="text-4xl font-bold">{position + 1}</p>
         </div>
         <div className="w-full sm:w-auto">
           <h4
-            className={`text-lg font-semibold ${module.active ? "text-slate-900" : "text-gray-400"
+            className={`text-lg font-semibold ${true ? "text-slate-900" : "text-gray-400"
               }`}
           >
-            {module.title}
+            {module.moduleName}
           </h4>
           <div className="flex flex-wrap items-center space-x-3 mt-1">
             <span
-              className={`rounded-full px-3 py-1 text-xs font-medium ${module.active
+              className={`rounded-full px-3 py-1 text-xs font-medium ${true
                 ? "bg-button-green text-white"
                 : "bg-gray-200 text-gray-500"
                 }`}
             >
-              {module.status}
+              {ModuleStatus[module.status]}
             </span>
             <span className="text-sm flex items-center">
-              <i className="mr-1">📄</i> {module.assignments} Assignments
+              <i className="mr-1">📄</i> {2} Assignments
             </span>
             <span className="text-sm flex items-center">
-              <i className="mr-1">📝</i> {module.tests} Test
+              <i className="mr-1">📝</i> {3} Test
             </span>
           </div>
         </div>
@@ -47,7 +48,7 @@ const Module = ({ module }) => {
         <div className="w-auto">
           <ProgressBar
             label="Overall Progress"
-            percentage={module.progress}
+            percentage={60}
             color="bg-button-blue"
           />
         </div>
@@ -55,7 +56,7 @@ const Module = ({ module }) => {
         <div className="w-full sm:w-auto">
           <ProgressBar
             label="Quiz Test"
-            percentage={module.quizTestScore}
+            percentage={70}
             color="bg-red-500"
           />
         </div>
@@ -64,19 +65,19 @@ const Module = ({ module }) => {
       {/* Right Section */}
       <div className="mt-4 md:mt-0 text-center w-full sm:w-auto">
         <p
-          className={`text-sm rounded-lg py-1 px-4 ${module.active
+          className={`text-sm rounded-lg py-1 px-4 ${true
             ? "text-black bg-gradient-blue"
             : "bg-gray-200 text-gray-400"
             }`}
         >
-          {module.dateRange}
+          {"17 Nov - 23 Nov 2024"}
         </p>
         <button
-          className={`px-12 py-2 rounded-md mt-1 text-md font-semibold shadow-lg ${module.active
-            ? "bg-button-blue text-white"
-            : "bg-gray-200 text-gray-400"
+          className={`px-12 py-2 rounded-md mt-1 text-md font-semibold shadow-lg ${true
+            ? 'bg-button-blue text-white'
+            : 'bg-gray-200 text-gray-400'
             }`}
-          onClick={() => navigate(`/student/modules/${module?.id || 2}/questions`)}
+          onClick={() => navigate(`/student/modules/${module.moduleId}/media`)}
         >
           Study Plan
         </button>
@@ -87,7 +88,7 @@ const Module = ({ module }) => {
           </button>
         )}
       </div>
-    </div>
+    </div >
   );
 };
 

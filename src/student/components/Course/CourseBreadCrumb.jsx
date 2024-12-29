@@ -5,7 +5,7 @@ const CourseBreadCrumb = () => {
   const { courseId, moduleId } = useParams();
 
   const breadcrumbMap = {
-    "/student/courses": "My Courses",
+    "/student/myCourses": "My Courses",
     [`/student/courses/${courseId}/overview`]: "Course Overview",
     [`/student/courses/${courseId}/modules`]: "Modules",
     [`/student/modules/${moduleId}/questions`]: "Quiz Test",

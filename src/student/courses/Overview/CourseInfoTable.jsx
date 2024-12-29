@@ -1,6 +1,8 @@
 import { FaInfoCircle, FaCheckCircle, FaBook, FaStar } from 'react-icons/fa';
+import useCourseStore from '../../store/useCourseStore';
 
 const CourseInfoTable = () => {
+  const { currentCourse } = useCourseStore();
   return (
     <div className="mx-auto my-4 max-w-3xl">
       <div className="bg-blue-50 rounded-lg shadow-md overflow-hidden">
@@ -13,34 +15,34 @@ const CourseInfoTable = () => {
                   <span className='text-sm sm:text-base'>Basic Info</span>
                 </th>
                 <td className='py-2 sm:py-4 px-3 sm:px-6 text-gray-800 text-sm sm:text-base'>
-                  Course 1 of 6 in the Meta Social Media Marketing
+                  {currentCourse?.courseName}
                 </td>
               </tr>
               <tr className='border-b'>
                 <th className='py-2 sm:py-4 px-3 sm:px-6 flex items-center space-x-2 sm:space-x-3 text-gray-800 font-medium'>
                   <FaCheckCircle className='text-base sm:text-lg' />
-                  <span className='text-sm sm:text-base'>Level</span>
+                  <span className='text-sm sm:text-base'>No Of Modules</span>
                 </th>
                 <td className='py-2 sm:py-4 px-3 sm:px-6 text-gray-800 text-sm sm:text-base'>
-                  Beginner
+                  {currentCourse?.analytics?.totalModules}
                 </td>
               </tr>
               <tr className='border-b bg-gray-100'>
                 <th className='py-2 sm:py-4 px-3 sm:px-6 flex items-center space-x-2 sm:space-x-3 text-gray-800 font-medium'>
                   <FaBook className='text-base sm:text-lg' />
-                  <span className='text-sm sm:text-base'>Language</span>
+                  <span className='text-sm sm:text-base'>Deadline-Based</span>
                 </th>
                 <td className='py-2 sm:py-4 px-3 sm:px-6 text-gray-800 text-sm sm:text-base'>
-                  English
+                  {currentCourse?.deadlineDate ? "Yes" : "No"}
                 </td>
               </tr>
               <tr>
                 <th className='py-2 sm:py-4 px-3 sm:px-6 flex items-center space-x-2 sm:space-x-3 text-gray-800 font-medium'>
                   <FaStar className='text-base sm:text-lg' />
-                  <span className='text-sm sm:text-base'>User Ratings</span>
+                  <span className='text-sm sm:text-base'>Enrollment Date</span>
                 </th>
                 <td className='py-2 sm:py-4 px-3 sm:px-6 text-gray-800 text-sm sm:text-base'>
-                  Average User Rating 4.8
+                  {currentCourse?.enrollmentDate}
                 </td>
               </tr>
             </tbody>

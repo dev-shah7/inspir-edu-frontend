@@ -1,12 +1,10 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import useModuleStore from '../../../../admin/store/useModuleStore';
 import NextPrevActions from '../../../../components/common/NextPrevActions/NextPrevActions';
 import ModuleSidebar from '../ModuleSidebar/ModuleSidebar';
 import PdfViewer from '../../../../components/common/PDFViewer/PDFViewer';
 
 const ModulePdf = () => {
-  const navigate = useNavigate();
   const { currentModule } = useModuleStore();
 
   const handleDownload = () => {

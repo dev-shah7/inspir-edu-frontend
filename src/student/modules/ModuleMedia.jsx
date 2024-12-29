@@ -8,14 +8,14 @@ import Loader from '../../components/common/Loader/Loader';
 import BackButton from '../../components/common/BackButton/BackButton';
 const ModuleMedia = () => {
   const { moduleId } = useParams();
-  const { fetchModuleById, isLoading, currentModule } = useModuleStore();
+  const { fetchModuleById, isFetchingModule, currentModule } = useModuleStore();
 
   useEffect(() => {
     if (moduleId)
       fetchModuleById(moduleId);
   }, [fetchModuleById]);
 
-  if (isLoading) {
+  if (isFetchingModule) {
     return <Loader />;
   }
 

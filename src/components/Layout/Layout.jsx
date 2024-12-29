@@ -49,18 +49,14 @@ const Layout = ({ userRole }) => {
           <aside
             className={`${
               isSidebarOpen
-                ? "absolute z-10 inset-y-0 left-0 w-64 transform translate-x-0 transition-transform"
-                : "absolute z-10 inset-y-0 left-0 w-64 transform -translate-x-full transition-transform"
+                ? "absolute z-30 inset-y-0 left-0 w-64 transform translate-x-0 transition-transform"
+                : "absolute z-30 inset-y-0 left-0 w-64 transform -translate-x-full transition-transform"
             } md:relative md:translate-x-0`}
           >
             <Sidebar isSidebarOpen={isSidebarOpen} userRole={userRole} />
           </aside>
 
-          <main
-            className={`flex-1 overflow-y-auto px-6 relative z-10 ${
-              isSidebarOpen ? "md:ml-64" : ""
-            }`}
-          >
+          <main className={`flex-1 overflow-y-auto px-6 relative z-10 `}>
             <Outlet />
           </main>
         </div>

@@ -335,7 +335,7 @@ const EnrolledCourses = () => {
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6">
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-3xl font-bold text-black">Enrolled Courses</h1>
       </div>

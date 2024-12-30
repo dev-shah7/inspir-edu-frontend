@@ -22,10 +22,6 @@ const Register = () => {
           <h2 className="text-4xl sm:text-6xl font-bold text-button-blue flex items-center justify-center mb-6">
             <span className="text-yellow-400 mr-2">💡</span> inspirEDU
           </h2>
-          <p className="text-2xl text-gray-700 text-center leading-relaxed max-w-md mx-auto">
-            Lorem ipsum dolor sit amet consectetur. Pellentesque dui vivamus
-            etiam senectus nulla rhoncus in fermentum non.
-          </p>
         </div>
 
         {/* Right Section - Scrollable (60%) */}

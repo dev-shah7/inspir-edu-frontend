@@ -24,7 +24,7 @@ const CourseNav = () => {
       {navItems.map((item) => (
         <button
           key={item.label}
-          className={`w-32 h-10 flex items-center justify-center rounded-md shadow-md font-medium transition-colors ${item.isActive
+          className={`w-44 h-16 flex items-center justify-center rounded-md shadow-md font-medium transition-colors text-xl ${item.isActive
             ? 'bg-button-blue text-white'
             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}

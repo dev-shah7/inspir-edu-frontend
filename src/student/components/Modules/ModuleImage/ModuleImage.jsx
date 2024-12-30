@@ -12,7 +12,7 @@ const ModuleImage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F0F8FF] to-white p-6">
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 space-y-4 md:space-y-0">
-        <ModuleHeading title={currentModule?.data?.name || "Module Title"} />
+        {/* <ModuleHeading title={currentModule?.data?.name || "Module Title"} /> */}
         {/* <NextPrevActions /> */}
       </div>
 

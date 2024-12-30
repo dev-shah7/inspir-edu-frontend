@@ -19,13 +19,13 @@ const ModuleMedia = () => {
     return <Loader />;
   }
 
-  const moduleType = currentModule?.data?.moduleType || 1;
+  const moduleType = currentModule?.data?.type || 1;
   return (
     <div>
       <BackButton />
-      {moduleType === 0 && <ModuleVideo />}
-      {moduleType === 1 && <ModulePdf />}
-      {moduleType === 2 && <ModuleImage />}
+      {moduleType === 1 && <ModuleVideo />}
+      {moduleType === 2 && <ModulePdf />}
+      {moduleType === 3 && <ModuleImage />}
     </div>
   );
 };

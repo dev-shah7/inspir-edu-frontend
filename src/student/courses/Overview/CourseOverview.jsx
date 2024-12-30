@@ -10,8 +10,11 @@ const CourseOverview = () => {
   const { currentCourse } = useCourseStore();
   return (
     <div className="bg-light-bg text-black rounded-lg shadow-md p-4 sm:p-8 mx-2 sm:mx-4 my-6 overflow-y-auto overflow-x-hidden h-[80vh]">
-      <CourseHeading name={currentCourse?.courseName} companyName={currentCourse?.companyName} />
-      <CourseIntro description={currentCourse?.description} />
+      <CourseHeading
+        name={currentCourse?.courseName}
+        companyName={currentCourse?.companyName}
+      />
+      {/* <CourseIntro description={currentCourse?.description} /> */}
       <CourseInstructions text={currentCourse?.instructions} />
       <CourseGrading passingPercentage={currentCourse?.passingPercentage} />
       <hr />

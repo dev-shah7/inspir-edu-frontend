@@ -9,27 +9,38 @@ const LongQuestion = ({
   correctAnswer,
   submitted,
   onAnswerChange,
-  debounceTime = 300, // Default debounce time in milliseconds
+  debounceTime = 900, // Default debounce time in milliseconds
 }) => {
   const [localAnswer, setLocalAnswer] = useState(userAnswer || "");
+  const [hasStartedTyping, setHasStartedTyping] = useState(false);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      if (localAnswer !== userAnswer) {
-        onAnswerChange(localAnswer);
-      }
-    }, debounceTime);
+    let handler;
+    if (hasStartedTyping) {
+      handler = setTimeout(() => {
+        if (localAnswer !== userAnswer) {
+          onAnswerChange(localAnswer);
+        }
+      }, debounceTime);
+    }
 
     return () => {
-      clearTimeout(handler); // Clear the timeout if the user types within the debounce time
+      if (handler) clearTimeout(handler); // Clear the timeout if the user types within the debounce time
     };
-  }, [localAnswer, userAnswer, onAnswerChange, debounceTime]);
+  }, [localAnswer, userAnswer, onAnswerChange, debounceTime, hasStartedTyping]);
+
+  const handleTextareaChange = (value) => {
+    if (!hasStartedTyping) {
+      setHasStartedTyping(true); // Start the timer only once
+    }
+    setLocalAnswer(value);
+  };
 
   return (
     <div>
-      <h2 className="font-bold text-lg mb-4">{question}</h2>
+      <h2 className="font-bold text-4xl mb-4">{question}</h2>
       <textarea
-        className={`w-full h-32 border ${submitted
+        className={`w-full h-32 border text-xl ${submitted
           ? localAnswer === correctAnswer
             ? "border-button-green"
             : "border-red-500"
@@ -38,7 +49,7 @@ const LongQuestion = ({
         placeholder={placeholder}
         disabled={submitted}
         value={localAnswer}
-        onChange={(e) => setLocalAnswer(e.target.value)}
+        onChange={(e) => handleTextareaChange(e.target.value)}
       ></textarea>
       {submitted && (
         <div className="mt-2">
@@ -47,7 +58,7 @@ const LongQuestion = ({
           ) : (
             <div>
               <IncorrectTag />
-              <p className="mt-1 text-red-500">Correct Answer: {correctAnswer}</p>
+              <p className="mt-1 text-red-500 text-lg">Correct Answer: {correctAnswer}</p>
             </div>
           )}
         </div>

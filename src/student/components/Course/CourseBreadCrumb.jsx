@@ -8,7 +8,7 @@ const CourseBreadCrumb = () => {
     "/student/courses": "My Courses",
     [`/student/courses/${courseId}/overview`]: "Course Overview",
     [`/student/courses/${courseId}/modules`]: "Modules",
-    [`/student/modules/${moduleId}/questions`]: "Quiz Test",
+    // [`/student/modules/${moduleId}/questions`]: "Quiz Test",
   };
 
   const pathSegments = location.pathname.split("/").filter(Boolean);

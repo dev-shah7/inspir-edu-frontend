@@ -1,7 +1,7 @@
 const CourseIntro = ({ description }) => {
   return (
-    <div className="mb-8">
-      <h2 className="text-xl font-semibold mb-4">About this Course</h2>
+    <div className="mb-8 text-lg">
+      <h2 className="text-3xl font-semibold mb-4">About this Course</h2>
       <p className="mb-4 text-gray-800">
         This course lays the foundation of social media marketing. You’ll
         learn what social media marketing entails, including the history and

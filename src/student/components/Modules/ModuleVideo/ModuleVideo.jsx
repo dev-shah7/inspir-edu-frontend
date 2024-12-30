@@ -4,20 +4,19 @@ import ModuleHeading from '../ModuleHeading/ModuleHeading';
 import NextPrevActions from '../../../../components/common/NextPrevActions/NextPrevActions';
 import VideoPlayer from '../../../../components/common/VideoPlayer/VideoPlayer';
 import DownloadActions from '../../../../components/common/DownloadActions/DownloadActions';
-import ModuleSidebar from '../ModuleSidebar/ModuleSidebar';
 import playVideoPoster from "../../../../assets/play-thumbnail.jpg";
+import ModuleSidebar from '../ModuleSidebar/ModuleSidebar';
 
 const ModuleVideo = () => {
   const { currentModule } = useModuleStore();
 
   const fallbackVideoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
 
-  console.log("current video:", currentModule.data)
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F0F8FF] to-white p-6">
       <div className="flex flex-col md:flex-row items-center justify-between mb-8">
         <ModuleHeading title={currentModule?.data?.name || "Module Title"} />
-        <NextPrevActions />
+        {/* <NextPrevActions /> */}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -26,7 +25,7 @@ const ModuleVideo = () => {
             videoUrl={currentModule?.data?.url || fallbackVideoUrl}
             posterUrl={playVideoPoster}
           />
-          <DownloadActions />
+          {/* <DownloadActions /> */}
         </div>
         <ModuleSidebar
           isLiveClass={true}

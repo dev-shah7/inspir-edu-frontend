@@ -12,6 +12,7 @@ import { QuestionType } from "../../helpers/enums";
 import useAnswerStore from "../store/useAnswerStore";
 import toast from "react-hot-toast";
 import useModuleStore from "../../admin/store/useModuleStore";
+import QuestionCounter from "../components/Question/QuestionCounter";
 import useCourseStore from "../store/useCourseStore";
 
 const QuestionsList = () => {
@@ -20,7 +21,7 @@ const QuestionsList = () => {
   const [currentIndex, setCurrentIndex] = useState(0); // Track the current question index
   const { moduleId } = useParams();
   const { fetchQuestionsByModule, questions, isLoading } = useQuestionStore();
-  const { saveAnswer, fetchAnswers, userAnswers } = useAnswerStore();
+  const { saveAnswer, fetchAnswers, userAnswers, isFetchingAnswer } = useAnswerStore();
   const { submitModule, currentModule, getModuleStatus, moduleStatus, isFetchingModule } = useModuleStore();
   const { currentCourse } = useCourseStore();
 
@@ -29,7 +30,7 @@ const QuestionsList = () => {
   useEffect(() => {
     if (moduleId) {
       fetchQuestionsByModule(moduleId);
-      getModuleStatus(currentCourse.courseId);
+      getModuleStatus(moduleId);
       fetchAnswers(moduleId);
     }
   }, [moduleId]);
@@ -64,7 +65,7 @@ const QuestionsList = () => {
     try {
       await submitModule(moduleId);
       toast.success("Your answers have been submitted!");
-      navigate(`/student/courses/${moduleId}/modules`);
+      navigate(`/student/courses/${currentCourse?.courseId}/modules`);
     } catch (error) {
       console.error("Error submitting the answers:", error);
       toast.error("Failed to submit your answers. Please try again.");
@@ -133,122 +134,134 @@ const QuestionsList = () => {
     setCurrentIndex((prev) => Math.max(prev - 1, 0));
   };
 
-  if (isLoading && isFetchingModule) {
-    return <Loader />;
-  }
-
   const currentQuestion = questions[currentIndex];
 
+  if (isLoading || isFetchingModule || isFetchingAnswer) {
+    return <Loader />;
+  };
+
   return (
-    <div className="p-6 max-w-7xl mx-5 my-4 bg-light-bg rounded-lg shadow-md">
-      {currentQuestion && (
-        <div>
-          {currentQuestion.type === QuestionType.MCQs && (
-            <MCQ
-              question={currentQuestion.question}
-              options={currentQuestion.questionOptions}
-              userAnswer={formState[currentQuestion.id]?.optionId} // Pass single selected option
-              submitted={moduleStatus == 2 || moduleStatus == 3}
-              onAnswerChange={(optionId) =>
-                handleAnswerChange(currentQuestion.id, "", optionId) // Update with selected option ID
-              }
-            />
+    <>
+      <QuestionCounter currentIndex={currentIndex}
+        totalQuestions={questions.length} />
+      <div className="p-6 max-w-7xl mx-5 my-4 bg-light-bg rounded-lg shadow-md">
+        {currentQuestion && (
+          <div>
+            {currentQuestion.type === QuestionType.MCQs && (
+              <MCQ
+                question={currentQuestion.question}
+                options={currentQuestion.questionOptions}
+                userAnswer={formState[currentQuestion.id]?.optionId} // Pass single selected option
+                submitted={moduleStatus == 2 || moduleStatus == 3}
+                onAnswerChange={(optionId) =>
+                  handleAnswerChange(currentQuestion.id, "", optionId) // Update with selected option ID
+                }
+              />
+            )}
+            {currentQuestion.type === QuestionType.TrueFalse && (
+              <TrueFalseQuestion
+                question={currentQuestion.question}
+                options={currentQuestion.questionOptions}
+                userAnswer={formState[currentQuestion.id]?.optionId}
+                submitted={moduleStatus == 2 || moduleStatus == 3}
+                onAnswerChange={(optionId) =>
+                  handleAnswerChange(currentQuestion.id, "", optionId)
+                }
+              />
+            )}
+            {currentQuestion.type === QuestionType.YesNo && (
+              <YesNoQuestion
+                question={currentQuestion.question}
+                options={currentQuestion.questionOptions}
+                userAnswer={formState[currentQuestion.id]?.optionId}
+                submitted={moduleStatus == 2 || moduleStatus == 3}
+                onAnswerChange={(optionId) =>
+                  handleAnswerChange(currentQuestion.id, "", optionId)
+                }
+              />
+            )}
+            {currentQuestion.type === QuestionType.Short && (
+              <ShortQuestion
+                question={currentQuestion.question}
+                placeholder="Type your answer..."
+                userAnswer={formState[currentQuestion.id]?.answer}
+                submitted={moduleStatus == 2 || moduleStatus == 3}
+                correctAnswer={currentQuestion.correctAnswer}
+                onAnswerChange={(value) =>
+                  handleAnswerChange(currentQuestion.id, value, null)
+                }
+              />
+            )}
+            {currentQuestion.type === QuestionType.Long && (
+              <LongQuestion
+                question={currentQuestion.question}
+                placeholder="Type your detailed answer..."
+                userAnswer={formState[currentQuestion.id]?.answer}
+                submitted={moduleStatus == 2 || moduleStatus == 3}
+                correctAnswer={currentQuestion.correctAnswer}
+                onAnswerChange={(value) =>
+                  handleAnswerChange(currentQuestion.id, value, null)
+                }
+              />
+            )}
+            {currentQuestion.type === QuestionType.MultiSelectMCQs && (
+              <MultipleSelection
+                question={currentQuestion.question}
+                options={currentQuestion.questionOptions}
+                userAnswers={formState[currentQuestion.id]?.optionIds || []} // Pass selected option IDs
+                submitted={moduleStatus == 2 || moduleStatus == 3}
+                onAnswerChange={(optionId, isChecked) =>
+                  handleAnswerChange(
+                    currentQuestion.id,
+                    null,
+                    null,
+                    isChecked
+                      ? [...(formState[currentQuestion.id]?.optionIds || []), optionId]
+                      : formState[currentQuestion.id]?.optionIds.filter((id) => id !== optionId)
+                  )
+                }
+              />
+            )}
+          </div>
+        )}
+
+        <div className="flex justify-between mt-6">
+          {currentIndex > 0 && ( // Hide Previous button if it's the first question
+            <button
+              onClick={handlePrevious}
+              className="bg-green-800 text-white text-xl px-4 py-2 rounded-md"
+            >
+              Previous
+            </button>
           )}
-          {currentQuestion.type === QuestionType.TrueFalse && (
-            <TrueFalseQuestion
-              question={currentQuestion.question}
-              options={currentQuestion.questionOptions}
-              userAnswer={formState[currentQuestion.id]?.optionId}
-              submitted={moduleStatus == 2 || moduleStatus == 3}
-              onAnswerChange={(optionId) =>
-                handleAnswerChange(currentQuestion.id, "", optionId)
-              }
-            />
-          )}
-          {currentQuestion.type === QuestionType.YesNo && (
-            <YesNoQuestion
-              question={currentQuestion.question}
-              options={currentQuestion.questionOptions}
-              userAnswer={formState[currentQuestion.id]?.optionId}
-              submitted={moduleStatus == 2 || moduleStatus == 3}
-              onAnswerChange={(optionId) =>
-                handleAnswerChange(currentQuestion.id, "", optionId)
-              }
-            />
-          )}
-          {currentQuestion.type === QuestionType.Short && (
-            <ShortQuestion
-              question={currentQuestion.question}
-              placeholder="Type your answer..."
-              userAnswer={formState[currentQuestion.id]?.answer}
-              submitted={moduleStatus == 2 || moduleStatus == 3}
-              correctAnswer={currentQuestion.correctAnswer}
-              onAnswerChange={(value) =>
-                handleAnswerChange(currentQuestion.id, value, null)
-              }
-            />
-          )}
-          {console.log("moduleStatus: ", moduleStatus)}
-          {currentQuestion.type === QuestionType.Long && (
-            <LongQuestion
-              question={currentQuestion.question}
-              placeholder="Type your detailed answer..."
-              userAnswer={formState[currentQuestion.id]?.answer}
-              submitted={moduleStatus == 2 || moduleStatus == 3}
-              correctAnswer={currentQuestion.correctAnswer}
-              onAnswerChange={(value) =>
-                handleAnswerChange(currentQuestion.id, value, null)
-              }
-            />
-          )}
-          {currentQuestion.type === QuestionType.MultiSelectMCQs && (
-            <MultipleSelection
-              question={currentQuestion.question}
-              options={currentQuestion.questionOptions}
-              userAnswers={formState[currentQuestion.id]?.optionIds || []} // Pass selected option IDs
-              submitted={moduleStatus == 2 || moduleStatus == 3}
-              onAnswerChange={(optionId, isChecked) =>
-                handleAnswerChange(
-                  currentQuestion.id,
-                  null,
-                  null,
-                  isChecked
-                    ? [...(formState[currentQuestion.id]?.optionIds || []), optionId]
-                    : formState[currentQuestion.id]?.optionIds.filter((id) => id !== optionId)
-                )
-              }
-            />
+          {currentIndex === questions.length - 1 ? (
+            moduleStatus == 0 || moduleStatus == 1 ? (
+              <button
+                onClick={handleSubmit}
+                className="bg-green-500 text-white text-xl px-4 py-2 rounded-md"
+              >
+                Submit
+              </button>
+            )
+              : (
+                <button
+                  disabled={true}
+                  className="bg-gray-800 text-white text-xl px-4 py-2 rounded-md"
+                >
+                  Submitted
+                </button>
+              )
+          ) : (
+            <button
+              onClick={handleNext}
+              className="bg-blue-500 text-white text-xl px-4 py-2 rounded-md"
+            >
+              Next
+            </button>
           )}
         </div>
-      )}
-
-      <div className="flex justify-between mt-6">
-        <button
-          onClick={handlePrevious}
-          className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md"
-          disabled={currentIndex === 0}
-        >
-          Previous
-        </button>
-        {currentIndex === questions.length - 1 ? (
-          moduleStatus == 0 || moduleStatus == 1 && (
-            <button
-              onClick={handleSubmit}
-              className="bg-green-500 text-white px-4 py-2 rounded-md"
-            >
-              Submit
-            </button>
-          )
-        ) : (
-          <button
-            onClick={handleNext}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md"
-          >
-            Next
-          </button>
-        )}
       </div>
-    </div>
+    </>
   );
 };
 

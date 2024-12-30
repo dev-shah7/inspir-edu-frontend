@@ -10,8 +10,8 @@ const CourseUserInfo = () => {
         className="rounded-full w-20 h-20 object-cover"
       />
       <div className="text-center md:text-left">
-        <h3 className="text-lg font-bold">{currentCourse?.createdByName || "Admin User"}</h3>
-        <p className="text-sm text-gray-600">
+        <h3 className="text-2xl font-bold">{currentCourse?.createdByName || "Admin User"}</h3>
+        <p className="text-lg text-gray-600">
           {currentCourse?.createdByEmail || "Admin"}<br />
           {currentCourse?.companyName || "Admin Company"}
         </p>

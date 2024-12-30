@@ -3,7 +3,7 @@ import { studentCourseService } from "../services/api/studentCourseService";
 import { studentAnswerService } from "../services/api/studentAnswerService";
 
 const useAnswerStore = create((set, get) => ({
-  answers: [],
+  userAnswers: [],
   currentAnswer: null,
   isLoading: false,
   error: null,
@@ -17,6 +17,26 @@ const useAnswerStore = create((set, get) => ({
       const response = await studentAnswerService.saveAnswer(data);
       set({
         isLoading: false,
+      });
+      return response;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to save answer please choose again",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  fetchAnswers: async (id) => {
+    set({
+      isLoading: true,
+    });
+    try {
+      const response = await studentAnswerService.fetchAnswersByModule(id);
+      set({
+        isLoading: false,
+        userAnswers: response.data,
       });
       return response;
     } catch (error) {

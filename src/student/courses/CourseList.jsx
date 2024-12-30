@@ -20,6 +20,10 @@ const CourseList = () => {
 
   const headingText = location.pathname.includes("myCourses") ? "My Courses" : "All Courses";
 
+  if (isLoading) {
+    return <Loader />;
+  }
+
   return (
     <div className="p-6">
       <h1 className="font-outfit text-xl text-gray-800 mb-6">{headingText}</h1>

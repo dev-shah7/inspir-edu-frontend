@@ -4,7 +4,7 @@ import IncorrectTag from "./IncorrectTag";
 const MultipleSelection = ({
   question,
   options,
-  userAnswers,
+  userAnswers = [],
   submitted,
   onAnswerChange,
 }) => {
@@ -27,19 +27,13 @@ const MultipleSelection = ({
                   }`}
                 disabled={submitted}
                 checked={userAnswers?.includes(option.id)}
-                onChange={(e) =>
-                  onAnswerChange(option.id, e.target.checked)
-                }
+                onChange={(e) => onAnswerChange(option.id, e.target.checked)}
               />
               <span
                 className={`${submitted
-                  ? userAnswers?.includes(option.id)
-                    ? option.isCorrect
-                      ? "text-button-green"
-                      : "text-red-500"
-                    : option.isCorrect
-                      ? "text-button-green"
-                      : "text-gray-800"
+                  ? option.isCorrect
+                    ? "text-button-green"
+                    : "text-gray-800"
                   : "text-gray-800"
                   }`}
               >

@@ -9,6 +9,7 @@ import ModuleMedia from "../student/modules/ModuleMedia";
 import QuestionsList from "../student/questions/QuestionsList";
 import CongratulationsBanner from "../student/components/common/CongratulationsBanner";
 import Support from "../components/common/Support/Support";
+import CourseResult from '../student/result/CourseResult';
 
 const StudentRoutes = () => {
   return (
@@ -33,10 +34,10 @@ const StudentRoutes = () => {
             </CourseContent>} />
           {/* <Route path="courses/modules/dashboard" element={<ModulesDashboard />} /> */}
           <Route
-            path="courses/success"
+            path='courses/result'
             element={
               <CourseContent showNav={false}>
-                <CongratulationsBanner />
+                <CourseResult />
               </CourseContent>
             }
           />

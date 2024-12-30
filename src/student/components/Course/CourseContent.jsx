@@ -23,6 +23,10 @@ const CourseContent = ({ children, showNav = true }) => {
         }
     };
 
+    if (isLoading) {
+        return <Loader />;
+    }
+
     return (
         <>
             <BackButton />

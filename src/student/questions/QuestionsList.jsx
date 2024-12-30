@@ -24,19 +24,19 @@ const QuestionsList = () => {
   const { saveAnswer, fetchAnswers, userAnswers, isFetchingAnswer } = useAnswerStore();
   const { submitModule, currentModule, getModuleStatus, moduleStatus, isFetchingModule } = useModuleStore();
   const { currentCourse } = useCourseStore();
-
-  console.log("current Module: ", currentModule);
+  const [loadingAnswers, setLoadingAnswers] = useState(false);
 
   useEffect(() => {
     if (moduleId) {
+      fetchAnswers(moduleId);
       fetchQuestionsByModule(moduleId);
       getModuleStatus(moduleId);
-      fetchAnswers(moduleId);
     }
   }, [moduleId]);
 
   useEffect(() => {
     if (questions && userAnswers) {
+      setLoadingAnswers(true);
       const initialState = {};
       questions.forEach((q) => {
         const userAnswer = userAnswers.find((ua) => ua.questionId === q.id);
@@ -59,6 +59,7 @@ const QuestionsList = () => {
       });
       setFormState(initialState);
     }
+    setLoadingAnswers(false);
   }, [questions, userAnswers]);
 
   const handleSubmit = async () => {
@@ -136,7 +137,7 @@ const QuestionsList = () => {
 
   const currentQuestion = questions[currentIndex];
 
-  if (isLoading || isFetchingModule || isFetchingAnswer) {
+  if (isLoading || isFetchingModule || isFetchingAnswer || loadingAnswers) {
     return <Loader />;
   };
 

@@ -2,10 +2,10 @@ import React from 'react';
 import useModuleStore from "../../../../admin/store/useModuleStore";
 import ModuleHeading from '../ModuleHeading/ModuleHeading';
 import NextPrevActions from '../../../../components/common/NextPrevActions/NextPrevActions';
-import VideoPlayer from '../../../../components/common/VideoPlayer/VideoPlayer';
 import DownloadActions from '../../../../components/common/DownloadActions/DownloadActions';
 import playVideoPoster from "../../../../assets/play-thumbnail.jpg";
 import ModuleSidebar from '../ModuleSidebar/ModuleSidebar';
+import VideoPlayer from '../../../../components/common/VideoPlayer/VideoPlayer';
 
 const ModuleVideo = () => {
   const { currentModule } = useModuleStore();

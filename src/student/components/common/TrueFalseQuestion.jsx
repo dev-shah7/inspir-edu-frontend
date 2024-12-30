@@ -11,43 +11,57 @@ const TrueFalseQuestion = ({
 }) => {
   return (
     <div>
-      <h2 className="font-bold text-lg mb-4">{question}</h2>
-      <div className="space-y-2">
+      <h2 className="font-bold text-4xl mb-4">{question}</h2>
+      <div className="space-y-2 text-xl">
         {options?.map((option) => (
-          <div key={option.id}>
-            <div className="flex items-center space-x-3">
-              <input
-                type="radio"
-                name={name}
-                className={`form-radio h-5 w-5 ${submitted
-                  ? option.id === userAnswer
-                    ? option.isCorrect
-                      ? "text-button-green"
-                      : "text-red-500"
-                    : "text-button-blue"
-                  : "text-button-blue"
-                  }`}
-                disabled={submitted}
-                checked={option.id === userAnswer}
-                onChange={() => onAnswerChange(option.id)}
-              />
-              <span
-                className={`${submitted
-                  ? option.isCorrect
-                    ? "text-button-green"
-                    : "text-gray-800"
+          <label
+            key={option.id}
+            className={`flex items-center space-x-3 p-2 cursor-pointer rounded-lg ${submitted
+              ? option.id === userAnswer
+                ? option.isCorrect
+                  ? "bg-green-100"
+                  : "bg-red-100"
+                : "bg-gray-100"
+              : "bg-gray-50 hover:bg-gray-200"
+              }`}
+            onClick={(e) => {
+              if (!submitted) {
+                e.preventDefault(); // Prevent default behavior
+                onAnswerChange(option.id);
+              }
+            }}
+
+          >
+            <input
+              type="radio"
+              name={name}
+              className="form-radio h-5 w-5"
+              disabled={submitted}
+              checked={option.id === userAnswer}
+              readOnly // Prevent direct edits
+            />
+            <span
+              className={`${submitted
+                ? option.isCorrect
+                  ? "text-button-green"
                   : "text-gray-800"
-                  }`}
-              >
-                {option.option}
-              </span>
-            </div>
-            {submitted && option.id === userAnswer && (
-              option.isCorrect ? <CorrectTag /> : <IncorrectTag />
-            )}
-          </div>
+                : "text-gray-800"
+                }`}
+            >
+              {option.option}
+            </span>
+          </label>
         ))}
       </div>
+      {submitted && userAnswer && (
+        <div className="mt-4">
+          {options.find((option) => option.id === userAnswer)?.isCorrect ? (
+            <CorrectTag />
+          ) : (
+            <IncorrectTag />
+          )}
+        </div>
+      )}
     </div>
   );
 };

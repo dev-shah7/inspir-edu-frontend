@@ -7,23 +7,24 @@ const ModuleSidebar = ({ isLiveClass = false, liveClassDates = "", description }
 
   return (
     <div className="lg:col-span-1 space-y-4">
+      <h1 className="text-5xl font-bold"> {currentModule?.data?.name}</h1>
       <div className="flex items-center space-x-4">
-        {isLiveClass && (
+        {/* {isLiveClass && (
           <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs">
             Live Class
           </span>
         )}
-        <span className="text-xs text-gray-600">{liveClassDates}</span>
+        <span className="text-xs text-gray-600">{liveClassDates}</span> */}
         <button
           onClick={() => navigate(`../modules/${currentModule?.data?.id}/questions`)}
-          className="bg-green-700 hover:bg-green-800 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition-all text-xs"
+          className="bg-green-700 hover:bg-green-800 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition-all text-xl"
         >
-          Quiz Test
+          Take Quiz
         </button>
       </div>
 
       <div className="bg-white p-4 rounded-lg shadow">
-        <p className="text-gray-600">Description: {description}</p>
+        <p className="text-gray-600 text-xl">Description: {description}</p>
       </div>
     </div>
   );

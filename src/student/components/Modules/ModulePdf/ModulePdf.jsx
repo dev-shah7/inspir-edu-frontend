@@ -1,8 +1,8 @@
 import React from 'react';
 import useModuleStore from '../../../../admin/store/useModuleStore';
 import NextPrevActions from '../../../../components/common/NextPrevActions/NextPrevActions';
-import ModuleSidebar from '../ModuleSidebar/ModuleSidebar';
 import PdfViewer from '../../../../components/common/PDFViewer/PDFViewer';
+import ModuleSidebar from '../ModuleSidebar/ModuleSidebar';
 
 const ModulePdf = () => {
   const { currentModule } = useModuleStore();
@@ -20,7 +20,7 @@ const ModulePdf = () => {
   return (
     <div className="flex flex-col items-center w-full p-2 sm:p-4 md:p-8">
       <div className="w-full max-w-6xl relative">
-        <div className="mb-4 flex justify-between items-center">
+        {/* <div className="mb-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <button
               onClick={handleDownload}
@@ -43,11 +43,11 @@ const ModulePdf = () => {
             </button>
           </div>
           <NextPrevActions />
-        </div>
+        </div> */}
 
         <div className='my-5'>
           <ModuleSidebar
-            isLiveClass={true}
+            isLiveClass={false}
             liveClassDates="17 Nov - 23 Nov 2024"
             description={currentModule?.data?.description}
           />

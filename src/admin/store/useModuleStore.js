@@ -106,14 +106,14 @@ const useModuleStore = create((set, get) => ({
   },
 
   submitModule: async (id) => {
-    set({ isLoading: true });
+    set({ isFetchingModule: true });
     try {
       const response = await moduleService.submitModule(id);
-      set({ isLoading: false });
+      set({ isFetchingModule: false });
       return response;
     } catch (error) {
       set({
-        error: error.response?.data?.message || "Failed to save module", isLoading: false
+        error: error.response?.data?.message || "Failed to save module", isFetchingModule: false
       });
       throw error;
     }

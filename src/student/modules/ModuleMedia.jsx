@@ -22,9 +22,7 @@ const ModuleMedia = () => {
   const moduleType = currentModule?.data?.moduleType || 1;
   return (
     <div>
-      <div className='m-5'>
-        <BackButton />
-      </div>
+      <BackButton />
       {moduleType === 0 && <ModuleVideo />}
       {moduleType === 1 && <ModulePdf />}
       {moduleType === 2 && <ModuleImage />}

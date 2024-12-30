@@ -24,9 +24,8 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
 
   return (
     <div
-      className={`z-30 h-[80vh] bg-gradient-to-br from-blue-100 to-blue-200 w-64 p-4 mt-4 ml-4 rounded-3xl shadow-2xl transform transition-transform duration-300 md:static md:translate-x-0 ${
-        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      }`}
+      className={`z-30 h-[80vh] bg-gradient-to-br from-blue-100 to-blue-200 w-64 p-4 mt-4 ml-4 rounded-3xl shadow-2xl transform transition-transform duration-300 md:static md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
     >
       <nav className="space-y-6">
         <button
@@ -57,9 +56,8 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
                 </div>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className={`h-5 w-5 transition-transform duration-300 ease-in-out text-blue-600 ${
-                    isUsersMenuOpen ? "rotate-90" : ""
-                  }`}
+                  className={`h-5 w-5 transition-transform duration-300 ease-in-out text-blue-600 ${isUsersMenuOpen ? "rotate-90" : ""
+                    }`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -73,9 +71,8 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
                 </svg>
               </button>
               <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  isUsersMenuOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0"
-                }`}
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${isUsersMenuOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0"
+                  }`}
               >
                 <div className="ml-4 mt-2 space-y-2 border-l-2 border-blue-300 pl-4">
                   <button
@@ -115,13 +112,6 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
               <IoSchoolOutline className="h-6 w-6 mr-2 text-blue-600" />
               <span>My Courses</span>
             </Link>
-            <button
-              onClick={() => handleNavigation("/student/progress")}
-              className="flex items-center w-full space-x-3 p-3 rounded-xl hover:bg-blue-300/50 text-left font-medium text-gray-700 hover:text-gray-900 transition-all duration-200 text-lg"
-            >
-              <IoStatsChartOutline className="h-6 w-6 mr-2 text-blue-600" />
-              <span>My Progress</span>
-            </button>
           </div>
         )}
       </nav>

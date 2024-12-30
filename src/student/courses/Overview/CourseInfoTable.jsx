@@ -12,36 +12,36 @@ const CourseInfoTable = () => {
               <tr className='border-b bg-gray-100'>
                 <th className='py-2 sm:py-4 px-3 sm:px-6 flex items-center space-x-2 sm:space-x-3 text-gray-800 font-medium'>
                   <FaInfoCircle className='text-base sm:text-lg' />
-                  <span className='text-sm sm:text-base'>Basic Info</span>
+                  <span className='text-xl sm:text-base'>Basic Info</span>
                 </th>
-                <td className='py-2 sm:py-4 px-3 sm:px-6 text-gray-800 text-sm sm:text-base'>
+                <td className='py-2 sm:py-4 px-3 sm:px-6 text-gray-800 text-lg sm:text-base'>
                   {currentCourse?.courseName}
                 </td>
               </tr>
               <tr className='border-b'>
                 <th className='py-2 sm:py-4 px-3 sm:px-6 flex items-center space-x-2 sm:space-x-3 text-gray-800 font-medium'>
                   <FaCheckCircle className='text-base sm:text-lg' />
-                  <span className='text-sm sm:text-base'>No Of Modules</span>
+                  <span className='text-xl sm:text-base'>No Of Modules</span>
                 </th>
-                <td className='py-2 sm:py-4 px-3 sm:px-6 text-gray-800 text-sm sm:text-base'>
+                <td className='py-2 sm:py-4 px-3 sm:px-6 text-gray-800 text-xl sm:text-base'>
                   {currentCourse?.analytics?.totalModules}
                 </td>
               </tr>
               <tr className='border-b bg-gray-100'>
                 <th className='py-2 sm:py-4 px-3 sm:px-6 flex items-center space-x-2 sm:space-x-3 text-gray-800 font-medium'>
                   <FaBook className='text-base sm:text-lg' />
-                  <span className='text-sm sm:text-base'>Deadline-Based</span>
+                  <span className='text-xl sm:text-base'>Deadline-Based</span>
                 </th>
-                <td className='py-2 sm:py-4 px-3 sm:px-6 text-gray-800 text-sm sm:text-base'>
+                <td className='py-2 sm:py-4 px-3 sm:px-6 text-gray-800 text-xl sm:text-base'>
                   {currentCourse?.deadlineDate ? "Yes" : "No"}
                 </td>
               </tr>
               <tr>
                 <th className='py-2 sm:py-4 px-3 sm:px-6 flex items-center space-x-2 sm:space-x-3 text-gray-800 font-medium'>
                   <FaStar className='text-base sm:text-lg' />
-                  <span className='text-sm sm:text-base'>Enrollment Date</span>
+                  <span className='text-xl sm:text-base'>Enrollment Date</span>
                 </th>
-                <td className='py-2 sm:py-4 px-3 sm:px-6 text-gray-800 text-sm sm:text-base'>
+                <td className='py-2 sm:py-4 px-3 sm:px-6 text-gray-800 text-xl sm:text-base'>
                   {currentCourse?.enrollmentDate}
                 </td>
               </tr>

@@ -123,13 +123,15 @@ const Header = ({ isSidebarOpen, setSidebarOpen, userRole }) => {
 
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-20">
-              <div
-                onClick={handleProfileClick}
-                className="flex items-center space-x-3 px-4 py-3 text-gray-800 hover:bg-gray-100 cursor-pointer"
-              >
-                <FaUser className="text-[#1A73E8] text-lg" />
-                <span className="text-lg font-medium">My Profile</span>
-              </div>
+              {userRole === "admin" && (
+                <div
+                  onClick={handleProfileClick}
+                  className="flex items-center space-x-3 px-4 py-3 text-gray-800 hover:bg-gray-100 cursor-pointer"
+                >
+                  <FaUser className="text-[#1A73E8] text-lg" />
+                  <span className="text-lg font-medium">My Profile</span>
+                </div>
+              )}
               <div
                 onClick={handleLogout}
                 className="flex items-center space-x-3 px-4 py-3 text-gray-800 hover:bg-gray-100 cursor-pointer"

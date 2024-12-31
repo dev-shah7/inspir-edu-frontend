@@ -25,6 +25,9 @@ const Login = () => {
           <h2 className="text-4xl sm:text-6xl font-bold text-button-blue flex items-center justify-center mb-6">
             <span className="text-yellow-400 mr-2">💡</span> inspirEDU
           </h2>
+          <p className="text-2xl text-gray-700 text-center leading-relaxed max-w-md mx-auto">
+            {/* add some text related to the app not the lorem ipsum */}
+          </p>
         </div>
 
         {/* Right Section */}

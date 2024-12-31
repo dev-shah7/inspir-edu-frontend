@@ -85,7 +85,7 @@ const Course = ({ course, status }) => {
 
         <div className="p-6 flex flex-col justify-between">
           <h4 className="mb-2 text-white text-xl font-bold">{course.name}</h4>
-          <p className="mb-6 text-black text-sm leading-relaxed font-light">
+          <p className="mb-6 text-white text-lg leading-relaxed font-light">
             {course.description}
           </p>
           <div className="flex flex-wrap gap-x-3 gap-y-2 mb-4">

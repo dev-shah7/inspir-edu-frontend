@@ -15,8 +15,13 @@ const ModuleVideo = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F0F8FF] to-white p-6">
       <div className="flex flex-col md:flex-row items-center justify-between mb-8">
-        <ModuleHeading title={currentModule?.data?.name || "Module Title"} />
+        {/* <ModuleHeading title={currentModule?.data?.name || "Module Title"} /> */}
         {/* <NextPrevActions /> */}
+        <ModuleSidebar
+          isLiveClass={true}
+          liveClassDates="17 Nov - 23 Nov 2024"
+          description={currentModule?.data?.description}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -27,11 +32,6 @@ const ModuleVideo = () => {
           />
           {/* <DownloadActions /> */}
         </div>
-        <ModuleSidebar
-          isLiveClass={true}
-          liveClassDates="17 Nov - 23 Nov 2024"
-          description={currentModule?.data?.description}
-        />
       </div>
     </div>
   );

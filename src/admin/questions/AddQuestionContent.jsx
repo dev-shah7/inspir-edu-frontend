@@ -11,7 +11,7 @@ const AddQuestionContent = () => {
   return (
     <>
       <h2 className="text-md text-center font-light text-[#0F172A]">
-        Do you want to help AI or you want to add questions to this module?
+        Would you like AI assistance to generate questions, or do you prefer to add them yourself?
       </h2>
       <div className="flex justify-center space-x-6 mb-6">
         <label className="flex items-center space-x-2">
@@ -30,7 +30,7 @@ const AddQuestionContent = () => {
             value="own"
             className="w-4 h-4 text-blue-500 focus:ring-blue-400 focus:ring-opacity-50"
           />
-          <span className="text-gray-700">No (Own)</span>
+          <span className="text-gray-700">No (Self)</span>
         </label>
       </div>
       <div className="flex justify-center space-x-4">

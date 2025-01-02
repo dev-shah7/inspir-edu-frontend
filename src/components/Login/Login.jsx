@@ -18,7 +18,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-light-bg px-4 sm:px-6 md:px-8">
       <div className="flex flex-col lg:flex-row w-full max-w-7xl">
         {/* Left Section */}
-        <div className="flex-1 flex flex-col justify-center items-center p-8 text-center space-y-4">
+        <div className="flex-1 flex flex-col justify-center items-center p-8 text-center space-y-6">
           <h1 className="font-outfit text-4xl sm:text-5xl leading-[3rem] sm:leading-[5rem] font-semibold text-gray-700">
             WELCOME <br /> TO
           </h1>
@@ -26,12 +26,11 @@ const Login = () => {
             <span className="text-yellow-400 mr-2">💡</span> inspirEDU
           </h2>
           <p className="text-lg text-gray-700 text-center leading-relaxed max-w-md mx-auto">
-            {/* add some text related to the app not the lorem ipsum */}
-            This app offers separate platforms for students and teachers,
-            enabling a comprehensive ecosystem for learning and teaching. With
-            AI-powered tools, secure payment methods, and a user-friendly
-            interface, it provides a seamless experience for both students and
-            teachers.
+            Empowering students and teachers with cutting-edge tools for an enhanced learning experience. 
+            Your journey to success starts here.
+          </p>
+          <p className="text-md text-gray-600 text-center italic leading-relaxed max-w-sm mx-auto font-outfit">
+            "Every great journey begins with a single step. Believe in yourself, and let today be the start of something extraordinary."
           </p>
         </div>
 

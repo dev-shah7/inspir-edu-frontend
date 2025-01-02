@@ -88,7 +88,7 @@ const Questions = () => {
   const getQuestionTypeName = (type) => {
     switch (type) {
       case 0:
-        return "Short Answer";
+        return "Short Answer Exact";
       case 1:
         return "Long Answer";
       case 2:

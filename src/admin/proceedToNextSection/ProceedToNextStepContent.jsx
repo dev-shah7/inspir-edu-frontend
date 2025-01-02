@@ -24,7 +24,7 @@ const ProceedToNextStepContent = () => {
             onClick={onProceedNext}
             className="px-6 py-2 bg-[#1A73E8] text-white font-medium rounded-md hover:bg-[#1E40AF] transition"
           >
-            Proceed Next
+            Proceed
           </button>
           <button
             onClick={closeModal}

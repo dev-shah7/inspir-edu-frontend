@@ -411,7 +411,7 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
       toast.success(
         `Module ${mode === "edit" ? "updated" : "created"} successfully`
       );
-      queueModal("Add More Questions", <AddQuestionContent />);
+      queueModal("Add Questions", <AddQuestionContent />);
       closeModal();
     } catch (error) {
       toast.error(error.message || "Operation failed");

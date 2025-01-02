@@ -167,7 +167,7 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
       toast.success("Question saved successfully");
 
       if (mode === "add") {
-        queueModal("Add More Questions", <AddMoreQuestionsContent />);
+        queueModal("Add Questions", <AddMoreQuestionsContent />);
       }
       closeModal();
     } catch (error) {

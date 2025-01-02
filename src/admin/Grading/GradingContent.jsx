@@ -39,7 +39,7 @@ const GradingContent = () => {
 
       await courseService.saveGradingInstructions(gradingData);
       toast.success("Grading instructions saved successfully");
-      queueModal("Proceed To Next", <ProceedToNextStepContent />);
+      queueModal("Add Module?", <ProceedToNextStepContent />);
       closeModal();
     } catch (error) {
       console.error("Error saving grading instructions:", error);

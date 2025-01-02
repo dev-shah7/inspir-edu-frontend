@@ -3,7 +3,7 @@ import React from "react";
 const QuestionTypeDropdown = ({ value, onChange }) => {
   const questionTypes = [
     { value: "", label: "Select Question Type" },
-    { value: "short-answer", label: "Short Answer" },
+    { value: "short-answer", label: "Short Answer Exact" },
     { value: "long-answer", label: "Long Answer" },
     { value: "mcq", label: "Multiple Choice" },
     { value: "checkbox", label: "Choose all that apply" },

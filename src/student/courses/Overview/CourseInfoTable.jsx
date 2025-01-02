@@ -33,7 +33,7 @@ const CourseInfoTable = () => {
                   <span className='text-xl sm:text-base'>Deadline-Based</span>
                 </th>
                 <td className='py-2 sm:py-4 px-3 sm:px-6 text-gray-800 text-xl sm:text-base'>
-                  {currentCourse?.deadlineDate ? "Yes" : "No"}
+                  {currentCourse?.deadLineDate ? "Yes" : "No"}
                 </td>
               </tr>
               <tr>

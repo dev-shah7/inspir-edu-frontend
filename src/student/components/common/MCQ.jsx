@@ -1,7 +1,8 @@
+import { CourseEnrollmentStatus } from "../../../helpers/enums";
 import CorrectTag from "./CorrectTag";
 import IncorrectTag from "./IncorrectTag";
 
-const MCQ = ({ question, options, userAnswer, submitted, onAnswerChange }) => {
+const MCQ = ({ courseStatus, question, options, userAnswer, submitted, onAnswerChange }) => {
   return (
     <div>
       <h2 className="font-bold text-4xl mb-4">{question}</h2>
@@ -18,7 +19,7 @@ const MCQ = ({ question, options, userAnswer, submitted, onAnswerChange }) => {
               : "bg-gray-50 hover:bg-gray-200"
               }`}
             onClick={(e) => {
-              if (!submitted) {
+              if (!submitted && courseStatus !== CourseEnrollmentStatus.DeadlineCrossed) {
                 e.preventDefault(); // Prevent default behavior
                 onAnswerChange(option.id);
               }
@@ -29,7 +30,7 @@ const MCQ = ({ question, options, userAnswer, submitted, onAnswerChange }) => {
               type="radio"
               name={`mcq-${question}`}
               className="form-radio h-5 w-5"
-              disabled={submitted}
+              disabled={submitted || courseStatus === CourseEnrollmentStatus.DeadlineCrossed}
               checked={userAnswer === option.id}
               readOnly // Prevent input from being editable directly
             />

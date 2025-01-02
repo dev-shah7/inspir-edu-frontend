@@ -5,9 +5,10 @@ import CourseNav from "./CourseNav";
 import Loader from "../../../components/common/Loader/Loader";
 import { useParams } from "react-router";
 import BackButton from "../../../components/common/BackButton/BackButton";
+import DeadlineCountdown from "../common/DeadlineCountdown";
 
 const CourseContent = ({ children, showNav = true }) => {
-    const { getEnrolledCourse, isLoading } = useCourseStore();
+    const { getEnrolledCourse, isLoading, currentCourse } = useCourseStore();
     const { courseId } = useParams();
 
     useEffect(() => {
@@ -32,6 +33,11 @@ const CourseContent = ({ children, showNav = true }) => {
             <BackButton />
             <CourseBreadCrumb />
             {showNav && <CourseNav />}
+            {currentCourse?.deadLineDate && (
+                <div className='mb-6'>
+                    <DeadlineCountdown course={currentCourse} />
+                </div>
+            )}
             {isLoading ? <Loader /> : children}
         </>
     );

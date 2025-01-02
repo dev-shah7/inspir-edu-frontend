@@ -9,11 +9,8 @@ const useCourseStore = create((set, get) => ({
   courseSubmissionResult: null,
 
   fetchStudentCourses: async () => {
-    const hasCourses = get().courses.length > 0;
-    if (!hasCourses) {
-      set({ isLoading: true });
-    }
 
+    set({ isLoading: true });
     try {
       const response = await studentCourseService.getAllCourses();
       set({
@@ -32,18 +29,13 @@ const useCourseStore = create((set, get) => ({
   },
 
   fetchEnrolledCourses: async () => {
-    const hasCourses = get().courses.length > 0;
-    if (!hasCourses) {
-      set({ isLoading: true });
-    }
-
+    set({ isLoading: true });
     try {
       const response = await studentCourseService.getEnrolledCourses();
       set({
         courses: response.data,
         isLoading: false,
       });
-      console.log("response is : ", response);
       return response;
     } catch (error) {
       set({

@@ -77,7 +77,7 @@ const ModuleList = () => {
         {currentCourse?.enrollmentStatus !== CourseEnrollmentStatus.Completed ? (
           <>
             <button
-              className={`p-5 rounded-md mt-1 text-xl font-semibold shadow-lg ${areAllModulesCompleted() ? 'bg-button-blue text-white' : 'bg-gray-200 text-gray-400'
+              className={`p-5 rounded-md mt-1 text-xl font-semibold shadow-lg ${areAllModulesCompleted() && currentCourse?.enrollmentStatus !== CourseEnrollmentStatus.DeadlineCrossed ? 'bg-button-blue text-white' : 'bg-gray-200 text-gray-400'
                 }`}
               onClick={handleCourseSubmission}
               disabled={!areAllModulesCompleted()}

@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import useModuleStore from "../../admin/store/useModuleStore";
 import QuestionCounter from "../components/Question/QuestionCounter";
 import useCourseStore from "../store/useCourseStore";
+import { CourseEnrollmentStatus } from "../../helpers/enums";
 
 const QuestionsList = () => {
   const navigate = useNavigate();
@@ -120,10 +121,11 @@ const QuestionsList = () => {
     const currentQuestion = questions[currentIndex];
     const currentAnswer = formState[currentQuestion.id];
 
-    if (
-      (currentQuestion.type === QuestionType.MultiSelectMCQs && currentAnswer?.optionIds?.length > 0) || // Multi-select: Ensure optionIds has selections
-      (currentQuestion.type === QuestionType.Short || currentQuestion.type === QuestionType.Long) && currentAnswer?.answer || // Short/Long: Ensure answer exists
-      currentAnswer?.optionId // Single-select: Ensure optionId exists
+    // Allow next if deadline crossed, otherwise check for answer
+    if (currentCourse?.enrollmentStatus === CourseEnrollmentStatus.DeadlineCrossed ||
+      (currentQuestion.type === QuestionType.MultiSelectMCQs && currentAnswer?.optionIds?.length > 0) ||
+      ((currentQuestion.type === QuestionType.Short || currentQuestion.type === QuestionType.Long) && currentAnswer?.answer) ||
+      currentAnswer?.optionId
     ) {
       setCurrentIndex((prev) => prev + 1);
     } else {
@@ -150,8 +152,9 @@ const QuestionsList = () => {
           <div>
             {currentQuestion.type === QuestionType.MCQs && (
               <MCQ
-                question={currentQuestion.question}
-                options={currentQuestion.questionOptions}
+                courseStatus={currentCourse?.enrollmentStatus}
+                question={currentQuestion?.question}
+                options={currentQuestion?.questionOptions}
                 userAnswer={formState[currentQuestion.id]?.optionId} // Pass single selected option
                 submitted={moduleStatus == 2 || moduleStatus == 3}
                 onAnswerChange={(optionId) =>
@@ -161,6 +164,7 @@ const QuestionsList = () => {
             )}
             {currentQuestion.type === QuestionType.TrueFalse && (
               <TrueFalseQuestion
+                courseStatus={currentCourse?.enrollmentStatus}
                 question={currentQuestion.question}
                 options={currentQuestion.questionOptions}
                 userAnswer={formState[currentQuestion.id]?.optionId}
@@ -172,6 +176,7 @@ const QuestionsList = () => {
             )}
             {currentQuestion.type === QuestionType.YesNo && (
               <YesNoQuestion
+                courseStatus={currentCourse?.enrollmentStatus}
                 question={currentQuestion.question}
                 options={currentQuestion.questionOptions}
                 userAnswer={formState[currentQuestion.id]?.optionId}
@@ -183,6 +188,7 @@ const QuestionsList = () => {
             )}
             {currentQuestion.type === QuestionType.Short && (
               <ShortQuestion
+                courseStatus={currentCourse?.enrollmentStatus}
                 question={currentQuestion.question}
                 placeholder="Type your answer..."
                 userAnswer={formState[currentQuestion.id]?.answer}
@@ -195,6 +201,7 @@ const QuestionsList = () => {
             )}
             {currentQuestion.type === QuestionType.Long && (
               <LongQuestion
+                courseStatus={currentCourse?.enrollmentStatus}
                 question={currentQuestion.question}
                 placeholder="Type your detailed answer..."
                 userAnswer={formState[currentQuestion.id]?.answer}
@@ -207,6 +214,7 @@ const QuestionsList = () => {
             )}
             {currentQuestion.type === QuestionType.MultiSelectMCQs && (
               <MultipleSelection
+                courseStatus={currentCourse?.enrollmentStatus}
                 question={currentQuestion.question}
                 options={currentQuestion.questionOptions}
                 userAnswers={formState[currentQuestion.id]?.optionIds || []} // Pass selected option IDs
@@ -236,22 +244,24 @@ const QuestionsList = () => {
             </button>
           )}
           {currentIndex === questions.length - 1 ? (
-            moduleStatus == 0 || moduleStatus == 1 ? (
+            (moduleStatus == 0 || moduleStatus == 1) &&
+              currentCourse?.enrollmentStatus !== CourseEnrollmentStatus.DeadlineCrossed ? (
               <button
                 onClick={handleSubmit}
                 className="bg-green-500 text-white text-xl px-4 py-2 rounded-md"
               >
                 Submit
               </button>
+            ) : (
+              <button
+                disabled={true}
+                className="bg-gray-800 text-white text-xl px-4 py-2 rounded-md"
+              >
+                {currentCourse?.enrollmentStatus === CourseEnrollmentStatus.DeadlineCrossed
+                  ? "Deadline Crossed"
+                  : "Submitted"}
+              </button>
             )
-              : (
-                <button
-                  disabled={true}
-                  className="bg-gray-800 text-white text-xl px-4 py-2 rounded-md"
-                >
-                  Submitted
-                </button>
-              )
           ) : (
             <button
               onClick={handleNext}

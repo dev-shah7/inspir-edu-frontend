@@ -1,7 +1,9 @@
+import { CourseEnrollmentStatus } from "../../../helpers/enums";
 import CorrectTag from "./CorrectTag";
 import IncorrectTag from "./IncorrectTag";
 
 const YesNoQuestion = ({
+  courseStatus,
   question,
   options,
   name,
@@ -25,7 +27,7 @@ const YesNoQuestion = ({
               : "bg-gray-50 hover:bg-gray-200"
               }`}
             onClick={(e) => {
-              if (!submitted) {
+              if (!submitted && courseStatus !== CourseEnrollmentStatus.DeadlineCrossed) {
                 e.preventDefault(); // Prevent default behavior
                 onAnswerChange(option.id);
               }
@@ -36,7 +38,7 @@ const YesNoQuestion = ({
               type="radio"
               name={name}
               className="form-radio h-5 w-5"
-              disabled={submitted}
+              disabled={submitted || courseStatus === CourseEnrollmentStatus.DeadlineCrossed}
               checked={option.id === userAnswer}
               readOnly // Prevent direct edits
             />

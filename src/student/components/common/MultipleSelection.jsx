@@ -1,7 +1,9 @@
+import { CourseEnrollmentStatus } from "../../../helpers/enums";
 import CorrectTag from "./CorrectTag";
 import IncorrectTag from "./IncorrectTag";
 
 const MultipleSelection = ({
+  courseStatus,
   question,
   options,
   userAnswers = [],
@@ -24,7 +26,7 @@ const MultipleSelection = ({
               : "bg-gray-50 hover:bg-gray-200"
               }`}
             onClick={(e) => {
-              if (!submitted) {
+              if (!submitted && courseStatus !== CourseEnrollmentStatus.DeadlineCrossed) {
                 e.preventDefault(); // Prevent double trigger
                 onAnswerChange(option.id, !userAnswers.includes(option.id));
               }
@@ -33,7 +35,7 @@ const MultipleSelection = ({
             <input
               type="checkbox"
               className="form-checkbox h-5 w-5"
-              disabled={submitted}
+              disabled={submitted || courseStatus === CourseEnrollmentStatus.DeadlineCrossed}
               checked={userAnswers.includes(option.id)}
               readOnly // Prevent direct edits
             />

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import CorrectTag from "./CorrectTag";
 import IncorrectTag from "./IncorrectTag";
+import { CourseEnrollmentStatus } from "../../../helpers/enums";
 
 const ShortQuestion = ({
+  courseStatus,
   question,
   placeholder,
   userAnswer,
@@ -47,7 +49,7 @@ const ShortQuestion = ({
           : "border-gray-300"
           } rounded-md p-3 focus:outline-button-blue`}
         placeholder={placeholder}
-        disabled={submitted}
+        disabled={submitted || courseStatus === CourseEnrollmentStatus.DeadlineCrossed}
         value={localAnswer}
         onChange={(e) => handleTextareaChange(e.target.value)}
       ></textarea>

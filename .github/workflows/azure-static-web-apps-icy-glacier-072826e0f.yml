@@ -19,6 +19,12 @@ jobs:
         with:
           submodules: true
           lfs: false
+      - name: Create .env file
+        run: |
+          echo "VITE_API_BASE_URL=\"${{ secrets.VITE_API_BASE_URL }}\"" > .env
+          echo "VITE_API_TIMEOUT=\"${{ secrets.VITE_API_TIMEOUT }}\"" >> .env
+          echo "VITE_EMAILJS_PUBLIC_KEY=\"${{ secrets.VITE_EMAILJS_PUBLIC_KEY }}\"" >> .env
+          echo "VITE_EMAILJS_SERVICE_ID=\"${{ secrets.VITE_EMAILJS_SERVICE_ID }}\"" >> .env
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -44,3 +50,4 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ICY_GLACIER_072826E0F }}
           action: "close"
+          app_location: "/" # App source code path

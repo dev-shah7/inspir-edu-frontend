@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -19,22 +19,19 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: '20.x'
 
       - name: npm install, build, and test
         run: |
           npm install
           npm run build --if-present
           npm run test --if-present
-
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
-
+      
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: release.zip
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
@@ -50,20 +47,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
-
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
       
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_DA80E7122BCD4F48B8C3A439074E3A15 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_DE59846A1FC540539EEB3942CFC9FE95 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_9B1A1EFB58BC44F9B51349609AD66756 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_A644E058B57045839F92BD988DAEA4A1 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_8E62CAB418494FA7BA41B8D482CAAC85 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0EA6BE4C4885453D811962763FBC3233 }}
 
       - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
+        id: deploy-to-webapp
         with:
           app-name: 'inspir-edu-frontend'
           slot-name: 'Production'

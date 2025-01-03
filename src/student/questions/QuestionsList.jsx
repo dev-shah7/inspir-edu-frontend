@@ -15,6 +15,7 @@ import useModuleStore from "../../admin/store/useModuleStore";
 import QuestionCounter from "../components/Question/QuestionCounter";
 import useCourseStore from "../store/useCourseStore";
 import { CourseEnrollmentStatus } from "../../helpers/enums";
+import { motion, AnimatePresence } from "framer-motion";
 
 const QuestionsList = () => {
   const navigate = useNavigate();
@@ -117,16 +118,35 @@ const QuestionsList = () => {
     }
   };
 
+  const slideVariants = {
+    enter: (direction) => ({
+      x: direction > 0 ? 100 : -100,
+      opacity: 0
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1
+    },
+    exit: (direction) => ({
+      zIndex: 0,
+      x: direction < 0 ? 100 : -100,
+      opacity: 0
+    })
+  };
+
+  const [direction, setDirection] = useState(0);
+
   const handleNext = () => {
     const currentQuestion = questions[currentIndex];
     const currentAnswer = formState[currentQuestion.id];
 
-    // Allow next if deadline crossed, otherwise check for answer
     if (currentCourse?.enrollmentStatus === CourseEnrollmentStatus.DeadlineCrossed ||
       (currentQuestion.type === QuestionType.MultiSelectMCQs && currentAnswer?.optionIds?.length > 0) ||
       ((currentQuestion.type === QuestionType.Short || currentQuestion.type === QuestionType.Long) && currentAnswer?.answer) ||
       currentAnswer?.optionId
     ) {
+      setDirection(1);
       setCurrentIndex((prev) => prev + 1);
     } else {
       toast.error("Please answer the question before proceeding.");
@@ -134,6 +154,7 @@ const QuestionsList = () => {
   };
 
   const handlePrevious = () => {
+    setDirection(-1);
     setCurrentIndex((prev) => Math.max(prev - 1, 0));
   };
 
@@ -147,92 +168,107 @@ const QuestionsList = () => {
     <>
       <QuestionCounter currentIndex={currentIndex}
         totalQuestions={questions.length} />
-      <div className="p-6 max-w-7xl mx-5 my-4 bg-light-bg rounded-lg shadow-md">
-        {currentQuestion && (
-          <div>
-            {currentQuestion.type === QuestionType.MCQs && (
-              <MCQ
-                courseStatus={currentCourse?.enrollmentStatus}
-                question={currentQuestion?.question}
-                options={currentQuestion?.questionOptions}
-                userAnswer={formState[currentQuestion.id]?.optionId} // Pass single selected option
-                submitted={moduleStatus == 2 || moduleStatus == 3}
-                onAnswerChange={(optionId) =>
-                  handleAnswerChange(currentQuestion.id, "", optionId) // Update with selected option ID
-                }
-              />
+      <div className="p-6 max-w-7xl mx-5 my-4 bg-light-bg rounded-lg shadow-md overflow-hidden">
+        <AnimatePresence initial={false} custom={direction} mode="wait">
+          <motion.div
+            key={currentIndex}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{
+              x: { type: "tween", duration: 0.2 },
+              opacity: { duration: 0.1 }
+            }}
+          >
+            {currentQuestion && (
+              <div>
+                {currentQuestion.type === QuestionType.MCQs && (
+                  <MCQ
+                    courseStatus={currentCourse?.enrollmentStatus}
+                    question={currentQuestion?.question}
+                    options={currentQuestion?.questionOptions}
+                    userAnswer={formState[currentQuestion.id]?.optionId} // Pass single selected option
+                    submitted={moduleStatus == 2 || moduleStatus == 3}
+                    onAnswerChange={(optionId) =>
+                      handleAnswerChange(currentQuestion.id, "", optionId) // Update with selected option ID
+                    }
+                  />
+                )}
+                {currentQuestion.type === QuestionType.TrueFalse && (
+                  <TrueFalseQuestion
+                    courseStatus={currentCourse?.enrollmentStatus}
+                    question={currentQuestion.question}
+                    options={currentQuestion.questionOptions}
+                    userAnswer={formState[currentQuestion.id]?.optionId}
+                    submitted={moduleStatus == 2 || moduleStatus == 3}
+                    onAnswerChange={(optionId) =>
+                      handleAnswerChange(currentQuestion.id, "", optionId)
+                    }
+                  />
+                )}
+                {currentQuestion.type === QuestionType.YesNo && (
+                  <YesNoQuestion
+                    courseStatus={currentCourse?.enrollmentStatus}
+                    question={currentQuestion.question}
+                    options={currentQuestion.questionOptions}
+                    userAnswer={formState[currentQuestion.id]?.optionId}
+                    submitted={moduleStatus == 2 || moduleStatus == 3}
+                    onAnswerChange={(optionId) =>
+                      handleAnswerChange(currentQuestion.id, "", optionId)
+                    }
+                  />
+                )}
+                {currentQuestion.type === QuestionType.Short && (
+                  <ShortQuestion
+                    courseStatus={currentCourse?.enrollmentStatus}
+                    question={currentQuestion.question}
+                    placeholder="Type your answer..."
+                    userAnswer={formState[currentQuestion.id]?.answer}
+                    submitted={moduleStatus == 2 || moduleStatus == 3}
+                    correctAnswer={currentQuestion.correctAnswer}
+                    onAnswerChange={(value) =>
+                      handleAnswerChange(currentQuestion.id, value, null)
+                    }
+                  />
+                )}
+                {currentQuestion.type === QuestionType.Long && (
+                  <LongQuestion
+                    courseStatus={currentCourse?.enrollmentStatus}
+                    question={currentQuestion.question}
+                    placeholder="Type your detailed answer..."
+                    userAnswer={formState[currentQuestion.id]?.answer}
+                    submitted={moduleStatus == 2 || moduleStatus == 3}
+                    correctAnswer={currentQuestion.correctAnswer}
+                    onAnswerChange={(value) =>
+                      handleAnswerChange(currentQuestion.id, value, null)
+                    }
+                  />
+                )}
+                {currentQuestion.type === QuestionType.MultiSelectMCQs && (
+                  <MultipleSelection
+                    courseStatus={currentCourse?.enrollmentStatus}
+                    question={currentQuestion.question}
+                    options={currentQuestion.questionOptions}
+                    userAnswers={formState[currentQuestion.id]?.optionIds || []} // Pass selected option IDs
+                    submitted={moduleStatus == 2 || moduleStatus == 3}
+                    onAnswerChange={(optionId, isChecked) =>
+                      handleAnswerChange(
+                        currentQuestion.id,
+                        null,
+                        null,
+                        isChecked
+                          ? [...(formState[currentQuestion.id]?.optionIds || []), optionId]
+                          : formState[currentQuestion.id]?.optionIds.filter((id) => id !== optionId)
+                      )
+                    }
+                  />
+                )}
+              </div>
             )}
-            {currentQuestion.type === QuestionType.TrueFalse && (
-              <TrueFalseQuestion
-                courseStatus={currentCourse?.enrollmentStatus}
-                question={currentQuestion.question}
-                options={currentQuestion.questionOptions}
-                userAnswer={formState[currentQuestion.id]?.optionId}
-                submitted={moduleStatus == 2 || moduleStatus == 3}
-                onAnswerChange={(optionId) =>
-                  handleAnswerChange(currentQuestion.id, "", optionId)
-                }
-              />
-            )}
-            {currentQuestion.type === QuestionType.YesNo && (
-              <YesNoQuestion
-                courseStatus={currentCourse?.enrollmentStatus}
-                question={currentQuestion.question}
-                options={currentQuestion.questionOptions}
-                userAnswer={formState[currentQuestion.id]?.optionId}
-                submitted={moduleStatus == 2 || moduleStatus == 3}
-                onAnswerChange={(optionId) =>
-                  handleAnswerChange(currentQuestion.id, "", optionId)
-                }
-              />
-            )}
-            {currentQuestion.type === QuestionType.Short && (
-              <ShortQuestion
-                courseStatus={currentCourse?.enrollmentStatus}
-                question={currentQuestion.question}
-                placeholder="Type your answer..."
-                userAnswer={formState[currentQuestion.id]?.answer}
-                submitted={moduleStatus == 2 || moduleStatus == 3}
-                correctAnswer={currentQuestion.correctAnswer}
-                onAnswerChange={(value) =>
-                  handleAnswerChange(currentQuestion.id, value, null)
-                }
-              />
-            )}
-            {currentQuestion.type === QuestionType.Long && (
-              <LongQuestion
-                courseStatus={currentCourse?.enrollmentStatus}
-                question={currentQuestion.question}
-                placeholder="Type your detailed answer..."
-                userAnswer={formState[currentQuestion.id]?.answer}
-                submitted={moduleStatus == 2 || moduleStatus == 3}
-                correctAnswer={currentQuestion.correctAnswer}
-                onAnswerChange={(value) =>
-                  handleAnswerChange(currentQuestion.id, value, null)
-                }
-              />
-            )}
-            {currentQuestion.type === QuestionType.MultiSelectMCQs && (
-              <MultipleSelection
-                courseStatus={currentCourse?.enrollmentStatus}
-                question={currentQuestion.question}
-                options={currentQuestion.questionOptions}
-                userAnswers={formState[currentQuestion.id]?.optionIds || []} // Pass selected option IDs
-                submitted={moduleStatus == 2 || moduleStatus == 3}
-                onAnswerChange={(optionId, isChecked) =>
-                  handleAnswerChange(
-                    currentQuestion.id,
-                    null,
-                    null,
-                    isChecked
-                      ? [...(formState[currentQuestion.id]?.optionIds || []), optionId]
-                      : formState[currentQuestion.id]?.optionIds.filter((id) => id !== optionId)
-                  )
-                }
-              />
-            )}
-          </div>
-        )}
+          </motion.div>
+        </AnimatePresence>
 
         <div className="flex justify-between mt-6">
           {currentIndex > 0 && ( // Hide Previous button if it's the first question

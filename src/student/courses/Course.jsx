@@ -85,7 +85,7 @@ const Course = ({ course, status }) => {
 
         <div className="p-6 flex flex-col justify-between">
           <h4 className="mb-2 text-white text-xl font-bold">{course.name}</h4>
-          <p className="mb-6 text-white text-lg leading-relaxed font-light line-clamp-4">
+          <p className="mb-6 text-white text-lg leading-relaxed font-light line-clamp-2 w-full">
             {course.description}
           </p>
           <div className="flex flex-wrap gap-x-3 gap-y-2 mb-4">
@@ -96,7 +96,7 @@ const Course = ({ course, status }) => {
               {CourseType[course.type]} Type
             </div>
             <div
-              className={`rounded-full py-1 px-3 text-xs sm:text-sm text-white font-medium shadow-md ${course.isDeadlineBase ? "bg-red-500" : "bg-gray-400"
+              className={`rounded-full py-1 px-2 text-xs sm:text-sm text-white font-medium shadow-md ${course.isDeadlineBase ? "bg-red-500" : "bg-gray-400"
                 }`}
             >
               {course.isDeadlineBase ? "Deadline-Based" : "No Deadline"}

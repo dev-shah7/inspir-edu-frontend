@@ -5,10 +5,19 @@ import useModuleStore from '../../admin/store/useModuleStore';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import Loader from "../../components/common/Loader/Loader";
+import useCourseStore from "../store/useCourseStore";
 
 const Module = ({ module, position, isPreviousModuleCompleted }) => {
   const navigate = useNavigate();
   const { startUserModule, isLoading } = useModuleStore();
+  const { currentCourse } = useCourseStore();
+
+  const calculateProgress = () => {
+    const moduleAnalytics = currentCourse.userModules[position]?.analytics;
+    if (!moduleAnalytics || !moduleAnalytics.totalQuestions) return 0;
+
+    return Math.round((moduleAnalytics.totalAttempted / moduleAnalytics.totalQuestions) * 100);
+  };
 
   const handleStartModule = async () => {
     if (module.status === 0) {
@@ -68,23 +77,15 @@ const Module = ({ module, position, isPreviousModuleCompleted }) => {
       </div>
 
       {/* Progress Bars Section */}
-      {/* <div className="flex flex-col items-center gap-6 mt-4 md:mt-0">
-        <div className="w-auto">
+      <div className="flex flex-col items-center gap-6 mt-4 md:mt-0">
+        <div className="w-auto mt-5">
           <ProgressBar
             label="Overall Progress"
-            percentage={60}
+            percentage={calculateProgress()}
             color="bg-button-blue"
           />
         </div>
-
-        <div className="w-full sm:w-auto">
-          <ProgressBar
-            label="Quiz Test"
-            percentage={70}
-            color="bg-red-500"
-          />
-        </div>
-      </div> */}
+      </div>
 
       {/* Right Section */}
       <div className="mt-4 md:mt-0 text-center w-full sm:w-auto">

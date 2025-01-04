@@ -1,14 +1,15 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import ReactCompiler from "babel-plugin-react-compiler";
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react({
-      babel: {
-        plugins: [ReactCompiler],
-      },
-    }),
-  ],
+  plugins: [react()],
+  build: {
+    outDir: "dist",
+    sourcemap: false,
+    chunkSizeWarningLimit: 1600,
+  },
+  server: {
+    port: 3000,
+  },
 });

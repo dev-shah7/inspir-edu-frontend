@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import useAuthStore from "../store/auth/useAuthStore";
 
 const PrivateRoute = ({ roleRequired }) => {
-  const { isAuthenticated, activeRole, isLoading } = useAuthStore();
+  const { isAuthenticated, user, activeRole, isLoading } = useAuthStore();
 
   if (isLoading) {
     return null;
@@ -13,8 +13,18 @@ const PrivateRoute = ({ roleRequired }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (roleRequired && activeRole !== roleRequired ) {
-    return <Navigate to="/unauthorized" replace />;
+  const hasRequiredRole = user?.roles
+    .map((role) => role.toLowerCase())
+    .includes(roleRequired.toLowerCase());
+
+  if (roleRequired && !hasRequiredRole) {
+    return <Navigate to={`/${activeRole}`} replace />;
+  }
+
+  if (roleRequired.toLowerCase() !== activeRole) {
+    if (hasRequiredRole) {
+      useAuthStore.getState().switchRole(roleRequired);
+    }
   }
 
   return <Outlet />;

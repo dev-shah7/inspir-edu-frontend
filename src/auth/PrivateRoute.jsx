@@ -3,14 +3,18 @@ import PropTypes from "prop-types";
 import useAuthStore from "../store/auth/useAuthStore";
 
 const PrivateRoute = ({ roleRequired }) => {
-  const { isAuthenticated, userRole } = useAuthStore();
+  const { isAuthenticated, activeRole, isLoading } = useAuthStore();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+  if (isLoading) {
+    return null;
   }
 
-  if (roleRequired && userRole !== roleRequired) {
-    return <Navigate to="/unauthorized" />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (roleRequired && activeRole !== roleRequired ) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return <Outlet />;

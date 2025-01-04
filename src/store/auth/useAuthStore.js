@@ -23,6 +23,7 @@ const useAuthStore = create(
       token: null,
       isAuthenticated: false,
       userRole: null,
+      activeRole: null,
       companyDetails: null,
       subscriptionPlans: [],
       isLoading: false,
@@ -83,23 +84,27 @@ const useAuthStore = create(
               data.companyId
             );
             const companyData = companyResponse.data.data;
+            const initialRole = data.roles[0].toLowerCase();
 
             set({
               user: userData,
               token: token,
               isLoading: false,
               isAuthenticated: true,
-              userRole: data.roles[0].toLowerCase(),
+              userRole: initialRole,
+              activeRole: initialRole,
               companyDetails: companyData,
             });
           } catch (companyError) {
             console.error("Failed to fetch company details:", companyError);
+            const initialRole = data.roles[0].toLowerCase();
             set({
               user: userData,
               token: token,
               isLoading: false,
               isAuthenticated: true,
-              userRole: data.roles[0].toLowerCase(),
+              userRole: initialRole,
+              activeRole: initialRole,
             });
           }
 
@@ -161,6 +166,7 @@ const useAuthStore = create(
           token: null,
           isAuthenticated: false,
           userRole: null,
+          activeRole: null,
           companyDetails: null,
           isLoading: false,
           error: null,
@@ -201,6 +207,26 @@ const useAuthStore = create(
           });
           throw error;
         }
+      },
+
+      switchRole: (newRole) => {
+        const lowerCaseRole = newRole.toLowerCase();
+        set((state) => ({
+          ...state,
+          isLoading: true,
+          activeRole: lowerCaseRole,
+        }));
+        
+        // Ensure loading state persists long enough for navigation
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            set((state) => ({
+              ...state,
+              isLoading: false
+            }));
+            resolve(lowerCaseRole);
+          }, 100);
+        });
       },
     }),
     {

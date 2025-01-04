@@ -9,6 +9,13 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  VITE_API_BASE_URL: ${{ env.VITE_API_BASE_URL }}
+  VITE_API_TIMEOUT: ${{ env.VITE_API_TIMEOUT }}
+  VITE_EMAILJS_PUBLIC_KEY: ${{ env.VITE_EMAILJS_PUBLIC_KEY }}
+  VITE_ENV_VAR2: ${{ env.VITE_ENV_VAR2 }}
+  VITE_EMAILJS_SERVICE_ID: ${{ env.VITE_EMAILJS_SERVICE_ID }}
+
 jobs:
   build:
     runs-on: windows-latest
@@ -24,13 +31,8 @@ jobs:
       - name: npm install and build
         run: |
           npm install
-          npm run build
-        env:
-          CI: false
-
-      - name: Copy web.config
-        run: |
-          copy web.config dist\web.config
+          npm run build --if-present
+          npm run test --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -66,4 +68,5 @@ jobs:
         with:
           app-name: "inspir-edu-frontend"
           slot-name: "Production"
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }} # Publish profile should always be stored as secrets in your repository Settings - Secrets and variables - Actions - secrets
           package: .

@@ -29,7 +29,7 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
     >
       <nav className="space-y-6">
         <button
-          onClick={() => handleNavigation("/")}
+            onClick={() => handleNavigation(userRole === "student" ? "/student" : "/")}
           className="flex items-center w-full space-x-3 p-3 rounded-xl hover:bg-blue-300/50 text-left font-medium text-gray-700 hover:text-gray-900 transition-all duration-200 text-lg"
         >
           <LuLayoutDashboard className="h-6 w-6 mr-2 text-blue-600" />

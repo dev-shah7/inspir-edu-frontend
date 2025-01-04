@@ -6,14 +6,26 @@ import useCourseStore from "../../../admin/store/useCourseStore";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaSignOutAlt } from "react-icons/fa";
 
-const Header = ({ isSidebarOpen, setSidebarOpen, userRole }) => {
+const Header = ({ isSidebarOpen, setSidebarOpen }) => {
   const logout = useAuthStore((state) => state.logout);
-  const clearCurrentCourse = useCourseStore(
-    (state) => state.clearCurrentCourse
-  );
+  const user = useAuthStore((state) => state.user);
+  const activeRole = useAuthStore((state) => state.activeRole);
+  const switchRole = useAuthStore((state) => state.switchRole);
+  const clearCurrentCourse = useCourseStore((state) => state.clearCurrentCourse);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+
+  const hasMultipleRoles = user?.roles?.length > 1;
+
+  const handleRoleSwitch = async () => {
+    const currentRole = activeRole;
+    const newRole = currentRole === "admin" ? "student" : "admin";
+    const updatedRole = await switchRole(newRole);
+    setIsDropdownOpen(false);
+    clearCurrentCourse();
+    navigate(updatedRole === "admin" ? "/admin" : "/student");
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -38,7 +50,7 @@ const Header = ({ isSidebarOpen, setSidebarOpen, userRole }) => {
 
   const handleSupport = () => {
     clearCurrentCourse();
-    if (userRole === "admin") {
+    if (activeRole === "admin") {
       navigate("/admin/support");
     } else {
       navigate("/student/support");
@@ -82,7 +94,7 @@ const Header = ({ isSidebarOpen, setSidebarOpen, userRole }) => {
 
         <div className="hidden md:flex items-center space-x-4">
           <span className="text-2xl flex items-center font-bold text-[#1A73E8]">
-            {userRole === "admin" ? "Admin Portal" : "Student Portal"}
+            {activeRole === "admin" ? "Admin Portal" : "Student Portal"}
             <span className="text-base font-medium text-gray-600 ml-3">
               | Welcome back
             </span>
@@ -90,7 +102,37 @@ const Header = ({ isSidebarOpen, setSidebarOpen, userRole }) => {
         </div>
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4 font-outfit">
+        {hasMultipleRoles && (
+          <>
+            <div className="relative inline-block">
+              <button 
+                onClick={handleRoleSwitch}
+                className="w-[200px] h-10 bg-white rounded-full p-1 cursor-pointer shadow-inner border border-[#1A73E8]/20 relative overflow-hidden"
+              >
+                <div 
+                  className={`absolute top-1 h-8 w-[96px] bg-[#1A73E8] rounded-full shadow-md transition-all duration-500 ease-in-out transform ${
+                    activeRole === "student" ? "translate-x-[96px]" : "translate-x-0"
+                  }`}
+                />
+                <div className="relative flex justify-between items-center h-full text-sm font-medium">
+                  <span className={`flex-1 text-center z-10 transition-colors duration-500 ease-in-out ${
+                    activeRole === "admin" ? "text-white" : "text-[#1A73E8]"
+                  }`}>
+                    Admin
+                  </span>
+                  <span className={`flex-1 text-center z-10 transition-colors duration-500 ease-in-out ${
+                    activeRole === "student" ? "text-white" : "text-[#1A73E8]"
+                  }`}>
+                    Student
+                  </span>
+                </div>
+              </button>
+            </div>
+            <div className="h-10 w-[1px] bg-[#1A73E8]"></div>
+          </>
+        )} 
+
         <button
           onClick={handleSupport}
           className="px-6 py-2.5 bg-white text-[#1A73E8] text-lg font-semibold rounded-lg hover:bg-[#1A73E8] hover:text-white transition-all duration-300 border-2 border-[#1A73E8] shadow-sm"
@@ -123,7 +165,7 @@ const Header = ({ isSidebarOpen, setSidebarOpen, userRole }) => {
 
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-20">
-              {userRole === "admin" && (
+              {activeRole === "admin" && (
                 <div
                   onClick={handleProfileClick}
                   className="flex items-center space-x-3 px-4 py-3 text-gray-800 hover:bg-gray-100 cursor-pointer"
@@ -146,7 +188,6 @@ const Header = ({ isSidebarOpen, setSidebarOpen, userRole }) => {
     </header>
   );
 };
-
 Header.propTypes = {
   isSidebarOpen: PropTypes.bool.isRequired,
   setSidebarOpen: PropTypes.func.isRequired,

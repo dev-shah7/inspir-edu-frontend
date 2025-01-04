@@ -39,64 +39,51 @@ const Module = ({ module, position, isPreviousModuleCompleted }) => {
 
   return (
     <div
-      className={`flex flex-col xl:flex-row items-center xl:justify-between sm:justify-center p-4 rounded-lg shadow-md bg-light-bg ${module.active ? "text-black" : "text-gray-400"
+      className={`flex flex-col xl:flex-row items-center justify-center p-4 rounded-lg shadow-md bg-light-bg ${module.active ? "text-black" : "text-gray-400"
         }`}
     >
-      <div className="flex flex-col sm:flex-row items-center sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
+      {/* Left Section - Module Info */}
+      <div className="flex flex-col sm:flex-row items-center justify-center sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full xl:w-1/3">
         <div
-          className={`rounded-lg p-3 flex items-center justify-center flex-col ${true ? "bg-gradient-blue text-black" : "bg-gray-200"
+          className={`rounded-lg p-3 flex items-center justify-center flex-col w-[100px] min-w-[100px] ${true ? "bg-gradient-blue text-black" : "bg-gray-200"
             }`}
         >
           <p className="text-lg">Module</p>
           <p className="text-4xl font-bold">{position + 1}</p>
         </div>
-        <div className="w-auto sm:w-auto">
+        <div className="w-full sm:w-[200px] text-center sm:text-left">
           <h4
-            className={`text-xl font-semibold ${true ? "text-slate-900" : "text-gray-400"
+            className={`text-xl font-semibold break-words hyphens-auto ${true ? "text-slate-900" : "text-gray-400"
               }`}
+            style={{ hyphens: 'auto' }}
           >
             {module.moduleName}
           </h4>
-          <div className="flex flex-wrap items-center justify-center xl:justify-start space-x-3 mt-1">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start space-x-3 mt-1">
             <span
-              className={`rounded-full px-3 py-1 text-lg font-medium ${true
-                ? "bg-button-green text-white"
-                : "bg-gray-200 text-gray-500"
+              className={`rounded-full px-3 py-1 text-lg font-medium ${true ? "bg-button-green text-white" : "bg-gray-200 text-gray-500"
                 }`}
             >
               {ModuleStatus[module.status]}
             </span>
-            {/* <span className="text-sm flex items-center">
-              <i className="mr-1">📄</i> {2} Assignments
-            </span>
-            <span className="text-sm flex items-center">
-              <i className="mr-1">📝</i> {3} Test
-            </span> */}
           </div>
         </div>
       </div>
 
-      {/* Progress Bars Section */}
-      <div className="flex flex-col items-center gap-6 mt-4 md:mt-0">
-        <div className="w-auto mt-5">
+      {/* Middle Section - Progress Bar */}
+      <div className="flex flex-col items-center justify-center w-full xl:w-1/3 mt-4 xl:mt-0">
+        <div className="w-full max-w-md mx-auto px-4 flex flex-col items-center mt-5">
           <ProgressBar
             label="Overall Progress"
             percentage={calculateProgress()}
             color="bg-button-blue"
+            className="w-full flex flex-col items-center"
           />
         </div>
       </div>
 
-      {/* Right Section */}
-      <div className="mt-4 md:mt-0 text-center w-full sm:w-auto">
-        {/* <span
-          className={`text-lg rounded-lg py-2 px-4 mx-4 ${true
-            ? "text-black bg-gradient-blue"
-            : "bg-gray-200 text-gray-400"
-            }`}
-        >
-          {"17 Nov - 23 Nov 2024"}
-        </span> */}
+      {/* Right Section - Button */}
+      <div className="mt-4 xl:mt-0 flex justify-center w-full xl:w-1/3">
         <button
           className={`px-12 py-2 rounded-md mt-1 text-xl font-semibold shadow-lg ${isPreviousModuleCompleted
             ? 'bg-button-blue text-white'
@@ -109,14 +96,8 @@ const Module = ({ module, position, isPreviousModuleCompleted }) => {
           {module.status === 1 && "Go To Module"}
           {(module.status === 2 || module.status === 3) && "View Module"}
         </button>
-        <br />
-        {/* {module.quizTestScore < 70 && (
-          <button className="mt-2 px-12 py-2 bg-red-100 text-red-500 rounded-md shadow-md font-medium">
-            Try Again
-          </button>
-        )} */}
       </div>
-    </div >
+    </div>
   );
 };
 

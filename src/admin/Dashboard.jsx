@@ -1,9 +1,11 @@
 import Card from "./common/Card/Card";
 import CreateCourseContent from "./courses/CreateCourseContent";
 import useModalStore from "./store/useModalStore";
+import useAuthStore from "../store/auth/useAuthStore";
 
 const Dashboard = () => {
   const { openModal } = useModalStore();
+  const { user } = useAuthStore();
 
   const handleAddCourse = () => {
     openModal("Create Course", <CreateCourseContent mode="add" />);
@@ -12,7 +14,7 @@ const Dashboard = () => {
   return (
     <>
       <h1 className="mt-6 text-4xl font-bold text-gray-800">
-        Hi, Syed Maaz Shah
+        Hi, {user?.name || "Admin"}
       </h1>
       <p className="text-xl text-gray-600 mt-2">
         Welcome to inspireEDU Dashboard

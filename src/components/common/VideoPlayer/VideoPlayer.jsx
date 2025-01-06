@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ReactPlayer from "react-player";
 
 const VideoPlayer = ({ videoUrl, posterUrl }) => {
@@ -10,6 +10,18 @@ const VideoPlayer = ({ videoUrl, posterUrl }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const playerRef = useRef(null);
   const containerRef = useRef(null);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -48,12 +60,10 @@ const VideoPlayer = ({ videoUrl, posterUrl }) => {
   };
 
   const toggleFullScreen = () => {
-    if (isFullScreen) {
+    if (document.fullscreenElement) {
       document.exitFullscreen();
-      setIsFullScreen(false);
     } else if (containerRef.current) {
       containerRef.current.requestFullscreen();
-      setIsFullScreen(true);
     }
   };
 

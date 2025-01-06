@@ -6,9 +6,9 @@ import { ResultStatus } from '../../helpers/enums';
 const CourseResult = () => {
   const { courseSubmissionResult } = useCourseStore();
 
-  if (courseSubmissionResult.status === ResultStatus.Pass) {
+  if (courseSubmissionResult?.status === ResultStatus.Pass) {
     return <CongratulationsBanner result={courseSubmissionResult} />;
-  } else if (courseSubmissionResult.status === ResultStatus.Fail) {
+  } else if (courseSubmissionResult?.status === ResultStatus.Fail) {
     return <FailedBanner result={courseSubmissionResult} />;
   }
 };

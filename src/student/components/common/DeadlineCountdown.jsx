@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const DeadlineCountdown = ({ course }) => {
+const DeadlineCountdown = ({ course, courseSubmissionResult }) => {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -9,32 +9,34 @@ const DeadlineCountdown = ({ course }) => {
   });
   const [isExpired, setIsExpired] = useState(false);
 
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date();
-      const endDate = course?.deadLineDate instanceof Date
-        ? course?.deadLineDate
-        : new Date(course?.deadLineDate + 'Z');
+  if (!course?.resultDetail && !courseSubmissionResult) {
+    useEffect(() => {
+      const calculateTimeLeft = () => {
+        const now = new Date();
+        const endDate = course?.deadLineDate instanceof Date
+          ? course?.deadLineDate
+          : new Date(course?.deadLineDate + 'Z');
 
-      const difference = endDate.getTime() - now.getTime();
+        const difference = endDate.getTime() - now.getTime();
 
-      if (difference > 0) {
-        setTimeLeft({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          minutes: Math.floor((difference / 1000 / 60) % 60),
-          seconds: Math.floor((difference / 1000) % 60),
-        });
-        setIsExpired(false);
-      } else {
-        setIsExpired(true);
-      }
-    };
+        if (difference > 0) {
+          setTimeLeft({
+            days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+            hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+            minutes: Math.floor((difference / 1000 / 60) % 60),
+            seconds: Math.floor((difference / 1000) % 60),
+          });
+          setIsExpired(false);
+        } else {
+          setIsExpired(true);
+        }
+      };
 
-    calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 1000);
-    return () => clearInterval(timer);
-  }, [course?.deadLineDate]);
+      calculateTimeLeft();
+      const timer = setInterval(calculateTimeLeft, 1000);
+      return () => clearInterval(timer);
+    }, [course?.deadLineDate]);
+  }
 
   const FlipCard = ({ value, label }) => (
     <div className='flex flex-col items-center mx-2'>
@@ -71,7 +73,7 @@ const DeadlineCountdown = ({ course }) => {
             Deadline Crossed
           </h1>
           <p className='text-lg mb-6 text-red-600'>
-            Please contact your instructor to resume the deadline
+            Please contact your instructor to restart the deadline
           </p>
         </>
       )}

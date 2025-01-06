@@ -8,7 +8,7 @@ import BackButton from "../../../components/common/BackButton/BackButton";
 import DeadlineCountdown from "../common/DeadlineCountdown";
 
 const CourseContent = ({ children, showNav = true }) => {
-    const { getEnrolledCourse, isLoading, currentCourse } = useCourseStore();
+    const { getEnrolledCourse, isLoading, currentCourse, courseSubmissionResult } = useCourseStore();
     const { courseId } = useParams();
 
     useEffect(() => {
@@ -35,7 +35,7 @@ const CourseContent = ({ children, showNav = true }) => {
             {showNav && <CourseNav />}
             {currentCourse?.deadLineDate && (
                 <div className='mb-6'>
-                    <DeadlineCountdown course={currentCourse} />
+                    <DeadlineCountdown course={currentCourse} courseSubmissionResult={courseSubmissionResult} />
                 </div>
             )}
             {isLoading ? <Loader /> : children}

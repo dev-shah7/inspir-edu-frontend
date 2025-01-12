@@ -216,13 +216,13 @@ const useAuthStore = create(
           isLoading: true,
           activeRole: lowerCaseRole,
         }));
-        
+
         // Ensure loading state persists long enough for navigation
         return new Promise((resolve) => {
           setTimeout(() => {
             set((state) => ({
               ...state,
-              isLoading: false
+              isLoading: false,
             }));
             resolve(lowerCaseRole);
           }, 100);

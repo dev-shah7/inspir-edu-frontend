@@ -95,6 +95,13 @@ export const sendPasswordResetEmail = async (userEmail, resetToken) => {
   }
 };
 
+export const sendPasswordResetSuccessEmail = async (email) => {
+  return sendTemplateEmail(emailConfig.templates.passwordResetSuccess, {
+    name: email,
+    user_email: email,
+  });
+};
+
 export const sendSupportEmail = async (formData) => {
   return sendTemplateEmail(emailConfig.templates.support, formData);
 };

@@ -1,5 +1,8 @@
 import api from "./axios";
-import { sendPasswordResetEmail } from "../emailjs/emailService";
+import {
+  sendPasswordResetEmail,
+  sendPasswordResetSuccessEmail,
+} from "../emailjs/emailService";
 
 export const authService = {
   signup: async (signupData) => {
@@ -60,6 +63,10 @@ export const authService = {
         email,
         newPassword,
       });
+
+      if (response.data) {
+        await sendPasswordResetSuccessEmail(email);
+      }
       return response.data;
     } catch (error) {
       if (error.response?.status === 400) {

@@ -12,6 +12,7 @@ export const emailConfig = {
     welcome: "template_welcome",
     completion: "template_completion",
     passwordReset: "template_ah250w3",
+    passwordResetSuccess: "template_88mxh0q",
     adminCourseInvitation: "template_8nkruxl",
     support: "template_qg8vkqk",
     invitationAlreadyRegistered: "template_v4dveuc",

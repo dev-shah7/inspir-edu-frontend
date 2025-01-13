@@ -3,14 +3,15 @@ import { useLocation } from "react-router-dom";
 import Course from "./Course";
 import useCourseStore from "../store/useCourseStore";
 import Loader from "../../components/common/Loader/Loader";
-import { UserCourseStatus } from "../../helpers/enums";
 
 const CourseList = () => {
   const location = useLocation();
-  const { courses, fetchStudentCourses, fetchEnrolledCourses, isLoading } =
+  const { courses, fetchStudentCourses, fetchEnrolledCourses, isLoading, clearCurrentCourse, clearSubmissionResult } =
     useCourseStore();
 
   useEffect(() => {
+    clearCurrentCourse();
+    clearSubmissionResult();
     if (location.pathname.includes("myCourses")) {
       fetchEnrolledCourses();
     } else {

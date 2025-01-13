@@ -6,11 +6,14 @@ import toast from "react-hot-toast";
 import useCourseStore from "../store/useCourseStore";
 import ConfirmationDialog from "../../components/common/ConfirmationDialog/DialogBox";
 import { useState } from "react";
+import { sendAdminCourseStartEmail, sendStudentCourseStartEmail } from "../../services/emailjs/emailService";
+import useAuthStore from "../../store/auth/useAuthStore";
 
 const Course = ({ course, status }) => {
   const navigate = useNavigate();
   const { enrollCourse } = useCourseStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { user } = useAuthStore();
 
   const handleCancel = () => {
     setIsDialogOpen(false);
@@ -22,6 +25,31 @@ const Course = ({ course, status }) => {
       await enrollCourse(course);
       toast.success("Course is enrolled successfully");
       navigate(`/student/courses/${course.id}/overview`);
+      try {
+        let templateAdminParams = {
+          to_admin_email: course?.createdByEmail,
+          course_admin_name: course?.createdByName,
+          user_name: user?.name,
+          course_title: course?.name,
+          user_email: user?.email,
+          course_start_date: new Date().toJSON().split('T')[0],
+          reply_to: course?.createdByEmail,
+        };
+
+        let templateStudentParams = {
+          user_email: user?.email,
+          user_name: user?.name,
+          course_title: course?.name,
+          course_start_date: new Date().toJSON().split('T')[0],
+        };
+
+        await Promise.all([
+          sendStudentCourseStartEmail(templateStudentParams),
+          sendAdminCourseStartEmail(templateAdminParams)
+        ]);
+      } catch (emailError) {
+        console.error("Failed to send notification emails:", emailError);
+      }
 
     } catch (error) {
       console.error("Failed to enroll in course:", error);

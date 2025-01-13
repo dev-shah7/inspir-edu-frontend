@@ -9,8 +9,9 @@ const DeadlineCountdown = ({ course, courseSubmissionResult }) => {
   });
   const [isExpired, setIsExpired] = useState(false);
 
-  if (!course?.resultDetail && !courseSubmissionResult) {
-    useEffect(() => {
+  useEffect(() => {
+    // Only run the logic if course?.resultDetail and courseSubmissionResult are falsy
+    if (!course?.resultDetail && !courseSubmissionResult) {
       const calculateTimeLeft = () => {
         const now = new Date();
         const endDate = course?.deadLineDate instanceof Date
@@ -32,11 +33,14 @@ const DeadlineCountdown = ({ course, courseSubmissionResult }) => {
         }
       };
 
-      calculateTimeLeft();
-      const timer = setInterval(calculateTimeLeft, 1000);
-      return () => clearInterval(timer);
-    }, [course?.deadLineDate]);
-  }
+      calculateTimeLeft();  // Calculate the initial time left
+      const timer = setInterval(calculateTimeLeft, 1000);  // Start the interval
+
+      return () => clearInterval(timer);  // Cleanup the interval on component unmount
+    }
+  }, [course?.deadLineDate, course?.resultDetail, courseSubmissionResult]);  // Add dependencies to rerun the effect when needed
+
+
 
   const FlipCard = ({ value, label }) => (
     <div className='flex flex-col items-center mx-2'>
@@ -59,21 +63,13 @@ const DeadlineCountdown = ({ course, courseSubmissionResult }) => {
 
   return (
     <div className='flex flex-col items-center justify-center p-8 bg-gray-100 rounded-xl shadow-md'>
-      {course?.resultDetail && (
-        <>
-          <p className='text-xl mb-6 text-yellow-600'>
-            You have successfully completed this course
-          </p>
-        </>
-      )}
-
       {isExpired && !course?.resultDetail && (
         <>
           <h1 className='text-4xl font-bold mb-2 text-red-600'>
             Deadline Crossed
           </h1>
           <p className='text-lg mb-6 text-red-600'>
-            Please contact your instructor to restart the deadline
+            Please contact your instructor to restart the deadline @{course?.createdByEmail}
           </p>
         </>
       )}

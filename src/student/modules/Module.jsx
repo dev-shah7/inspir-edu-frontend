@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import ProgressBar from "../components/common/ProgressBar";
-import { ModuleStatus } from "../../helpers/enums";
+import { CourseEnrollmentStatus, ModuleStatus } from "../../helpers/enums";
 import useModuleStore from '../../admin/store/useModuleStore';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -20,7 +20,7 @@ const Module = ({ module, position, isPreviousModuleCompleted }) => {
   };
 
   const handleStartModule = async () => {
-    if (module.status === 0) {
+    if (module.status === 0 && currentCourse?.enrollmentStatus !== CourseEnrollmentStatus.DeadlineCrossed) {
       try {
         await startUserModule(module.moduleId);
         navigate(`/student/modules/${module.moduleId}/media`);
@@ -92,9 +92,14 @@ const Module = ({ module, position, isPreviousModuleCompleted }) => {
           onClick={handleStartModule}
           disabled={!isPreviousModuleCompleted || isLoading}
         >
-          {module.status === 0 && "Start Module"}
-          {module.status === 1 && "Go To Module"}
-          {(module.status === 2 || module.status === 3) && "View Module"}
+          {currentCourse?.enrollmentStatus === CourseEnrollmentStatus.DeadlineCrossed
+            ? "View Module"
+            : module.status === 0
+              ? "Start Module"
+              : module.status === 1
+                ? "Go To Module"
+                : "View Module"
+          }
         </button>
       </div>
     </div>

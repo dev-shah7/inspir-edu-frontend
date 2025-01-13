@@ -5,42 +5,36 @@ import CourseNav from "./CourseNav";
 import Loader from "../../../components/common/Loader/Loader";
 import { useParams } from "react-router";
 import BackButton from "../../../components/common/BackButton/BackButton";
-import DeadlineCountdown from "../common/DeadlineCountdown";
 
 const CourseContent = ({ children, showNav = true }) => {
-    const { getEnrolledCourse, isLoading, currentCourse, courseSubmissionResult } = useCourseStore();
-    const { courseId } = useParams();
+  const { getEnrolledCourse, isLoading } = useCourseStore();
+  const { courseId } = useParams();
 
-    useEffect(() => {
+  useEffect(() => {
         if (courseId)
             fetchCourse(courseId);
-    }, [getEnrolledCourse, courseId]);
+  }, [getEnrolledCourse, courseId]);
 
-    const fetchCourse = async (id) => {
-        try {
-            await getEnrolledCourse(id);
-        } catch (error) {
+  const fetchCourse = async (id) => {
+    try {
+      await getEnrolledCourse(id);
+    } catch (error) {
             console.error("Failed to fetch enrolled course:", error);
-        }
-    };
-
-    if (isLoading) {
-        return <Loader />;
     }
+  };
 
-    return (
-        <>
-            <BackButton />
-            <CourseBreadCrumb />
-            {showNav && <CourseNav />}
-            {currentCourse?.deadLineDate && (
-                <div className='mb-6'>
-                    <DeadlineCountdown course={currentCourse} courseSubmissionResult={courseSubmissionResult} />
-                </div>
-            )}
-            {isLoading ? <Loader /> : children}
-        </>
-    );
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  return (
+    <>
+      <BackButton />
+      <CourseBreadCrumb />
+      {showNav && <CourseNav />}
+      {isLoading ? <Loader /> : children}
+    </>
+  );
 };
 
 export default CourseContent;

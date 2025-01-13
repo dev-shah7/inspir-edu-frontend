@@ -16,5 +16,9 @@ export const emailConfig = {
     adminCourseInvitation: "template_8nkruxl",
     support: "template_qg8vkqk",
     invitationAlreadyRegistered: "template_v4dveuc",
+    courseStartAdmin: 'template_92ukgyc',
+    courseStartStudent: 'template_rzftc67',
+    courseSubmissionStudent: 'template_fkf1hn7',
+    courseSubmissionAdmin: 'template_1kbox7n',
   },
 };

@@ -13,13 +13,7 @@ import DeadlineCountdown from '../components/common/DeadlineCountdown';
 const ModuleList = () => {
   const navigate = useNavigate();
   const { courseId } = useParams();
-  const {
-    currentCourse,
-    submitCourse,
-    isLoading,
-    getEnrolledCourse,
-    courseSubmissionResult,
-  } = useCourseStore();
+  const { currentCourse, submitCourse, isLoading, getEnrolledCourse, clearSubmissionResult, courseSubmissionResult } = useCourseStore();
 
   useEffect(() => {
     if (!currentCourse && courseId) {
@@ -75,7 +69,7 @@ const ModuleList = () => {
               percentage={Number(
                 (currentCourse?.analytics.totalCompleted /
                   currentCourse?.analytics.totalModules) *
-                  100
+                100
               ).toFixed(2)}
               color='bg-button-blue'
               showPercentage={true}
@@ -89,11 +83,11 @@ const ModuleList = () => {
               showPercentage={true}
             />
           </div>
-        {currentCourse?.enrollmentStatus !== CourseEnrollmentStatus.Completed ? (
+          {currentCourse?.enrollmentStatus !== CourseEnrollmentStatus.Completed ? (
             <>
               <button
-              className={`p-5 rounded-md mt-1 text-xl font-semibold shadow-lg ${areAllModulesCompleted() && currentCourse?.enrollmentStatus !== CourseEnrollmentStatus.DeadlineCrossed ? 'bg-button-blue text-white' : 'bg-gray-200 text-gray-400'
-                }`}
+                className={`p-5 rounded-md mt-1 text-xl font-semibold shadow-lg ${areAllModulesCompleted() && currentCourse?.enrollmentStatus !== CourseEnrollmentStatus.DeadlineCrossed ? 'bg-button-blue text-white' : 'bg-gray-200 text-gray-400'
+                  }`}
                 onClick={handleCourseSubmission}
                 disabled={!areAllModulesCompleted()}
               >
@@ -101,7 +95,7 @@ const ModuleList = () => {
               </button>
             </>
           ) : (
-          currentCourse?.resultDetail?.percentage && currentCourse?.enrollmentStatus === CourseEnrollmentStatus?.Completed && (
+            currentCourse?.resultDetail?.percentage && currentCourse?.enrollmentStatus === CourseEnrollmentStatus?.Completed && (
               <div className='w-auto xl:w-full'>
                 <ProgressBar
                   label='Achieved Percentage'
@@ -120,9 +114,9 @@ const ModuleList = () => {
 
         <div className='space-y-4'>
           {currentCourse?.userModules?.map((module, index) => (
-          <Module key={index} module={module} position={index} isPreviousModuleCompleted={
-            index === 0 || currentCourse?.userModules[index - 1]?.status === 2
-          } />
+            <Module key={index} module={module} position={index} isPreviousModuleCompleted={
+              index === 0 || currentCourse?.userModules[index - 1]?.status === 2
+            } />
           ))}
         </div>
       </div>

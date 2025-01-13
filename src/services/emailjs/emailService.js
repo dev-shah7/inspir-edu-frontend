@@ -71,11 +71,10 @@ export const sendAdminNotificationEmail = async (params) => {
 };
 
 export const sendPasswordResetEmail = async (userEmail, resetToken) => {
-  const resetLink = `${
-    window.location.origin
-  }/reset-password?token=${encodeURIComponent(
-    resetToken
-  )}&email=${encodeURIComponent(userEmail)}`;
+  const resetLink = `${window.location.origin
+    }/reset-password?token=${encodeURIComponent(
+      resetToken
+    )}&email=${encodeURIComponent(userEmail)}`;
 
   const templateParams = {
     user_email: userEmail,
@@ -104,4 +103,56 @@ export const sendPasswordResetSuccessEmail = async (email) => {
 
 export const sendSupportEmail = async (formData) => {
   return sendTemplateEmail(emailConfig.templates.support, formData);
+};
+
+export const sendAdminCourseStartEmail = async (templateParams) => {
+
+  try {
+    return sendTemplateEmail(
+      emailConfig.templates.courseStartAdmin,
+      templateParams
+    );
+  } catch (error) {
+    console.error("Error sending admin course start notification:", error);
+    throw new Error("Failed to send admin course start notification");
+  }
+};
+
+export const sendStudentCourseStartEmail = async (templateParams) => {
+
+  try {
+    return sendTemplateEmail(
+      emailConfig.templates.courseStartStudent,
+      templateParams
+    );
+  } catch (error) {
+    console.error("Error sending student course start notification:", error);
+    throw new Error("Failed to send student course start notification");
+  }
+};
+
+export const sendAdminCourseSubmissionEmail = async (templateParams) => {
+
+  try {
+    return sendTemplateEmail(
+      emailConfig.templates.courseSubmissionAdmin,
+      templateParams
+    );
+  } catch (error) {
+    console.error("Error sending admin course submission notification:", error);
+    throw new Error("Failed to send admin course submission notification");
+  }
+};
+
+export const sendStudentCourseSubmissionEmail = async (templateParams) => {
+
+  try {
+    return sendTemplateEmail(
+      emailConfig.templates.courseSubmissionStudent,
+      templateParams
+    );
+  } catch (error) {
+    console.error("Error sending student course submission notification:", error);
+    throw new Error("Failed to send student course submission notification");
+  }
 };

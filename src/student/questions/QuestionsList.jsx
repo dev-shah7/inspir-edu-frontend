@@ -16,6 +16,7 @@ import QuestionCounter from "../components/Question/QuestionCounter";
 import useCourseStore from "../store/useCourseStore";
 import { CourseEnrollmentStatus } from "../../helpers/enums";
 import { motion, AnimatePresence } from "framer-motion";
+import CurrentModuleMedia from "../modules/CurrentModuleMedia";
 
 const QuestionsList = () => {
   const navigate = useNavigate();
@@ -166,10 +167,15 @@ const QuestionsList = () => {
 
   return (
     <>
-      <QuestionCounter currentIndex={currentIndex}
-        totalQuestions={questions.length} />
-      <div className="p-6 max-w-7xl mx-5 my-4 bg-light-bg rounded-lg shadow-md overflow-hidden">
-        <AnimatePresence initial={false} custom={direction} mode="wait">
+      <div className='mb-8'>
+        <CurrentModuleMedia />
+      </div>
+      <QuestionCounter
+        currentIndex={currentIndex}
+        totalQuestions={questions.length}
+      />
+      <div className='p-6 max-w-7xl mx-5 my-4 bg-light-bg rounded-lg shadow-md overflow-hidden'>
+        <AnimatePresence initial={false} custom={direction} mode='wait'>
           <motion.div
             key={currentIndex}
             custom={direction}

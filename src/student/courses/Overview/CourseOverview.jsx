@@ -1,3 +1,4 @@
+import DeadlineCountdown from "../../components/common/DeadlineCountdown";
 import useCourseStore from "../../store/useCourseStore";
 import CourseGrading from "./CourseGrading";
 import CourseHeading from "./CourseHeading";
@@ -7,22 +8,32 @@ import CourseIntro from "./CourseIntro";
 import CourseUserInfo from "./CourseUserInfo";
 
 const CourseOverview = () => {
-  const { currentCourse } = useCourseStore();
+  const { currentCourse, courseSubmissionResult } = useCourseStore();
   return (
-    <div className="bg-light-bg text-black rounded-lg shadow-md p-4 sm:p-8 mx-2 sm:mx-4 my-6 overflow-y-auto overflow-x-hidden h-[80vh]">
-      <CourseHeading
-        name={currentCourse?.courseName}
-        companyName={currentCourse?.companyName}
-      />
-      {/* <CourseIntro description={currentCourse?.description} /> */}
-      <CourseInstructions text={currentCourse?.instructions} />
-      <CourseGrading passingPercentage={currentCourse?.passingPercentage} />
-      <hr />
+    <>
+      {currentCourse?.deadLineDate && !currentCourse.resultDetail && (
+        <div className='mb-6'>
+          <DeadlineCountdown
+            course={currentCourse}
+            courseSubmissionResult={courseSubmissionResult}
+          />
+        </div>
+      )}
+            <div className='bg-light-bg text-black rounded-lg shadow-md p-4 sm:p-8 mx-2 sm:mx-4 my-6 overflow-y-auto overflow-x-hidden h-[80vh]'>
+        <CourseHeading
+          name={currentCourse?.courseName}
+          companyName={currentCourse?.companyName}
+        />
+        {/* <CourseIntro description={currentCourse?.description} /> */}
+        <CourseInstructions text={currentCourse?.instructions} />
+        <CourseGrading passingPercentage={currentCourse?.passingPercentage} />
+        <hr />
       <div className="mx-auto w-full px-2 sm:px-4 mb-8">
-        <CourseUserInfo />
-        <CourseInfoTable />
+          <CourseUserInfo />
+          <CourseInfoTable />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -17,7 +17,7 @@ const MultipleSelection = ({
         {options?.map((option) => (
           <label
             key={option.id}
-            className={`flex items-center space-x-3 p-2 cursor-pointer rounded-lg ${submitted
+            className={`flex items-center space-x-3 p-6 cursor-pointer rounded-lg ${submitted
               ? userAnswers.includes(option.id)
                 ? option.isCorrect
                   ? "bg-green-100"
@@ -32,26 +32,32 @@ const MultipleSelection = ({
               }
             }}
           >
-            <input
-              type="checkbox"
-              className="form-checkbox h-5 w-5"
-              disabled={submitted || courseStatus === CourseEnrollmentStatus.DeadlineCrossed}
-              checked={userAnswers.includes(option.id)}
-              readOnly // Prevent direct edits
-            />
-            <span
-              className={`${submitted
-                ? option.isCorrect
-                  ? "text-button-green"
+            <div className="self-center flex-shrink-0">
+              <input
+                type="checkbox"
+                className="form-checkbox h-5 w-5"
+                disabled={submitted || courseStatus === CourseEnrollmentStatus.DeadlineCrossed}
+                checked={userAnswers.includes(option.id)}
+                readOnly
+              />
+            </div>
+            <div className="flex flex-1 gap-2">
+              <span
+                className={`leading-relaxed ${submitted
+                  ? option.isCorrect
+                    ? "text-button-green"
+                    : "text-gray-800"
                   : "text-gray-800"
-                : "text-gray-800"
-                }`}
-            >
-              {option.option}
-            </span>
-            {submitted && userAnswers?.includes(option.id) && (
-              option.isCorrect ? <CorrectTag /> : <IncorrectTag />
-            )}
+                  }`}
+              >
+                {option.option}
+              </span>
+              {submitted && userAnswers?.includes(option.id) && (
+                <div className="flex-shrink-0">
+                  {option.isCorrect ? <CorrectTag /> : <IncorrectTag />}
+                </div>
+              )}
+            </div>
           </label>
         ))}
       </div>

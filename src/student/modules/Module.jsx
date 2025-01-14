@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 import Loader from "../../components/common/Loader/Loader";
 import useCourseStore from "../store/useCourseStore";
 
-const Module = ({ module, position, isPreviousModuleCompleted }) => {
+const Module = ({ module, position, isPreviousModuleCompleted, courseId }) => {
   const navigate = useNavigate();
   const { startUserModule, isLoading } = useModuleStore();
   const { currentCourse } = useCourseStore();
@@ -29,7 +29,7 @@ const Module = ({ module, position, isPreviousModuleCompleted }) => {
       }
     }
     else {
-      navigate(`/student/modules/${module.moduleId}/media`);
+      navigate(`/student/${courseId}/modules/${module.moduleId}/media`);
     }
   };
 

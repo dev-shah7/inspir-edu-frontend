@@ -34,9 +34,9 @@ const StudentRoutes = () => {
               </CourseContent>
             }
           />
-          <Route path="modules/:moduleId/media" element={<ModuleMedia />} />
+          <Route path=":courseId/modules/:moduleId/media" element={<ModuleMedia />} />
           <Route
-            path="modules/:moduleId/questions"
+            path=":courseId/modules/:moduleId/questions"
             element={
               <CourseContent showNav={false}>
                 <QuestionsList />

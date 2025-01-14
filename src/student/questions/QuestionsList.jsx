@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
 import useQuestionStore from "../../admin/store/useQuestionStore";
 import Loader from "../../components/common/Loader/Loader";
@@ -22,18 +22,22 @@ const QuestionsList = () => {
   const navigate = useNavigate();
   const [formState, setFormState] = useState({});
   const [currentIndex, setCurrentIndex] = useState(0); // Track the current question index
-  const { moduleId } = useParams();
+  const { moduleId, courseId } = useParams();
   const { fetchQuestionsByModule, questions, isLoading } = useQuestionStore();
   const { saveAnswer, fetchAnswers, userAnswers, isFetchingAnswer } = useAnswerStore();
-  const { submitModule, currentModule, getModuleStatus, moduleStatus, isFetchingModule } = useModuleStore();
+  const { submitModule, currentModule, getModuleStatus, moduleStatus, isFetchingModule, fetchModuleById } = useModuleStore();
   const { currentCourse } = useCourseStore();
   const [loadingAnswers, setLoadingAnswers] = useState(false);
+  const questionRef = useRef(null);
 
   useEffect(() => {
     if (moduleId) {
       fetchAnswers(moduleId);
       fetchQuestionsByModule(moduleId);
       getModuleStatus(moduleId);
+      if (!currentModule) {
+        fetchModuleById(moduleId);
+      }
     }
   }, [moduleId]);
 
@@ -161,20 +165,32 @@ const QuestionsList = () => {
 
   const currentQuestion = questions[currentIndex];
 
+  const scrollToQuestion = () => {
+    questionRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   if (isLoading || isFetchingModule || isFetchingAnswer || loadingAnswers) {
     return <Loader />;
   };
 
   return (
     <>
-      <div className='mb-8'>
-        <CurrentModuleMedia />
+      <div>
+        <button
+          onClick={() => navigate(`/student/courses/${courseId}/modules`)}
+          className="bg-gray-800 text-white text-xl px-4 py-2 rounded-md m-5"
+        >
+          Back to Modules List
+        </button>
+        <div className='mb-8'>
+          <CurrentModuleMedia />
+        </div>
+        <QuestionCounter
+          currentIndex={currentIndex}
+          totalQuestions={questions.length}
+        />
       </div>
-      <QuestionCounter
-        currentIndex={currentIndex}
-        totalQuestions={questions.length}
-      />
-      <div className='p-6 max-w-7xl mx-5 my-4 bg-light-bg rounded-lg shadow-md overflow-hidden'>
+      <div ref={questionRef} className='p-6 max-w-7xl mx-5 my-4 bg-light-bg rounded-lg shadow-md overflow-hidden'>
         <AnimatePresence initial={false} custom={direction} mode='wait'>
           <motion.div
             key={currentIndex}
@@ -313,6 +329,34 @@ const QuestionsList = () => {
             </button>
           )}
         </div>
+      </div>
+
+      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2">
+        <button
+          onClick={scrollToQuestion}
+          className="bg-yellow-200 p-4 rounded-lg shadow-lg hover:bg-yellow-300 transition-colors"
+        >
+          <div className="text-md font-medium flex items-center gap-2">
+            Question {currentIndex + 1} of {questions.length}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 13l-7 7-7-7m14-8l-7 7-7-7"
+              />
+            </svg>
+          </div>
+          <div className="text-sm truncate max-w-[150px]">
+            {currentQuestion?.question}
+          </div>
+        </button>
       </div>
     </>
   );

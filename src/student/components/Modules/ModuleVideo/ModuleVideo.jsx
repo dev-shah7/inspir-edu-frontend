@@ -7,7 +7,7 @@ import playVideoPoster from "../../../../assets/play-thumbnail.jpg";
 import ModuleSidebar from '../ModuleSidebar/ModuleSidebar';
 import VideoPlayer from '../../../../components/common/VideoPlayer/VideoPlayer';
 
-const ModuleVideo = () => {
+const ModuleVideo = ({ courseId }) => {
   const { currentModule } = useModuleStore();
 
   const fallbackVideoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
@@ -21,6 +21,7 @@ const ModuleVideo = () => {
           isLiveClass={true}
           liveClassDates="17 Nov - 23 Nov 2024"
           description={currentModule?.data?.description}
+          courseId={courseId}
         />
       </div>
 

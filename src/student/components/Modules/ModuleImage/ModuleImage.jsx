@@ -6,7 +6,7 @@ import NextPrevActions from "../../../../components/common/NextPrevActions/NextP
 import ImageViewer from "../../../../components/common/ImageViewer/ImageViewer";
 import ModuleSidebar from '../ModuleSidebar/ModuleSidebar';
 
-const ModuleImage = () => {
+const ModuleImage = ({ courseId }) => {
   const { currentModule } = useModuleStore();
 
   return (
@@ -28,6 +28,7 @@ const ModuleImage = () => {
           isLiveClass={true}
           liveClassDates="17 Nov - 23 Nov 2024"
           description={currentModule?.data?.description}
+          courseId={courseId}
         />
       </div>
     </div>

@@ -10,7 +10,7 @@ const MCQ = ({ courseStatus, question, options, userAnswer, submitted, onAnswerC
         {options?.map((option) => (
           <label
             key={option.id}
-            className={`flex items-center space-x-3 p-2 cursor-pointer rounded-lg ${submitted
+            className={`flex items-center space-x-3 p-6 cursor-pointer rounded-lg ${submitted
               ? userAnswer === option.id
                 ? option.isCorrect
                   ? "bg-green-100"
@@ -20,31 +20,38 @@ const MCQ = ({ courseStatus, question, options, userAnswer, submitted, onAnswerC
               }`}
             onClick={(e) => {
               if (!submitted && courseStatus !== CourseEnrollmentStatus.DeadlineCrossed) {
-                e.preventDefault(); // Prevent default behavior
+                e.preventDefault();
                 onAnswerChange(option.id);
               }
             }}
-          // Trigger onAnswerChange only if not submitted
           >
-            <input
-              type="radio"
-              name={`mcq-${question}`}
-              className="form-radio h-5 w-5"
-              disabled={submitted || courseStatus === CourseEnrollmentStatus.DeadlineCrossed}
-              checked={userAnswer === option.id}
-              readOnly // Prevent input from being editable directly
-            />
-            <span
-              className={`${submitted
-                ? option.isCorrect
-                  ? "text-button-green"
+            <div className="self-center flex-shrink-0">
+              <input
+                type="radio"
+                name={`mcq-${question}`}
+                className="form-radio h-5 w-5"
+                disabled={submitted || courseStatus === CourseEnrollmentStatus.DeadlineCrossed}
+                checked={userAnswer === option.id}
+                readOnly
+              />
+            </div>
+            <div className="flex flex-1 gap-2">
+              <span
+                className={`leading-relaxed ${submitted
+                  ? option.isCorrect
+                    ? "text-button-green"
+                    : "text-gray-800"
                   : "text-gray-800"
-                : "text-gray-800"
-                }`}
-            >
-              {option.option}
-            </span>
-            {submitted && option.isCorrect && <CorrectTag />}
+                  }`}
+              >
+                {option.option}
+              </span>
+              {submitted && userAnswer === option.id && (
+                <div className="flex-shrink-0">
+                  {option.isCorrect ? <CorrectTag /> : <IncorrectTag />}
+                </div>
+              )}
+            </div>
           </label>
         ))}
       </div>

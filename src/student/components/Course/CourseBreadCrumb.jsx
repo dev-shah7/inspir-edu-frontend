@@ -20,7 +20,7 @@ const CourseBreadCrumb = () => {
   });
 
   return (
-    <nav className='text-gray-500 text-sm font-medium mb-6 mt-4 mx-4'>
+    <nav className='text-gray-500 text-md font-medium mb-6 mt-4 mx-4'>
       <ul className='flex items-center space-x-2'>
         {breadcrumbs.map((breadcrumb, idx) => (
           <li key={idx} className='flex items-center'>

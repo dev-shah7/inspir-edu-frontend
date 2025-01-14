@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import useModuleStore from "../../../../admin/store/useModuleStore";
 
-const ModuleSidebar = ({ isLiveClass = false, liveClassDates = "", description }) => {
+const ModuleSidebar = ({ isLiveClass = false, liveClassDates = "", description, courseId }) => {
   const navigate = useNavigate();
   const { currentModule } = useModuleStore();
 
@@ -16,7 +16,7 @@ const ModuleSidebar = ({ isLiveClass = false, liveClassDates = "", description }
         )}
         <span className="text-xs text-gray-600">{liveClassDates}</span> */}
         <button
-          onClick={() => navigate(`../modules/${currentModule?.data?.id}/questions`)}
+          onClick={() => navigate(`../${courseId}/modules/${currentModule?.data?.id}/questions`)}
           className="bg-green-700 hover:bg-green-800 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition-all text-xl"
         >
           Take Quiz

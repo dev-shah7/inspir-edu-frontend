@@ -7,7 +7,7 @@ import { useParams } from 'react-router';
 import Loader from '../../components/common/Loader/Loader';
 import BackButton from '../../components/common/BackButton/BackButton';
 const ModuleMedia = () => {
-  const { moduleId } = useParams();
+  const { moduleId, courseId } = useParams();
   const { fetchModuleById, isFetchingModule, currentModule } = useModuleStore();
 
   useEffect(() => {
@@ -23,9 +23,9 @@ const ModuleMedia = () => {
   return (
     <div>
       <BackButton />
-      {moduleType === 1 && <ModuleVideo />}
-      {moduleType === 2 && <ModulePdf />}
-      {moduleType === 3 && <ModuleImage />}
+      {moduleType === 1 && <ModuleVideo courseId={courseId} />}
+      {moduleType === 2 && <ModulePdf courseId={courseId} />}
+      {moduleType === 3 && <ModuleImage courseId={courseId} />}
     </div>
   );
 };

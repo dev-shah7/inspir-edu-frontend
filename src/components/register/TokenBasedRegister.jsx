@@ -9,12 +9,11 @@ import InputField from "../common/InputField/InputField";
 
 // Zod Validation Schema for User
 const userSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  phoneNumber: z.string().min(10, "Invalid phone number"),
-  address: z.string().min(5, "Address must be at least 5 characters"),
-  city: z.string().min(2, "City must be at least 2 characters"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase character"),
   terms: z
     .boolean()
     .refine((val) => val === true, "You must agree to the terms"),
@@ -28,10 +27,10 @@ const TokenBasedRegister = () => {
 
   const [invitationToken, setInvitationToken] = useState("");
   const [userFormData, setUserFormData] = useState({
-    name: "",
+    name: "InspirEDU",
     email: "",
     password: "",
-    phoneNumber: "",
+    phoneNumber: "0900786012",
     address: "",
     city: "",
     terms: false,
@@ -72,6 +71,7 @@ const TokenBasedRegister = () => {
     }
   };
 
+  console.log(errors, "fieldErrors");
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateUserDetails()) {
@@ -109,16 +109,6 @@ const TokenBasedRegister = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <InputField
-            type="text"
-            placeholder="Name *"
-            value={userFormData.name}
-            onChange={(e) =>
-              setUserFormData({ ...userFormData, name: e.target.value })
-            }
-            error={errors.name}
-            Icon={FiUser}
-          />
-          <InputField
             type="email"
             placeholder="Email address *"
             value={userFormData.email}
@@ -139,36 +129,7 @@ const TokenBasedRegister = () => {
             error={errors.password}
             Icon={FiLock}
           />
-          <InputField
-            type="tel"
-            placeholder="Phone Number *"
-            value={userFormData.phoneNumber}
-            onChange={(e) =>
-              setUserFormData({ ...userFormData, phoneNumber: e.target.value })
-            }
-            error={errors.phoneNumber}
-            Icon={FiPhone}
-          />
-          <InputField
-            type="text"
-            placeholder="Address *"
-            value={userFormData.address}
-            onChange={(e) =>
-              setUserFormData({ ...userFormData, address: e.target.value })
-            }
-            error={errors.address}
-            Icon={FiMapPin}
-          />
-          <InputField
-            type="text"
-            placeholder="City *"
-            value={userFormData.city}
-            onChange={(e) =>
-              setUserFormData({ ...userFormData, city: e.target.value })
-            }
-            error={errors.city}
-            Icon={FiMapPin}
-          />
+
           <div className="flex items-center text-sm text-gray-600">
             <input
               type="checkbox"

@@ -104,7 +104,7 @@ const Questions = () => {
     }
   };
 
-  const renderRow = (question) => (
+  const renderRow = (index, question) => (
     <>
       <tr className="hover:bg-gray-50 transition">
         <td className="py-3 px-4">{getQuestionTypeName(question.type)}</td>
@@ -171,11 +171,10 @@ const Questions = () => {
               </button>
               <button
                 onClick={handlePreviewClick}
-                className={`w-full lg:w-auto px-4 py-2 ${
-                  isPreviewMode
-                    ? "bg-gray-600"
-                    : "bg-blue-500 hover:bg-blue-600"
-                } text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring focus:ring-blue-300 transition flex items-center justify-center gap-2`}
+                className={`w-full lg:w-auto px-4 py-2 ${isPreviewMode
+                  ? "bg-gray-600"
+                  : "bg-blue-500 hover:bg-blue-600"
+                  } text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring focus:ring-blue-300 transition flex items-center justify-center gap-2`}
               >
                 <AiOutlineEye className="text-md" />
                 {isPreviewMode ? "Exit Preview" : "Question Preview"}
@@ -248,9 +247,6 @@ const Questions = () => {
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-120px)] px-4 md:px-6">
-      <p className="text-md text-gray-600 mb-4">
-        Courses / Modules / Questions
-      </p>
       {renderHeader()}
 
       <div className="flex-1 overflow-x-auto">{renderContent()}</div>

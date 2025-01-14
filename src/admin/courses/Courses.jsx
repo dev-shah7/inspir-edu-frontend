@@ -94,7 +94,7 @@ const Courses = () => {
     { label: "Action", align: "center" },
   ];
 
-  const renderRow = (course) => (
+  const renderRow = (index, course) => (
     <>
       <tr className="hover:bg-gray-50 transition">
         <td className="py-3 px-2 md:px-4">{course.name}</td>
@@ -173,7 +173,6 @@ const Courses = () => {
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-120px)] px-4 md:px-6">
-      <p className="text-lg text-gray-600 mb-4">Courses</p>
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 mb-6">
         <div className="flex-1">
           <h1 className="text-2xl md:text-4xl font-bold text-gray-800">
@@ -241,11 +240,10 @@ const Courses = () => {
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`text-sm md:text-base text-blue-500 font-medium ${
-              currentPage === 1
-                ? "text-gray-400 cursor-not-allowed"
-                : "hover:text-blue-700"
-            }`}
+            className={`text-sm md:text-base text-blue-500 font-medium ${currentPage === 1
+              ? "text-gray-400 cursor-not-allowed"
+              : "hover:text-blue-700"
+              }`}
           >
             <IoIosArrowBack size={20} />
           </button>
@@ -255,11 +253,10 @@ const Courses = () => {
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className={`text-sm md:text-base text-blue-500 font-medium ${
-              currentPage === totalPages
-                ? "text-gray-400 cursor-not-allowed"
-                : "hover:text-blue-700"
-            }`}
+            className={`text-sm md:text-base text-blue-500 font-medium ${currentPage === totalPages
+              ? "text-gray-400 cursor-not-allowed"
+              : "hover:text-blue-700"
+              }`}
           >
             <IoIosArrowForward size={20} />
           </button>

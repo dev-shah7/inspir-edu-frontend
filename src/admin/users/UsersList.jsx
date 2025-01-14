@@ -115,7 +115,7 @@ const UsersList = () => {
     { label: "Action", align: "center" },
   ];
 
-  const renderRow = (user) => (
+  const renderRow = (index, user) => (
     <>
       <tr className="hover:bg-gray-50 transition">
         <td className="py-3 px-4 sm:px-2">{user.name || "-"}</td>

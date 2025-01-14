@@ -16,8 +16,10 @@ const ModuleList = () => {
   const { currentCourse, submitCourse, isLoading, getEnrolledCourse, clearSubmissionResult, courseSubmissionResult } = useCourseStore();
 
   useEffect(() => {
-    getEnrolledCourse(courseId);
-  }, [getEnrolledCourse])
+    if (!currentCourse && courseId) {
+      getEnrolledCourse(courseId);
+    }
+  }, [getEnrolledCourse, currentCourse, courseId])
 
 
   const handleCourseSubmission = async () => {

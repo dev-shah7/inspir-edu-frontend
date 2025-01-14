@@ -26,7 +26,7 @@ const QuestionsList = () => {
   const { fetchQuestionsByModule, questions, isLoading } = useQuestionStore();
   const { saveAnswer, fetchAnswers, userAnswers, isFetchingAnswer } = useAnswerStore();
   const { submitModule, currentModule, getModuleStatus, moduleStatus, isFetchingModule, fetchModuleById } = useModuleStore();
-  const { currentCourse } = useCourseStore();
+  const { currentCourse, clearCurrentCourse } = useCourseStore();
   const [loadingAnswers, setLoadingAnswers] = useState(false);
   const questionRef = useRef(null);
 
@@ -73,7 +73,8 @@ const QuestionsList = () => {
     try {
       await submitModule(moduleId);
       toast.success("Your answers have been submitted!");
-      navigate(`/student/courses/${currentCourse?.courseId}/modules`);
+      clearCurrentCourse();
+      navigate(`/student/courses/${courseId}/modules`);
     } catch (error) {
       console.error("Error submitting the answers:", error);
       toast.error("Failed to submit your answers. Please try again.");
@@ -177,7 +178,10 @@ const QuestionsList = () => {
     <>
       <div>
         <button
-          onClick={() => navigate(`/student/courses/${courseId}/modules`)}
+          onClick={() => {
+            clearCurrentCourse();
+            navigate(`/student/courses/${courseId}/modules`)
+          }}
           className="bg-gray-800 text-white text-xl px-4 py-2 rounded-md m-5"
         >
           Back to Modules List

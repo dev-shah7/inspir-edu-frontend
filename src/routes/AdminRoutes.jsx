@@ -43,7 +43,7 @@ const AdminRoutes = () => {
             }
           />
           <Route
-            path="modules/:moduleId/questions"
+            path="courses/:courseId/modules/:moduleId/questions"
             element={
               <MainContent>
                 <Questions />

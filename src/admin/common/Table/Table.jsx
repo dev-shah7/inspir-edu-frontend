@@ -10,9 +10,8 @@ const Table = ({ headers, data, renderRow }) => {
             {headers.map((header, index) => (
               <th
                 key={index}
-                className={`py-2 px-3 ${
-                  header.align === "center" ? "text-center" : "text-left"
-                } font-outfit text-xl`}
+                className={`py-2 px-3 ${header.align === "center" ? "text-center" : "text-left"
+                  } font-outfit text-xl`}
               >
                 {header.label}
               </th>
@@ -21,7 +20,7 @@ const Table = ({ headers, data, renderRow }) => {
         </thead>
         <tbody>
           {data.map((item, index) => (
-            <React.Fragment key={index}>{renderRow(item)}</React.Fragment>
+            <React.Fragment key={index}>{renderRow(index, item)}</React.Fragment>
           ))}
         </tbody>
       </table>

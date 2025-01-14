@@ -87,17 +87,17 @@ const Modules = () => {
     { label: "Action", align: "center" },
   ];
 
-  const renderRow = (module) => (
+  const renderRow = (index, module) => (
     <>
       <tr className="hover:bg-gray-50 transition">
-        <td className="py-3 px-4 sm:px-2">{module.position}</td>
+        <td className="py-3 px-4 sm:px-2">{module.position || index + 1}</td>
         <td className="py-3 px-4 sm:px-2">{module.name || "-"}</td>
         <td className="py-3 px-4 sm:px-2 text-center">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 justify-center">
             <CustomButton
               text="View Questions"
               className="w-full sm:w-auto text-sm bg-custom-button-green hover:bg-green-700"
-              onClick={() => navigate(`/admin/modules/${module.id}/questions`)}
+              onClick={() => navigate(`/admin/courses/${courseId}/modules/${module.id}/questions`)}
             />
           </div>
         </td>
@@ -210,7 +210,6 @@ const Modules = () => {
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-120px)] px-4 md:px-6">
-      <p className="text-md text-gray-600 mb-4">Courses / Modules</p>
       {renderHeader()}
 
       <div className="w-full mt-4 mb-5">

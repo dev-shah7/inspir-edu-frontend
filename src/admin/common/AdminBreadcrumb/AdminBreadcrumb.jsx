@@ -1,26 +1,24 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
 
-const CourseBreadCrumb = () => {
+const AdminBreadCrumb = () => {
   const location = useLocation();
   const { courseId, moduleId } = useParams();
 
   const breadcrumbMap = {
-    '/student/myCourses': 'My Courses',
-    [`/student/courses/${courseId}/overview`]: 'Course Overview',
-    [`/student/courses/${courseId}/modules`]: 'Modules',
+    '/admin/courses': 'Courses',
+    [`/admin/courses/${courseId}/modules`]: 'Modules',
+    [`/admin/courses/${courseId}/modules/${moduleId}/questions`]: 'Questions',
   };
 
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const breadcrumbs = pathSegments.map((segment, index) => {
     const path = `/${pathSegments.slice(0, index + 1).join('/')}`;
-    if (breadcrumbMap[path] === 'My Courses' || path === '/student/courses') {
-      return { path: '/student/myCourses', label: 'My Courses' };
-    }
-    return { path, label: breadcrumbMap[path] };
-  });
+    const label = breadcrumbMap[path];
+    return label ? { path, label } : null;
+  }).filter(Boolean);
 
   return (
-    <nav className='text-gray-500 text-lg font-medium mb-6 mt-4 mx-4'>
+    <nav className='text-gray-500 text-xl font-medium mb-6 mt-4 mx-4'>
       <ul className='flex items-center space-x-2'>
         {breadcrumbs.map((breadcrumb, idx) => (
           <li key={idx} className='flex items-center'>
@@ -47,4 +45,4 @@ const CourseBreadCrumb = () => {
   );
 };
 
-export default CourseBreadCrumb;
+export default AdminBreadCrumb;

@@ -16,9 +16,7 @@ const ModuleList = () => {
   const { currentCourse, submitCourse, isLoading, getEnrolledCourse, clearSubmissionResult, courseSubmissionResult } = useCourseStore();
 
   useEffect(() => {
-    if (!currentCourse && courseId) {
-      getEnrolledCourse(courseId);
-    }
+    getEnrolledCourse(courseId);
   }, [getEnrolledCourse])
 
 

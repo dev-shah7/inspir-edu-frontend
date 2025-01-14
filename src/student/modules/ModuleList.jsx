@@ -116,7 +116,7 @@ const ModuleList = () => {
           {currentCourse?.userModules?.map((module, index) => (
             <Module key={index} module={module} position={index} isPreviousModuleCompleted={
               index === 0 || currentCourse?.userModules[index - 1]?.status === 2
-            } />
+            } courseId={courseId} />
           ))}
         </div>
       </div>

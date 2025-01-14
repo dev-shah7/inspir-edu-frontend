@@ -1,7 +1,5 @@
 const Score = ({ totalCorrectAnswers, totalQuestions, isFailed = false }) => {
-  const finalResult = totalCorrectAnswers
-    ? `${totalCorrectAnswers}/${totalQuestions}`
-    : 'N/A';
+  const finalResult = `${totalCorrectAnswers}/${totalQuestions}` || 'N/A';
 
   const textColorClass = isFailed ? 'text-red-600' : 'text-green-600';
 

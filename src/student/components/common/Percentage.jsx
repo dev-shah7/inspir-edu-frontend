@@ -9,7 +9,7 @@ const Percentage = ({ percentage, isFailed = false }) => {
       <div>
         <p className='text-md sm:text-lg text-gray-700'>Your Percentage</p>
         <p className={`text-xl sm:text-2xl font-bold ${textColorClass}`}>
-          {percentage ? `${percentage}%` : 'N/A'}
+          {`${percentage}%` || 'N/A'}
         </p>
       </div>
     </div>

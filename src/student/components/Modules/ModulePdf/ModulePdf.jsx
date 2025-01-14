@@ -4,7 +4,7 @@ import NextPrevActions from '../../../../components/common/NextPrevActions/NextP
 import PdfViewer from '../../../../components/common/PDFViewer/PDFViewer';
 import ModuleSidebar from '../ModuleSidebar/ModuleSidebar';
 
-const ModulePdf = () => {
+const ModulePdf = ({ courseId }) => {
   const { currentModule } = useModuleStore();
 
   const handleDownload = () => {
@@ -50,6 +50,7 @@ const ModulePdf = () => {
             isLiveClass={false}
             liveClassDates="17 Nov - 23 Nov 2024"
             description={currentModule?.data?.description}
+            courseId={courseId}
           />
         </div>
         <div className="h-[50vh] md:h-[70vh] lg:h-[750px] w-full">

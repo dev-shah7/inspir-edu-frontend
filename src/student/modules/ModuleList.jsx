@@ -25,7 +25,7 @@ const ModuleList = () => {
   const handleCourseSubmission = async () => {
     try {
       await submitCourse(currentCourse?.courseId);
-      navigate('/student/courses/result');
+      navigate(`/student/courses/${courseId}/result`);
     } catch (error) {
       console.error('Error submitting the course:', error);
       toast.error('Failed to submit the course. Please try again.');

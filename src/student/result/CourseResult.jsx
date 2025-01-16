@@ -5,13 +5,16 @@ import { ResultStatus } from '../../helpers/enums';
 import { useEffect } from 'react';
 import useAuthStore from '../../store/auth/useAuthStore';
 import { sendAdminCourseSubmissionEmail, sendStudentCourseSubmissionEmail } from '../../services/emailjs/emailService';
+import { useNavigate, useParams } from 'react-router';
 
 const CourseResult = () => {
-  const { currentCourse, courseSubmissionResult } = useCourseStore();
+  const navigate = useNavigate();
+  const { courseId } = useParams();
+  const { currentCourse, courseSubmissionResult, clearCurrentCourse } = useCourseStore();
   const { user } = useAuthStore();
 
   useEffect(() => {
-    if (courseSubmissionResult) {
+    if (courseSubmissionResult && user) {
       const message = `You have ${courseSubmissionResult.percentage >= currentCourse?.passingPercentage
         ? "successfully passed"
         : "failed"} the course. 
@@ -26,7 +29,7 @@ const CourseResult = () => {
       // Send emails without awaiting them
       Promise.all([
         sendAdminCourseSubmissionEmail({
-          from_name: "inspirEDU",
+          from_name: user?.name,
           to_admin_email: currentCourse?.createdByEmail,
           course_name: currentCourse?.courseName,
           to_name: currentCourse?.createdByName,
@@ -42,12 +45,38 @@ const CourseResult = () => {
         console.error('Error sending submission emails:', emailError);
       });
     }
-  }, [courseSubmissionResult])
+    else {
+      clearCurrentCourse();
+      navigate(`/student/courses/${courseId}/modules`)
+    }
+  }, [courseSubmissionResult]);
+
+  const renderBackButton = () => (
+    <button
+      onClick={() => {
+        clearCurrentCourse();
+        navigate(`/student/courses/${courseId}/modules`)
+      }}
+      className="bg-gray-800 text-white text-xl px-4 py-2 rounded-md m-5"
+    >
+      Back to Modules List
+    </button>
+  );
 
   if (courseSubmissionResult?.status === ResultStatus.Pass) {
-    return <CongratulationsBanner result={courseSubmissionResult} />;
+    return (
+      <>
+        {renderBackButton()}
+        <CongratulationsBanner result={courseSubmissionResult} />
+      </>
+    );
   } else if (courseSubmissionResult?.status === ResultStatus.Fail) {
-    return <FailedBanner result={courseSubmissionResult} />;
+    return (
+      <>
+        {renderBackButton()}
+        <FailedBanner result={courseSubmissionResult} />
+      </>
+    );
   }
 };
 

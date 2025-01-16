@@ -45,7 +45,7 @@ const StudentRoutes = () => {
           />
           {/* <Route path="courses/modules/dashboard" element={<ModulesDashboard />} /> */}
           <Route
-            path="courses/result"
+            path="courses/:courseId/result"
             element={
               <CourseContent showNav={false}>
                 <CourseResult />

@@ -29,7 +29,7 @@ const CourseResult = () => {
       // Send emails without awaiting them
       Promise.all([
         sendAdminCourseSubmissionEmail({
-          from_name: user?.name,
+          customer_name: user?.name,
           to_admin_email: currentCourse?.createdByEmail,
           course_name: currentCourse?.courseName,
           to_name: currentCourse?.createdByName,

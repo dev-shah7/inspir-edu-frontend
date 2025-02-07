@@ -89,7 +89,7 @@ const ModuleList = () => {
                 className={`p-5 rounded-md mt-1 text-xl font-semibold shadow-lg ${areAllModulesCompleted() && currentCourse?.enrollmentStatus !== CourseEnrollmentStatus.DeadlineCrossed ? 'bg-button-blue text-white' : 'bg-gray-200 text-gray-400'
                   }`}
                 onClick={handleCourseSubmission}
-                disabled={!areAllModulesCompleted()}
+                disabled={!areAllModulesCompleted() || currentCourse?.enrollmentStatus === CourseEnrollmentStatus.DeadlineCrossed}
               >
                 Submit Course
               </button>

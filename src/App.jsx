@@ -32,7 +32,6 @@ const App = () => {
       <Toaster position="top-right" />
       <Router>
         <Routes>
-          {/* Public Routes */}
           <Route
             path="/login"
             element={
@@ -40,7 +39,6 @@ const App = () => {
             }
           />
 
-          {/* Regular signup */}
           <Route
             path="/signup"
             element={
@@ -52,7 +50,6 @@ const App = () => {
             }
           />
 
-          {/* Token-based signup */}
           <Route
             path="/signup/:token"
             element={
@@ -64,7 +61,6 @@ const App = () => {
             }
           />
 
-          {/* Redirect Based on Role */}
           <Route
             path="/"
             element={

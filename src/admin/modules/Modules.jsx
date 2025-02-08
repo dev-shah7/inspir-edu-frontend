@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import { useState, useMemo, useEffect } from "react";
 import CustomButton from "../../components/common/CustomButton/CustomButton";
 import useModalStore from "../store/useModalStore";
@@ -11,6 +11,7 @@ import { IoMdAdd } from "react-icons/io";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import ModuleCard from "../common/ModuleCard/ModuleCard";
 import useCourseStore from "../store/useCourseStore";
+import { usePaymentStatusHandler } from "../../hooks/usePaymentStatusHandler";
 
 const Modules = () => {
   const { courseId } = useParams();
@@ -28,6 +29,8 @@ const Modules = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const { gradingInstructions, fetchGradingInstructions } = useCourseStore();
+
+  usePaymentStatusHandler();
 
   useEffect(() => {
     const loadModules = async () => {

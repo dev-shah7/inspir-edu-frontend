@@ -32,3 +32,9 @@ export const CourseEnrollmentStatus = {
   DeadlineCrossed: 2,
   Completed: 3,
 };
+
+export const PaymentStatus = {
+  Pending: 0,
+  Success: 1,
+  Failed: 2,
+};

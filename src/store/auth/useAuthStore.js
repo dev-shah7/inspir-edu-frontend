@@ -45,6 +45,21 @@ const useAuthStore = create(
           throw error;
         }
       },
+      
+      trialSignup: async (signupData) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await authService.signup(signupData);
+          set({ isLoading: false, error: null });
+          return response;
+        } catch (error) {
+          set({
+            error: error.response?.data?.message || "Signup failed",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
 
       tokenBasedSignup: async (signupData) => {
         set({ isLoading: true, error: null });

@@ -5,12 +5,17 @@ import GradingContent from "../Grading/GradingContent";
 import { courseService } from "../../services/api/courseService";
 import useCourseStore from "../store/useCourseStore";
 import { toast } from "react-hot-toast";
+import useAuthStore from "../../store/auth/useAuthStore";
+import UpdateSubscription from "../common/UpdateSubscription/UpdateSubscription";
 
 const CreateCourseContent = ({ mode = "add", courseId }) => {
   const { closeModal, queueModal } = useModalStore();
   const { saveCourse, fetchCourses } = useCourseStore();
+  const { user } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(mode === "edit");
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [showSubscriptionForm, setShowSubscriptionForm] = useState(false);
 
   const {
     register,
@@ -83,11 +88,28 @@ const CreateCourseContent = ({ mode = "add", courseId }) => {
       }
     } catch (error) {
       console.error("Error saving course:", error);
-      toast.error("Failed to save course");
+      if (error?.response?.data?.data?.subscriptionMissingOrUpgradeRequired) {
+        toast.error(error.response.data.message);
+        setShowSubscriptionForm(true);
+      } else {
+        toast.error("Failed to save course");
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (showSubscriptionForm) {
+    return (
+      <UpdateSubscription
+        isOpen={showSubscriptionForm}
+        onClose={() => setShowSubscriptionForm(false)}
+        selectedPlan={selectedPlan}
+        setSelectedPlan={setSelectedPlan}
+        userId={user?.id}
+      />
+    );
+  }
 
   if (isFetching) {
     return (

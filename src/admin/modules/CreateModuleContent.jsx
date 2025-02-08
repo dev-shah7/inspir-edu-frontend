@@ -4,9 +4,10 @@ import useModalStore from "../store/useModalStore";
 import useModuleStore from "../store/useModuleStore";
 import useCourseStore from "../store/useCourseStore";
 import { toast } from "react-hot-toast";
-import InputField from "../../components/common/InputField/InputField";
 import AddQuestionContent from "../questions/AddQuestionContent";
 import { useForm } from "react-hook-form";
+import useAuthStore from "../../store/auth/useAuthStore";
+import UpdateSubscription from '../common/UpdateSubscription/UpdateSubscription';
 
 const MediaPreview = ({ type, file, url }) => {
   if (!file && !url) return null;
@@ -92,6 +93,7 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
     isFetchingModule,
   } = useModuleStore();
   const { currentCourse } = useCourseStore();
+  const { user } = useAuthStore();
   const { courseId: courseIdFromParams } = useParams();
 
   const courseId = currentCourse || courseIdFromParams;
@@ -113,6 +115,8 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
 
   // Add state to track if we want to replace existing media
   const [replaceMedia, setReplaceMedia] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [showSubscriptionForm, setShowSubscriptionForm] = useState(false);
 
   const {
     register,
@@ -414,7 +418,14 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
       queueModal("Add Questions", <AddQuestionContent />);
       closeModal();
     } catch (error) {
-      toast.error(error.message || "Operation failed");
+      console.error("Error saving module:", error);
+      // Check for subscription limit error
+      if (error?.response?.data?.data?.subscriptionMissingOrUpgradeRequired) {
+        toast.error(error.response.data.message);
+        setShowSubscriptionForm(true);
+      } else {
+        toast.error("Failed to save course");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -464,6 +475,18 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
           </div>
         )}
       </div>
+    );
+  }
+
+  if (showSubscriptionForm) {
+    return (
+      <UpdateSubscription
+        isOpen={showSubscriptionForm}
+        onClose={() => setShowSubscriptionForm(false)}
+        selectedPlan={selectedPlan}
+        setSelectedPlan={setSelectedPlan}
+        userId={user?.id}
+      />
     );
   }
 

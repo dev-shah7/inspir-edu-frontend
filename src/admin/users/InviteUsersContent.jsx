@@ -13,6 +13,7 @@ import {
 import { courseService } from "../../services/api/courseService";
 import useCourseStore from "../store/useCourseStore";
 import useAuthStore from "../../store/auth/useAuthStore";
+import UpdateSubscription from "../common/UpdateSubscription/UpdateSubscription";
 
 const InviteUsersContent = ({ courseId, companyId, withCourse = false }) => {
   const { closeModal, queueModal } = useModalStore();
@@ -20,6 +21,8 @@ const InviteUsersContent = ({ courseId, companyId, withCourse = false }) => {
   const { user } = useAuthStore();
   const [emails, setEmails] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [showSubscriptionForm, setShowSubscriptionForm] = useState(false);
 
   const {
     register,
@@ -108,7 +111,13 @@ const InviteUsersContent = ({ courseId, companyId, withCourse = false }) => {
       }
       closeModal();
     } catch (error) {
-      toast.error(error.message || "Failed to send invitations");
+      console.error("Error inviting user:", error.message);
+      if (error?.response?.data?.data?.subscriptionMissingOrUpgradeRequired) {
+        toast.error(error.response.data.message);
+        setShowSubscriptionForm(true);
+      } else {
+        toast.error("Failed to send invitations");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -120,6 +129,18 @@ const InviteUsersContent = ({ courseId, companyId, withCourse = false }) => {
       handleAddEmail();
     }
   };
+
+  if (showSubscriptionForm) {
+    return (
+      <UpdateSubscription
+        isOpen={showSubscriptionForm}
+        onClose={() => setShowSubscriptionForm(false)}
+        selectedPlan={selectedPlan}
+        setSelectedPlan={setSelectedPlan}
+        userId={user?.id}
+      />
+    );
+  }
 
   return (
     <div className="p-6">

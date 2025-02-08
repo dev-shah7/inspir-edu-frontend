@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import { useState, useMemo, useEffect } from "react";
 import CustomButton from "../../components/common/CustomButton/CustomButton";
 import useModalStore from "../store/useModalStore";
@@ -11,6 +11,7 @@ import { IoMdAdd } from "react-icons/io";
 import { AiOutlineEye } from "react-icons/ai";
 import QuestionCard from "../../components/QuestionCard";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { usePaymentStatusHandler } from "../../hooks/usePaymentStatusHandler";
 
 const Questions = () => {
   const { moduleId } = useParams();
@@ -23,6 +24,8 @@ const Questions = () => {
   const [isOperationLoading, setIsOperationLoading] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  usePaymentStatusHandler();
 
   useEffect(() => {
     const loadQuestions = async () => {

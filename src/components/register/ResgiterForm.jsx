@@ -10,7 +10,7 @@ import {
   FiMapPin,
   FiPhone,
 } from "react-icons/fi";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import Stepper from "../common/Stepper/Stepper";
 import CompanyInfoForm from "./CompanyInfoForm";
 import SubscriptionPlanForm from "./SubscriptionPlanForm";
@@ -67,7 +67,8 @@ const RegisterForm = () => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [errors, setErrors] = useState({});
 
-  const { signup, isLoading, error } = useAuthStore();
+  const { trialSignup, isLoading, error } = useAuthStore();
+  const navigate = useNavigate();
 
   const validateStep = async (step) => {
     setErrors({}); // Clear previous errors
@@ -140,19 +141,21 @@ const RegisterForm = () => {
 
     const step1Valid = await validateStep(1);
     const step2Valid = await validateStep(2);
-    const step3Valid = await validateStep(3);
+    // const step3Valid = await validateStep(3);
 
-    if (step1Valid && step2Valid && step3Valid) {
+    if (step1Valid && step2Valid) {
       try {
         const finalData = {
           userDetail: userFormData,
           companyDetail: companyFormData,
-          subscriptionPlanId: selectedPlan,
-          successUrl: window.location.origin + "/login",
-          cancelUrl: window.location.origin + "/signup",
+          // subscriptionPlanId: selectedPlan,
+          // successUrl: window.location.origin + "/login",
+          // cancelUrl: window.location.origin + "/signup",
         };
 
-        await signup(finalData);
+        await trialSignup(finalData);
+        toast.success("Successfully signed up! Please login to continue.");
+        navigate("/login");
       } catch (error) {
         toast.error(
           error.response?.data?.message || "Signup failed. Please try again."
@@ -166,7 +169,7 @@ const RegisterForm = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    if (currentStep === 3) {
+    if (currentStep === 2) {
       await handleSubmit(e);
     } else {
       await handleNext();
@@ -265,20 +268,20 @@ const RegisterForm = () => {
             errors={errors}
           />
         );
-      case 3:
-        return (
-          <div className="w-full">
-            <SubscriptionPlanForm
-              selectedPlan={selectedPlan}
-              setSelectedPlan={setSelectedPlan}
-            />
-            {errors.plan && (
-              <p className="text-red-500 text-xs text-center mt-2">
-                {errors.plan}
-              </p>
-            )}
-          </div>
-        );
+      // case 3:
+      //   return (
+      //     <div className="w-full">
+      //       <SubscriptionPlanForm
+      //         selectedPlan={selectedPlan}
+      //         setSelectedPlan={setSelectedPlan}
+      //       />
+      //       {errors.plan && (
+      //         <p className="text-red-500 text-xs text-center mt-2">
+      //           {errors.plan}
+      //         </p>
+      //       )}
+      //     </div>
+      //   );
       default:
         return null;
     }
@@ -317,11 +320,11 @@ const RegisterForm = () => {
             )}
 
             <Button
-              text={currentStep === 3 ? "Complete Signup" : "Next"}
+              text={currentStep === 2 ? "Complete Signup" : "Next"}
               type="submit"
               disabled={isLoading}
               className={`px-6 py-2 ${
-                currentStep === 3
+                currentStep === 2
                   ? "bg-green-500 hover:bg-green-600"
                   : "bg-blue-500 hover:bg-blue-600"
               } text-white rounded-lg ${
@@ -330,7 +333,7 @@ const RegisterForm = () => {
             >
               {isLoading
                 ? "Loading..."
-                : currentStep === 3
+                : currentStep === 2
                 ? "Complete Signup"
                 : "Next"}
             </Button>

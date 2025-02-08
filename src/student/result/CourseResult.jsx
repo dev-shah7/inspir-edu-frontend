@@ -21,15 +21,15 @@ const CourseResult = () => {
         You answered ${courseSubmissionResult.totalCorrectAnswers} out of ${courseSubmissionResult.totalQuestions
         } questions correctly and secured ${courseSubmissionResult.percentage}%.`;
 
-      const adminMessage = `${user?.name} has ${courseSubmissionResult.percentage >= currentCourse?.passingPercentage
+      const adminMessage = `${user?.email} has ${courseSubmissionResult.percentage >= currentCourse?.passingPercentage
         ? "successfully passed"
-        : "failed"} the course and ${user?.name} answered ${courseSubmissionResult.totalCorrectAnswers} out of ${courseSubmissionResult.totalQuestions
+        : "failed"} the course and ${user?.email} answered ${courseSubmissionResult.totalCorrectAnswers} out of ${courseSubmissionResult.totalQuestions
         } questions correctly and secured ${courseSubmissionResult.percentage}%.`;
 
       // Send emails without awaiting them
       Promise.all([
         sendAdminCourseSubmissionEmail({
-          customer_name: user?.name,
+          customer_email: user?.email,
           to_admin_email: currentCourse?.createdByEmail,
           course_name: currentCourse?.courseName,
           to_name: currentCourse?.createdByName,

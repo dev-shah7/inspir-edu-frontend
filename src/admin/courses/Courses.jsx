@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import CustomButton from "../../components/common/CustomButton/CustomButton";
 import useModalStore from "../store/useModalStore";
 import Table from "../common/Table/Table";
@@ -10,6 +10,7 @@ import { toast } from "react-hot-toast";
 import { IoIosArrowBack, IoIosArrowForward, IoMdAdd } from "react-icons/io";
 import InviteUsersContent from "../users/InviteUsersContent";
 import CourseUsersContent from "./CourseUsersContent";
+import { usePaymentStatusHandler } from '../../hooks/usePaymentStatusHandler';
 
 const Courses = () => {
   const navigate = useNavigate();
@@ -21,6 +22,8 @@ const Courses = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
 
+  usePaymentStatusHandler();
+  
   useEffect(() => {
     const loadCourses = async () => {
       try {

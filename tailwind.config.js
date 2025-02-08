@@ -36,6 +36,15 @@ export default {
         "card-blue-gradient":
           "linear-gradient(90deg, #95C3FF 0%, #929FF5 100%)",
       },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(-10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' }
+        }
+      },
+      animation: {
+        fadeIn: 'fadeIn 0.3s ease-out'
+      }
     },
   },
   plugins: [],

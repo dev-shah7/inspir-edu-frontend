@@ -78,4 +78,21 @@ export const authService = {
       throw new Error("Failed to reset password");
     }
   },
+
+  updatePaymentStatus: async (sessionId, status, userId, isNewSubscription) => {
+    try {
+      const response = await api.post("/Auth/update-payment-status", {
+        sessionId,
+        status,
+        userId,
+        isNewSubscription
+      });
+      return response.data;
+    } catch (error) {
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw new Error("Failed to update payment status");
+    }
+  },
 };

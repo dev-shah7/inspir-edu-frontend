@@ -79,11 +79,10 @@ export const authService = {
     }
   },
 
-  updatePaymentStatus: async (sessionId, status, userId, isNewSubscription) => {
+  updatePaymentStatus: async (sessionId, userId, isNewSubscription) => {
     try {
       const response = await api.post("/Auth/update-payment-status", {
         sessionId,
-        status,
         userId,
         isNewSubscription
       });

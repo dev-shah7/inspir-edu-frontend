@@ -3,7 +3,7 @@ import React from "react";
 const Stepper = ({ currentStep }) => {
   const steps = [
     { number: 1, title: "User Details" },
-    { number: 2, title: "Company Info" },
+    // { number: 2, title: "Company Info" },
     // { number: 3, title: "Subscription" },
   ];
 

@@ -239,11 +239,10 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
                     setReplaceMedia(true);
                   }
                 }}
-                className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${
-                  selectedType === value
+                className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${selectedType === value
                     ? "border-blue-500 bg-blue-50"
                     : "border-gray-300 bg-gray-100 opacity-50"
-                } hover:shadow-md transition`}
+                  } hover:shadow-md transition`}
               >
                 <img
                   src={`https://cdn-icons-png.flaticon.com/512/${icon}.png`}
@@ -282,22 +281,20 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
               <button
                 type="button"
                 onClick={() => setMediaInputType("upload")}
-                className={`px-4 py-2 border rounded-lg ${
-                  mediaInputType === "upload"
+                className={`px-4 py-2 border rounded-lg ${mediaInputType === "upload"
                     ? "border-blue-500 bg-blue-50 text-blue-700"
                     : "border-gray-300 bg-gray-100 text-gray-700"
-                } hover:shadow-md transition`}
+                  } hover:shadow-md transition`}
               >
                 Upload {selectedType}
               </button>
               <button
                 type="button"
                 onClick={() => setMediaInputType("url")}
-                className={`px-4 py-2 border rounded-lg ${
-                  mediaInputType === "url"
+                className={`px-4 py-2 border rounded-lg ${mediaInputType === "url"
                     ? "border-blue-500 bg-blue-50 text-blue-700"
                     : "border-gray-300 bg-gray-100 text-gray-700"
-                } hover:shadow-md transition`}
+                  } hover:shadow-md transition`}
               >
                 {selectedType} URL
               </button>
@@ -315,8 +312,8 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
                     selectedType === "Image"
                       ? "image/*"
                       : selectedType === "Video"
-                      ? "video/*"
-                      : ".pdf"
+                        ? "video/*"
+                        : ".pdf"
                   }
                   className="w-full p-2 border rounded-md focus:outline-none"
                 />
@@ -445,6 +442,18 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
     }
   };
 
+  if (showSubscriptionForm) {
+    return (
+      <UpdateSubscription
+        isOpen={showSubscriptionForm}
+        onClose={() => setShowSubscriptionForm(false)}
+        selectedPlan={selectedPlan}
+        setSelectedPlan={setSelectedPlan}
+        userId={user?.id}
+      />
+    );
+  }
+
   if (isFetchingModule) {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
@@ -478,18 +487,6 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
     );
   }
 
-  if (showSubscriptionForm) {
-    return (
-      <UpdateSubscription
-        isOpen={showSubscriptionForm}
-        onClose={() => setShowSubscriptionForm(false)}
-        selectedPlan={selectedPlan}
-        setSelectedPlan={setSelectedPlan}
-        userId={user?.id}
-      />
-    );
-  }
-
   return (
     <div className="my-2">
       <form onSubmit={handleSubmit} className="space-y-6 px-16">
@@ -511,9 +508,8 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
             {...register("name", {
               required: "Module name is required",
             })}
-            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-              errors.moduleName ? "border-red-500" : ""
-            }`}
+            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 ${errors.moduleName ? "border-red-500" : ""
+              }`}
             placeholder="Enter module name"
             onChange={(e) => {
               handleInputChange(e);

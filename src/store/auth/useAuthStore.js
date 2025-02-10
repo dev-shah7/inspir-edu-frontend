@@ -49,9 +49,50 @@ const useAuthStore = create(
       trialSignup: async (signupData) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await authService.signup(signupData);
+          const { data } = await authService.signup(signupData);
           set({ isLoading: false, error: null });
-          return response;
+
+          const userData = {
+            id: data.id,
+            name: data.name,
+            email: data.email,
+            phoneNumber: data.phoneNumber,
+            companyId: data.companyId,
+            roles: data.roles,
+          };
+
+          const token = data.token;
+          localStorage.setItem("token", token);
+
+          try {
+            const companyResponse = await companyService.getCompanyDetails(
+              data.companyId
+            );
+            const companyData = companyResponse.data.data;
+            const initialRole = data.roles[0].toLowerCase();
+            set({
+              user: userData,
+              token: token,
+              isLoading: false,
+              isAuthenticated: true,
+              userRole: initialRole,
+              activeRole: initialRole,
+              companyDetails: companyData,
+            });
+          } catch (companyError) {
+            console.error("Failed to fetch company details:", companyError);
+            const initialRole = data.roles[0].toLowerCase();
+            set({
+              user: userData,
+              token: token,
+              isLoading: false,
+              isAuthenticated: true,
+              userRole: initialRole,
+              activeRole: initialRole,
+            });
+          }
+
+          return data;
         } catch (error) {
           set({
             error: error.response?.data?.message || "Signup failed",

@@ -27,7 +27,6 @@ export const usePaymentStatusHandler = () => {
       try {
         const response = await authService.updatePaymentStatus(
           sessionId,
-          PaymentStatus.Success,
           userId,
           isNewSubscription === 'True'
         );
@@ -40,7 +39,6 @@ export const usePaymentStatusHandler = () => {
       } catch (error) {
         await authService.updatePaymentStatus(
           sessionId,
-          PaymentStatus.Failed,
           userId,
           isNewSubscription === 'True'
         );

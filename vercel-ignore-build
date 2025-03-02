@@ -7,5 +7,14 @@ rm -f package-lock.json
 echo "Installing dependencies"
 npm install
 
-echo "Building project"
-npm run build 
+echo "Building project with Vite..."
+npm run build
+
+# Check if build was successful and dist directory exists
+if [ -d "dist" ]; then
+  echo "Build successful - dist directory created"
+  exit 0
+else
+  echo "Build failed - no dist directory found"
+  exit 1
+fi 

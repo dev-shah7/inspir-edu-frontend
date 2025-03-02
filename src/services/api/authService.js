@@ -16,12 +16,8 @@ export const authService = {
   },
 
   getSubscriptionPlans: async () => {
-    try {
-      const response = await api.get("/Auth/all-subscription-plans");
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await api.get("/Auth/all-subscription-plans");
+    return response.data;
   },
 
   login: async (credentials) => {
@@ -84,7 +80,7 @@ export const authService = {
       const response = await api.post("/Auth/update-payment-status", {
         sessionId,
         userId,
-        isNewSubscription
+        isNewSubscription,
       });
       return response.data;
     } catch (error) {

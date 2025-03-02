@@ -11,8 +11,9 @@
       "use": "@vercel/static-build",
       "config": {
         "zeroConfig": true,
-        "clearCache": true
+        "distDir": "dist"
       }
     }
-  ]
+  ],
+  "outputDirectory": "dist"
 }

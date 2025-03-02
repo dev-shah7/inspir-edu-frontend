@@ -1,20 +1,22 @@
 #!/bin/bash
 
-echo "Removing node_modules and package-lock.json"
+echo "Cleaning up previous build artifacts..."
+rm -rf dist
 rm -rf node_modules
 rm -f package-lock.json
 
-echo "Installing dependencies"
+echo "Installing dependencies..."
 npm install
 
 echo "Building project with Vite..."
 npm run build
 
 # Check if build was successful and dist directory exists
-if [ -d "dist" ]; then
-  echo "Build successful - dist directory created"
+if [ -d "dist" ] && [ -f "dist/index.html" ]; then
+  echo "Build successful - dist directory created with index.html"
   exit 0
 else
-  echo "Build failed - no dist directory found"
+  echo "Build failed - dist directory or index.html not found"
+  ls -la dist || echo "dist directory does not exist"
   exit 1
 fi 

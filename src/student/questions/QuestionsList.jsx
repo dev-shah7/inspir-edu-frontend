@@ -170,6 +170,26 @@ const QuestionsList = () => {
     questionRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Add this new function to check if all questions are answered
+  const areAllQuestionsAnswered = () => {
+    if (!questions || !formState) return false;
+    
+    return questions.every(question => {
+      const answer = formState[question.id];
+      if (!answer) return false;
+
+      switch (question.type) {
+        case QuestionType.MultiSelectMCQs:
+          return answer.optionIds?.length > 0;
+        case QuestionType.Short:
+        case QuestionType.Long:
+          return !!answer.answer?.trim();
+        default:
+          return !!answer.optionId;
+      }
+    });
+  };
+
   if (isLoading || isFetchingModule || isFetchingAnswer || loadingAnswers) {
     return <Loader />;
   };
@@ -307,12 +327,15 @@ const QuestionsList = () => {
           )}
           {currentIndex === questions.length - 1 ? (
             (moduleStatus == 0 || moduleStatus == 1) &&
-              currentCourse?.enrollmentStatus !== CourseEnrollmentStatus.DeadlineCrossed ? (
+            currentCourse?.enrollmentStatus !== CourseEnrollmentStatus.DeadlineCrossed ? (
               <button
                 onClick={handleSubmit}
-                className="bg-green-500 text-white text-xl px-4 py-2 rounded-md"
+                disabled={!areAllQuestionsAnswered()}
+                className={`text-white text-xl px-4 py-2 rounded-md ${
+                  areAllQuestionsAnswered() ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-400 cursor-not-allowed'
+                }`}
               >
-                Submit
+                {areAllQuestionsAnswered() ? 'Submit' : 'Answer All Questions to Submit'}
               </button>
             ) : (
               <button

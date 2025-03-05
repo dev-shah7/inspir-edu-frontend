@@ -29,7 +29,7 @@ const Course = ({ course, status }) => {
         let templateAdminParams = {
           to_admin_email: course?.createdByEmail,
           course_admin_name: course?.createdByName,
-          user_name: user?.name,
+          user_name: user?.email,
           course_title: course?.name,
           user_email: user?.email,
           course_start_date: new Date().toJSON().split('T')[0],
@@ -38,7 +38,7 @@ const Course = ({ course, status }) => {
 
         let templateStudentParams = {
           user_email: user?.email,
-          user_name: user?.name,
+          user_name: user?.email,
           course_title: course?.name,
           course_start_date: new Date().toJSON().split('T')[0],
         };

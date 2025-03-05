@@ -13,7 +13,7 @@ const userSchema = z.object({
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase character"),
+    .regex(/[A-Z]/, "Password must contain at least one capital letter"),
   terms: z
     .boolean()
     .refine((val) => val === true, "You must agree to the terms"),
@@ -121,7 +121,7 @@ const TokenBasedRegister = () => {
           />
           <InputField
             type="password"
-            placeholder="Password * (at least 8 characters)"
+            placeholder="Password * (min 8 chars, 1 capital letter)"
             value={userFormData.password}
             onChange={(e) =>
               setUserFormData({ ...userFormData, password: e.target.value })

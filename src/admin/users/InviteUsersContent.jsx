@@ -78,6 +78,7 @@ const InviteUsersContent = ({ courseId, companyId, withCourse = false }) => {
             // Send email to already registered user with correct parameters
             await sendInvitationEmailToAlreadyRegistered({
               from_name: user?.name || "Course Admin",
+              to_name: studentEmail,
               course_name: courseDetails.name,
               user_email: studentEmail,
             });

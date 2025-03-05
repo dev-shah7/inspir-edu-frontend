@@ -515,7 +515,7 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
               handleInputChange(e);
               setValue("moduleName", e.target.value);
             }}
-            value={formData.moduleName}
+            value={formData.moduleName || formData.name}
           />
           {errors.moduleName && (
             <p className="text-sm text-red-500 mt-1">

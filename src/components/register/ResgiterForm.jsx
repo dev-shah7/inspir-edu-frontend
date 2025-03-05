@@ -24,7 +24,10 @@ import { LuUser } from "react-icons/lu";
 const userSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one capital letter"),
   // phoneNumber: z.string().min(10, "Invalid phone number"),
   // address: z.string().min(5, "Address must be at least 5 characters"),
   // city: z.string().min(2, "City must be at least 2 characters"),
@@ -201,7 +204,7 @@ const RegisterForm = () => {
       />
       <InputField
         type="password"
-        placeholder="Password * (at least 8 characters)"
+        placeholder="Password * (min 8 chars, 1 capital letter)"
         value={userFormData.password}
         onChange={(e) =>
           setUserFormData({ ...userFormData, password: e.target.value })

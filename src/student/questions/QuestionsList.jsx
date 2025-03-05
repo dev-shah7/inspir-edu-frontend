@@ -215,6 +215,9 @@ const QuestionsList = () => {
         />
       </div>
       <div ref={questionRef} className='p-6 max-w-7xl mx-5 my-4 bg-light-bg rounded-lg shadow-md overflow-hidden'>
+      {!areAllQuestionsAnswered() && (
+        <p className="text-red-500 text-sm mb-4">*Answer All Questions to enable submission</p>
+      )}
         <AnimatePresence initial={false} custom={direction} mode='wait'>
           <motion.div
             key={currentIndex}

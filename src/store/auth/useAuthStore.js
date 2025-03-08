@@ -187,7 +187,7 @@ const useAuthStore = create(
       },
 
       fetchSubscriptionPlans: async () => {
-        set({ isLoading: true });
+        // set({ isLoading: true });
         try {
           const response = await authService.getSubscriptionPlans();
           const { data } = response;

@@ -17,10 +17,10 @@ const SubscriptionPlanForm = ({ selectedPlan, setSelectedPlan }) => {
   };
 
   useEffect(() => {
-    if (!subscriptionPlans || subscriptionPlans.length === 0) {
+    // if (!subscriptionPlans || subscriptionPlans.length === 0) {
       fetchPlans();
-    }
-  }, [subscriptionPlans, fetchPlans]);
+    // }
+  }, []);
 
   const togglePlan = (planId) => {
     setExpandedPlan(expandedPlan === planId ? null : planId);
@@ -41,7 +41,7 @@ const SubscriptionPlanForm = ({ selectedPlan, setSelectedPlan }) => {
         <Loader />
       ) : (
         <div className="space-y-6">
-          {subscriptionPlans.map((plan) => (
+          {subscriptionPlans?.map((plan) => (
             <div 
               key={plan.id} 
               className="border rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"

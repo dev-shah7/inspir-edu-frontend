@@ -27,10 +27,10 @@ const userSchema = z.object({
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one capital letter"),
-  // phoneNumber: z.string().min(10, "Invalid phone number"),
-  // address: z.string().min(5, "Address must be at least 5 characters"),
-  // city: z.string().min(2, "City must be at least 2 characters"),
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   terms: z
     .boolean()
     .refine((val) => val === true, "You must agree to the terms"),
@@ -202,16 +202,28 @@ const RegisterForm = () => {
         error={errors.email}
         icon={MdOutlineEmail}
       />
-      <InputField
-        type="password"
-        placeholder="Password * (min 8 chars, 1 capital letter)"
-        value={userFormData.password}
-        onChange={(e) =>
-          setUserFormData({ ...userFormData, password: e.target.value })
-        }
-        error={errors.password}
-        icon={FiLock}
-      />
+      <div className="space-y-2">
+        <InputField
+          type="password"
+          placeholder="Password *"
+          value={userFormData.password}
+          onChange={(e) =>
+            setUserFormData({ ...userFormData, password: e.target.value })
+          }
+          error={errors.password}
+          icon={FiLock}
+        />
+        <div className="text-sm text-bold pl-1">
+          Password must contain:
+          <ul className="list-disc pl-4 mt-1">
+            <li>At least 8 characters</li>
+            <li>One uppercase letter</li>
+            <li>One lowercase letter</li>
+            <li>One number</li>
+            <li>One special character</li>
+          </ul>
+        </div>
+      </div>
       {/* <InputField
         type="tel"
         placeholder="Phone Number *"

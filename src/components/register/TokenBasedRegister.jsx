@@ -7,13 +7,16 @@ import Button from "../common/Button/Button";
 import useAuthStore from "../../store/auth/useAuthStore";
 import InputField from "../common/InputField/InputField";
 
-// Zod Validation Schema for User
+// Updated Zod Validation Schema for User
 const userSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one capital letter"),
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   terms: z
     .boolean()
     .refine((val) => val === true, "You must agree to the terms"),
@@ -119,16 +122,28 @@ const TokenBasedRegister = () => {
             Icon={FiMail}
             disabled={true}
           />
-          <InputField
-            type="password"
-            placeholder="Password * (min 8 chars, 1 capital letter)"
-            value={userFormData.password}
-            onChange={(e) =>
-              setUserFormData({ ...userFormData, password: e.target.value })
-            }
-            error={errors.password}
-            Icon={FiLock}
-          />
+          <div className="space-y-2">
+            <InputField
+              type="password"
+              placeholder="Password *"
+              value={userFormData.password}
+              onChange={(e) =>
+                setUserFormData({ ...userFormData, password: e.target.value })
+              }
+              error={errors.password}
+              Icon={FiLock}
+            />
+            <div className="text-sm text-bold space-y-1 ml-1">
+              <p>Password must contain:</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>At least 8 characters</li>
+                <li>One uppercase letter</li>
+                <li>One lowercase letter</li>
+                <li>One number</li>
+                <li>One special character</li>
+              </ul>
+            </div>
+          </div>
 
           <div className="flex items-center text-sm text-gray-600">
             <input

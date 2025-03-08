@@ -27,6 +27,7 @@ const useAuthStore = create(
       companyDetails: null,
       subscriptionPlans: [],
       isLoading: false,
+      plansLoading: false,
       error: null,
 
       signup: async (signupData) => {
@@ -187,7 +188,7 @@ const useAuthStore = create(
       },
 
       fetchSubscriptionPlans: async () => {
-        // set({ isLoading: true });
+        set({ plansLoading: true });
         try {
           const response = await authService.getSubscriptionPlans();
           const { data } = response;
@@ -199,7 +200,7 @@ const useAuthStore = create(
 
           set({
             subscriptionPlans: mergedPlans,
-            isLoading: false,
+            plansLoading: false,
           });
 
           return response;
@@ -208,7 +209,7 @@ const useAuthStore = create(
             error:
               error.response?.data?.message ||
               "Failed to fetch subscription plans",
-            isLoading: false,
+            plansLoading: false,
           });
           throw error;
         }

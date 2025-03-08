@@ -5,7 +5,7 @@ import Loader from "../../components/common/Loader/Loader";
 
 const SubscriptionPlanForm = ({ selectedPlan, setSelectedPlan }) => {
   const [expandedPlan, setExpandedPlan] = useState(null);
-  const { fetchSubscriptionPlans, subscriptionPlans, isLoading, error } =
+  const { fetchSubscriptionPlans, subscriptionPlans, plansLoading, error } =
     useAuthStore();
 
   const fetchPlans = async () => {
@@ -37,8 +37,10 @@ const SubscriptionPlanForm = ({ selectedPlan, setSelectedPlan }) => {
         </p>
       </div>
 
-      {isLoading ? (
-        <Loader />
+      {plansLoading ? (
+        <div className="flex justify-center items-center h-32 overflow-hidden">
+          <Loader />
+        </div>
       ) : (
         <div className="space-y-6">
           {subscriptionPlans?.map((plan) => (

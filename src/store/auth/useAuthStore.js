@@ -46,7 +46,7 @@ const useAuthStore = create(
           throw error;
         }
       },
-      
+
       trialSignup: async (signupData) => {
         set({ isLoading: true, error: null });
         try {
@@ -168,8 +168,14 @@ const useAuthStore = create(
           return response;
         } catch (error) {
           set({
-            error: error.response?.data?.message || "Login failed",
             isLoading: false,
+            error: error.response?.data?.message || "Login failed",
+            user: null,
+            token: null,
+            isAuthenticated: false,
+            userRole: null,
+            activeRole: null,
+            companyDetails: null,
           });
           throw error;
         }
@@ -217,7 +223,6 @@ const useAuthStore = create(
 
       logout: () => {
         localStorage.clear();
-
         set({
           user: null,
           token: null,
@@ -285,10 +290,20 @@ const useAuthStore = create(
           }, 100);
         });
       },
+
+      resetLoadingState: () => {
+        set((state) => ({
+          ...state,
+          isLoading: false,
+        }));
+      },
     }),
     {
       name: "auth-storage",
       getStorage: () => localStorage,
+      onRehydrateStorage: () => (state) => {
+        state.isLoading = false;
+      },
     }
   )
 );

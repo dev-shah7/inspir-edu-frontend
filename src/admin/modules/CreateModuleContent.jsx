@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { useParams } from "react-router-dom";
 import useModalStore from "../store/useModalStore";
 import useModuleStore from "../store/useModuleStore";
@@ -7,9 +7,11 @@ import { toast } from "react-hot-toast";
 import AddQuestionContent from "../questions/AddQuestionContent";
 import { useForm } from "react-hook-form";
 import useAuthStore from "../../store/auth/useAuthStore";
-import UpdateSubscription from '../common/UpdateSubscription/UpdateSubscription';
+import UpdateSubscription from "../common/UpdateSubscription/UpdateSubscription";
+import PropTypes from "prop-types";
 
-const MediaPreview = ({ type, file, url }) => {
+// Memoize MediaPreview component
+const MediaPreview = memo(({ type, file, url }) => {
   if (!file && !url) return null;
 
   if (type === "Image") {
@@ -21,7 +23,7 @@ const MediaPreview = ({ type, file, url }) => {
           className="w-48 h-48 object-cover rounded-md mx-auto"
           onError={(e) => {
             e.target.onerror = null;
-            e.target.src = "path/to/fallback-image.png"; // Add your fallback image
+            e.target.src = "path/to/fallback-image.png";
           }}
         />
       </div>
@@ -66,7 +68,17 @@ const MediaPreview = ({ type, file, url }) => {
       </p>
     </div>
   );
+});
+
+MediaPreview.propTypes = {
+  type: PropTypes.oneOf(["Image", "Video", "Pdf"]).isRequired,
+  file: PropTypes.shape({
+    name: PropTypes.string,
+  }),
+  url: PropTypes.string,
 };
+
+MediaPreview.displayName = "MediaPreview";
 
 const getYouTubeEmbedUrl = (url) => {
   if (!url) return "";
@@ -99,7 +111,6 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
   const courseId = currentCourse || courseIdFromParams;
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(mode === "edit");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedType, setSelectedType] = useState("Pdf");
   const [mediaInputType, setMediaInputType] = useState("upload");
@@ -125,7 +136,7 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
     trigger,
   } = useForm({
     defaultValues: {
-      name: formData.name || "",
+      name: "",
     },
   });
   // Update the type options array
@@ -190,6 +201,9 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
             position: moduleData.position,
             releaseDate: moduleData.releaseDate,
           });
+
+          // Set the form value for name field
+          setValue("name", moduleData.name);
         } catch (error) {
           console.error("Error loading module:", error);
           toast.error("Failed to load module data");
@@ -197,14 +211,7 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
       };
       loadModule();
     }
-  }, [mode, moduleId, fetchModuleById]);
-
-  const handleTypeSelect = (type) => {
-    setSelectedType(type);
-    setMediaInputType("upload");
-    setSelectedFile(null);
-    setMediaUrl("");
-  };
+  }, [mode, moduleId, fetchModuleById, setValue]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -239,10 +246,11 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
                     setReplaceMedia(true);
                   }
                 }}
-                className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${selectedType === value
+                className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${
+                  selectedType === value
                     ? "border-blue-500 bg-blue-50"
                     : "border-gray-300 bg-gray-100 opacity-50"
-                  } hover:shadow-md transition`}
+                } hover:shadow-md transition`}
               >
                 <img
                   src={`https://cdn-icons-png.flaticon.com/512/${icon}.png`}
@@ -281,20 +289,22 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
               <button
                 type="button"
                 onClick={() => setMediaInputType("upload")}
-                className={`px-4 py-2 border rounded-lg ${mediaInputType === "upload"
+                className={`px-4 py-2 border rounded-lg ${
+                  mediaInputType === "upload"
                     ? "border-blue-500 bg-blue-50 text-blue-700"
                     : "border-gray-300 bg-gray-100 text-gray-700"
-                  } hover:shadow-md transition`}
+                } hover:shadow-md transition`}
               >
                 Upload {selectedType}
               </button>
               <button
                 type="button"
                 onClick={() => setMediaInputType("url")}
-                className={`px-4 py-2 border rounded-lg ${mediaInputType === "url"
+                className={`px-4 py-2 border rounded-lg ${
+                  mediaInputType === "url"
                     ? "border-blue-500 bg-blue-50 text-blue-700"
                     : "border-gray-300 bg-gray-100 text-gray-700"
-                  } hover:shadow-md transition`}
+                } hover:shadow-md transition`}
               >
                 {selectedType} URL
               </button>
@@ -312,8 +322,8 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
                     selectedType === "Image"
                       ? "image/*"
                       : selectedType === "Video"
-                        ? "video/*"
-                        : ".pdf"
+                      ? "video/*"
+                      : ".pdf"
                   }
                   className="w-full p-2 border rounded-md focus:outline-none"
                 />
@@ -364,15 +374,16 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Trigger validation
-    const isValid = await trigger();
-    if (!isValid) {
-      return;
-    }
-
-    setIsLoading(true);
-
     try {
+      // Trigger validation
+      const isValid = await trigger();
+
+      if (!isValid) {
+        return;
+      }
+
+      setIsLoading(true);
+
       let fileUrl = formData.url;
 
       // Add validation for media requirement
@@ -393,13 +404,13 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
       }
 
       const moduleData = {
-        id: mode === "edit" ? parseInt(moduleId) : 0,
+        id: mode === "edit" ? Number(moduleId) : 0,
         name: formData.name,
         description: formData.description,
         url: fileUrl,
         position: formData.position,
         releaseDate: formData.releaseDate,
-        courseId: parseInt(courseId),
+        courseId: Number(courseId),
         moduleType: getModuleTypeNumber(selectedType),
       };
 
@@ -508,19 +519,18 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
             {...register("name", {
               required: "Module name is required",
             })}
-            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 ${errors.moduleName ? "border-red-500" : ""
-              }`}
+            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+              errors.name ? "border-red-500" : ""
+            }`}
             placeholder="Enter module name"
             onChange={(e) => {
               handleInputChange(e);
-              setValue("moduleName", e.target.value);
+              setValue("name", e.target.value);
             }}
-            value={formData.moduleName || formData.name}
+            value={formData.name}
           />
-          {errors.moduleName && (
-            <p className="text-sm text-red-500 mt-1">
-              {errors.moduleName.message}
-            </p>
+          {errors.name && (
+            <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
           )}
         </div>
 
@@ -558,6 +568,11 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
       </form>
     </div>
   );
+};
+
+CreateModuleContent.propTypes = {
+  mode: PropTypes.oneOf(["add", "edit"]),
+  moduleId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 export default CreateModuleContent;

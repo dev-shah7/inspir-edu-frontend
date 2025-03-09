@@ -26,11 +26,13 @@ const Login = () => {
             <span className="text-yellow-400 mr-2">💡</span> inspirEDU
           </h2>
           <p className="text-lg text-gray-700 text-center leading-relaxed max-w-md mx-auto">
-            Empowering students and teachers with cutting-edge tools for an enhanced learning experience. 
-            Your journey to success starts here.
+            Empowering students and teachers with cutting-edge tools for an
+            enhanced learning experience. Your journey to success starts here.
           </p>
           <p className="text-md text-gray-600 text-center italic leading-relaxed max-w-sm mx-auto font-outfit">
-            "Every great journey begins with a single step. Believe in yourself, and let today be the start of something extraordinary."
+            &ldquo;Every great journey begins with a single step. Believe in
+            yourself, and let today be the start of something
+            extraordinary.&rdquo;
           </p>
         </div>
 

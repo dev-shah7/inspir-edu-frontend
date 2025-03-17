@@ -113,7 +113,7 @@ const VideoPlayer = ({ videoUrl, posterUrl, lastPlayPosition, isWatched, setIsWa
     setCurrentTime(formatTime(progress.playedSeconds));
     setCurrentPlayTime(progress.playedSeconds);
     currentPlayTimeRef.current = progress.playedSeconds;
-    
+
     // Mark video as watched when within 5 seconds of end
     if (playerRef.current) {
       const duration = playerRef.current.getDuration();
@@ -125,7 +125,7 @@ const VideoPlayer = ({ videoUrl, posterUrl, lastPlayPosition, isWatched, setIsWa
           moduleService.updateLastPlayPosition(moduleId, currentTime)
             .catch(error => console.error('Error updating watch status:', error));
           moduleService.updateFullVideoWatched(moduleId, true)
-          .catch(error => console.error('Error updating full video watched status:', error));
+            .catch(error => console.error('Error updating full video watched status:', error));
         }
       }
     }
@@ -146,7 +146,7 @@ const VideoPlayer = ({ videoUrl, posterUrl, lastPlayPosition, isWatched, setIsWa
       // Update with isFullVideoWatched as true when video ends
       moduleService.updateLastPlayPosition(moduleId, duration)
         .catch(error => console.error('Error saving final position:', error));
-      
+
       // Add call to update full video watched status
       moduleService.updateFullVideoWatched(moduleId, true)
         .catch(error => console.error('Error updating full video watched status:', error));
@@ -201,7 +201,10 @@ const VideoPlayer = ({ videoUrl, posterUrl, lastPlayPosition, isWatched, setIsWa
         width="100%"
         height="100%"
         onProgress={handleProgress}
-        onPause={handlePause}
+        onPause={() => {
+          handlePause();
+          setIsPlaying(false);
+        }}
         onEnded={handleEnded}
         onDuration={handleDuration}
         onReady={() => {
@@ -211,6 +214,7 @@ const VideoPlayer = ({ videoUrl, posterUrl, lastPlayPosition, isWatched, setIsWa
             hasSetInitialPosition.current = true;
           }
         }}
+        onPlay={() => setIsPlaying(true)}
         style={isFullScreen ? { position: "absolute", top: 0, left: 0 } : {}}
       />
 

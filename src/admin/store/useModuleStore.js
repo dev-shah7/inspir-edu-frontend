@@ -9,6 +9,9 @@ const useModuleStore = create((set, get) => ({
   error: null,
   uploadProgress: 0,
   moduleStatus: null,
+  lastPlayPosition: null,
+  userModuleId: null,
+  isFullVideoWatched: false,
 
   uploadFile: async (file, moduleType, onProgress) => {
     try {
@@ -135,7 +138,7 @@ const useModuleStore = create((set, get) => ({
     set({ isFetchingModule: true });
     try {
       const response = await moduleService.getModuleStatus(moduleId);
-      set({ isFetchingModule: false, moduleStatus: response?.data?.status });
+      set({ isFetchingModule: false, moduleStatus: response?.data?.status , lastPlayPosition: response?.data?.lastPlayPosition, userModuleId: response?.data?.id, isFullVideoWatched: response?.data?.isFullVideoWatched });
       return response;
     } catch (error) {
       set({ isFetchingModule: false });

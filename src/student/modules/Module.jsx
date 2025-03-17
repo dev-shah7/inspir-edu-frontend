@@ -23,13 +23,13 @@ const Module = ({ module, position, isPreviousModuleCompleted, courseId }) => {
     if (module.status === 0 && currentCourse?.enrollmentStatus !== CourseEnrollmentStatus.DeadlineCrossed) {
       try {
         await startUserModule(module.moduleId);
-        navigate(`/student/${courseId}/modules/${module.moduleId}/media`);
+        navigate(`../${courseId}/modules/${module.moduleId}/questions`);
       } catch (error) {
         toast.error('Failed to start module. Please try again.');
       }
     }
     else {
-      navigate(`/student/${courseId}/modules/${module.moduleId}/media`);
+      navigate(`../${courseId}/modules/${module.moduleId}/questions`);
     }
   };
 

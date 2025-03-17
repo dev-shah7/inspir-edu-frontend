@@ -21,14 +21,16 @@ import CurrentModuleMedia from "../modules/CurrentModuleMedia";
 const QuestionsList = () => {
   const navigate = useNavigate();
   const [formState, setFormState] = useState({});
+  const [isWatched, setIsWatched] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0); // Track the current question index
   const { moduleId, courseId } = useParams();
   const { fetchQuestionsByModule, questions, isLoading } = useQuestionStore();
   const { saveAnswer, fetchAnswers, userAnswers, isFetchingAnswer } = useAnswerStore();
-  const { submitModule, currentModule, getModuleStatus, moduleStatus, isFetchingModule, fetchModuleById } = useModuleStore();
+  const { submitModule, currentModule, getModuleStatus, moduleStatus, isFetchingModule, fetchModuleById, isFullVideoWatched } = useModuleStore();
   const { currentCourse, clearCurrentCourse } = useCourseStore();
   const [loadingAnswers, setLoadingAnswers] = useState(false);
   const questionRef = useRef(null);
+  const [videoLength, setVideoLength] = useState(0);
 
   useEffect(() => {
     if (moduleId) {
@@ -190,34 +192,37 @@ const QuestionsList = () => {
     });
   };
 
-  if (isLoading || isFetchingModule || isFetchingAnswer || loadingAnswers) {
-    return <Loader />;
+  const isVideoSufficientlyWatched = () => {
+    if (currentModule?.data?.type !== 1) return true; // If not video, return true
+    
+    // Check if either the video is watched or if it was previously fully watched
+    return isWatched || isFullVideoWatched;
   };
 
-  return (
-    <>
-      <div>
-        <button
-          onClick={() => {
-            clearCurrentCourse();
-            navigate(`/student/courses/${courseId}/modules`)
-          }}
-          className="bg-gray-800 text-white text-xl px-4 py-2 rounded-md m-5"
-        >
-          Back to Modules List
-        </button>
-        <div className='mb-8'>
-          <CurrentModuleMedia />
+
+  const handleVideoEnd = () => {
+    if (questionRef.current) {
+      questionRef.current.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
+  const renderContent = () => {
+    if (!isVideoSufficientlyWatched()) {
+      return (
+        <div className="p-6 max-w-[95%] mx-5 mt-4 mb-32 bg-light-bg rounded-lg shadow-md text-center">
+          <p className="text-xl text-red-600">Please watch the video before attempting the questions.</p>
         </div>
-        <QuestionCounter
-          currentIndex={currentIndex}
-          totalQuestions={questions.length}
-        />
-      </div>
-      <div ref={questionRef} className='p-6 max-w-7xl mx-5 my-4 bg-light-bg rounded-lg shadow-md overflow-hidden'>
-      {!areAllQuestionsAnswered() && (
-        <p className="text-red-500 text-sm mb-4">*Answer All Questions to enable submission</p>
-      )}
+      );
+    }
+
+    return (
+      <div ref={questionRef} className='p-6 max-w-[95%] mx-5 my-4 bg-light-bg rounded-lg shadow-md overflow-hidden'>
+        {!areAllQuestionsAnswered() && (
+          <p className="text-red-500 text-sm mb-4">*Answer All Questions to enable submission</p>
+        )}
         <AnimatePresence initial={false} custom={direction} mode='wait'>
           <motion.div
             key={currentIndex}
@@ -360,34 +365,71 @@ const QuestionsList = () => {
           )}
         </div>
       </div>
+    );
+  };
 
-      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2">
+  if (isLoading || isFetchingModule || isFetchingAnswer || loadingAnswers) {
+    return <Loader />;
+  };
+
+  return (
+    <>
+      <div>
         <button
-          onClick={scrollToQuestion}
-          className="bg-yellow-200 p-4 rounded-lg shadow-lg hover:bg-yellow-300 transition-colors"
+          onClick={() => {
+            clearCurrentCourse();
+            navigate(`/student/courses/${courseId}/modules`)
+          }}
+          className="bg-gray-800 text-white text-xl px-4 py-2 rounded-md m-5"
         >
-          <div className="text-md font-medium flex items-center gap-2">
-            Question {currentIndex + 1} of {questions.length}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 13l-7 7-7-7m14-8l-7 7-7-7"
-              />
-            </svg>
-          </div>
-          <div className="text-sm truncate max-w-[150px]">
-            {currentQuestion?.question}
-          </div>
+          Back to Modules List
         </button>
+        <div className='mb-8'>
+          <CurrentModuleMedia 
+            isWatched={isWatched} 
+            setIsWatched={setIsWatched}
+            onDuration={setVideoLength}
+            onVideoEnd={handleVideoEnd}
+          />
+        </div>
+        {isVideoSufficientlyWatched() && (
+          <QuestionCounter
+            currentIndex={currentIndex}
+            totalQuestions={questions.length}
+          />
+        )}
       </div>
+      {renderContent()}
+
+      {isVideoSufficientlyWatched() && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2">
+          <button
+            onClick={scrollToQuestion}
+            className="bg-yellow-200 p-4 rounded-lg shadow-lg hover:bg-yellow-300 transition-colors"
+          >
+            <div className="text-md font-medium flex items-center gap-2">
+              Question {currentIndex + 1} of {questions.length}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 13l-7 7-7-7m14-8l-7 7-7-7"
+                />
+              </svg>
+            </div>
+            <div className="text-sm truncate max-w-[150px]">
+              {currentQuestion?.question}
+            </div>
+          </button>
+        </div>
+      )}
     </>
   );
 };

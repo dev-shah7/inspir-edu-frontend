@@ -24,7 +24,7 @@ const Course = ({ course, status }) => {
     try {
       await enrollCourse(course);
       toast.success("Course is enrolled successfully");
-      navigate(`/student/courses/${course.id}/overview`);
+      navigate(`/student/courses/${course.id}/modules`);
       try {
         let templateAdminParams = {
           to_admin_email: course?.createdByEmail,
@@ -61,12 +61,12 @@ const Course = ({ course, status }) => {
 
   const handleResume = (e) => {
     e.stopPropagation();
-    navigate(`/student/courses/${course.id}/overview`);
+    navigate(`/student/courses/${course.id}/modules`);
   };
 
   const handleView = (e) => {
     e.stopPropagation();
-    navigate(`/student/courses/${course.id}/overview`);
+    navigate(`/student/courses/${course.id}/modules`);
   };
 
   const renderButton = () => {

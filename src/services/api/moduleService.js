@@ -65,4 +65,20 @@ export const moduleService = {
     const response = await api.get(`/UserModule/get-by/${moduleId}`);
     return response.data;
   },
+
+  updateLastPlayPosition: async (userModuleId, lastPlayPosition) => {
+    const response = await api.post('/UserModule/update-last-play-position', {
+      id: userModuleId,
+      lastPlayPosition
+    });
+    return response.data;
+  },
+
+  updateFullVideoWatched: async (userModuleId, isFullVideoWatched) => {
+    const response = await api.post('/UserModule/update-full-video-watched-status', {
+      id: userModuleId,
+      isFullVideoWatched
+    });
+    return response.data;
+  },
 };

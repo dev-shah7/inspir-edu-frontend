@@ -8,14 +8,14 @@ const CourseNav = () => {
 
   const navItems = [
     {
-      label: 'Overview',
-      path: 'overview',
-      isActive: location.pathname.split('/').pop() === 'overview',
-    },
-    {
       label: 'Modules',
       path: 'modules',
       isActive: location.pathname.split('/').pop() === 'modules',
+    },
+    {
+      label: 'Overview',
+      path: 'overview',
+      isActive: location.pathname.split('/').pop() === 'overview',
     },
   ];
 

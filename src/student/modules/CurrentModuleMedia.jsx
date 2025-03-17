@@ -5,13 +5,24 @@ import ImageViewer from '../../components/common/ImageViewer/ImageViewer';
 import useModuleStore from '../../admin/store/useModuleStore';
 import playVideoPoster from "../../assets/play-thumbnail.jpg";
 
-const CurrentModuleMedia = () => {
-  const { currentModule } = useModuleStore();
+const CurrentModuleMedia = ({ isWatched, setIsWatched, onDuration, onVideoEnd }) => {
+  const { currentModule, lastPlayPosition, userModuleId, isFullVideoWatched } = useModuleStore();
   const moduleType = currentModule?.data?.type || 1;
 
   return <div className='mx-5'>
-    {moduleType === 1 && <VideoPlayer videoUrl={currentModule?.data?.url}
-      posterUrl={playVideoPoster} />}
+    {moduleType === 1 && (
+      <VideoPlayer 
+        videoUrl={currentModule?.data?.url} 
+        lastPlayPosition={Number(lastPlayPosition) || 0}
+        posterUrl={playVideoPoster} 
+        isWatched={isWatched} 
+        setIsWatched={setIsWatched}
+        onDuration={onDuration}
+        moduleId={userModuleId}
+        onVideoEnd={onVideoEnd}
+        isFullVideoWatched={isFullVideoWatched}
+      />
+    )}
     {moduleType === 2 && <PdfViewer fileUrl={currentModule?.data?.url} />}
     {moduleType === 3 && <ImageViewer imageUrl={currentModule.data.url}
       altText={currentModule.data.name || 'Course image'} />}

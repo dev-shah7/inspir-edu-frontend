@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import ReactPlayer from "react-player";
+import { moduleService } from "../../../services/api/moduleService";
 
-const VideoPlayer = ({ videoUrl, posterUrl }) => {
+
+const VideoPlayer = ({ videoUrl, posterUrl, lastPlayPosition, isWatched, setIsWatched, onDuration, moduleId, onVideoEnd, isFullVideoWatched }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [played, setPlayed] = useState(0);
   const [muted, setMuted] = useState(false);
@@ -10,6 +12,11 @@ const VideoPlayer = ({ videoUrl, posterUrl }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const playerRef = useRef(null);
   const containerRef = useRef(null);
+  const [currentPlayTime, setCurrentPlayTime] = useState(0);
+  const currentPlayTimeRef = useRef(0);
+  const hasSetInitialPosition = useRef(false);
+  const isInitialMount = useRef(true);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -23,6 +30,37 @@ const VideoPlayer = ({ videoUrl, posterUrl }) => {
     };
   }, []);
 
+  // Save video position when user leaves/closes tab
+  useEffect(() => {
+    const handleBeforeUnload = async () => {
+      if (moduleId && currentPlayTimeRef.current > 2) {
+        try {
+          await moduleService.updateLastPlayPosition(moduleId, currentPlayTimeRef.current);
+        } catch (error) {
+          console.error('Error saving play position:', error);
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      if (moduleId && currentPlayTimeRef.current > 2) {
+        moduleService.updateLastPlayPosition(moduleId, currentPlayTimeRef.current)
+          .catch(error => console.error('Error saving final play position:', error));
+      }
+    };
+  }, [moduleId]);
+
+  // Restore last play position when video is ready
+  useEffect(() => {
+    if (isReady && playerRef.current && !hasSetInitialPosition.current && lastPlayPosition > 1) {
+      playerRef.current.seekTo(parseFloat(lastPlayPosition));
+      hasSetInitialPosition.current = true;
+    }
+  }, [isReady, lastPlayPosition]);
+
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -31,13 +69,94 @@ const VideoPlayer = ({ videoUrl, posterUrl }) => {
       .padStart(2, "0")}`;
   };
 
+  // Function to save play position
+  const savePlayPosition = async (time) => {
+    if (isInitialMount.current || !moduleId || time <= 1) {
+      return;
+    }
+
+    try {
+      await moduleService.updateLastPlayPosition(moduleId, Math.floor(time));
+    } catch (error) {
+      console.error('Error saving play position:', error);
+    }
+  };
+
+  // Effect to handle component unmount and tab/window close
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && playerRef.current) {
+        const currentTime = playerRef.current.getCurrentTime();
+        if (currentTime > 1 && !isInitialMount.current) {
+          savePlayPosition(currentTime);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    isInitialMount.current = false;
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (playerRef.current && !isInitialMount.current) {
+        const currentTime = playerRef.current.getCurrentTime();
+        if (currentTime > 1) {
+          savePlayPosition(currentTime);
+        }
+      }
+    };
+  }, [moduleId]);
+
+  // Track video progress and mark as watched when near end
   const handleProgress = (progress) => {
     setPlayed(progress.played * 100);
     setCurrentTime(formatTime(progress.playedSeconds));
+    setCurrentPlayTime(progress.playedSeconds);
+    currentPlayTimeRef.current = progress.playedSeconds;
+    
+    // Mark video as watched when within 5 seconds of end
+    if (playerRef.current) {
+      const duration = playerRef.current.getDuration();
+      const currentTime = playerRef.current.getCurrentTime();
+      if (currentTime >= (duration - 5)) {
+        if (!isWatched) {
+          setIsWatched(true);
+          // Also update backend when near end of video
+          moduleService.updateLastPlayPosition(moduleId, currentTime)
+            .catch(error => console.error('Error updating watch status:', error));
+          moduleService.updateFullVideoWatched(moduleId, true)
+          .catch(error => console.error('Error updating full video watched status:', error));
+        }
+      }
+    }
+  };
+
+  // Save position when video is paused
+  const handlePause = () => {
+    if (moduleId && currentPlayTimeRef.current > 2) {
+      moduleService.updateLastPlayPosition(moduleId, currentPlayTimeRef.current)
+        .catch(error => console.error('Error saving position on pause:', error));
+    }
+  };
+
+  // Handle video completion
+  const handleEnded = () => {
+    if (playerRef.current && !isInitialMount.current) {
+      const duration = playerRef.current.getDuration();
+      // Update with isFullVideoWatched as true when video ends
+      moduleService.updateLastPlayPosition(moduleId, duration)
+        .catch(error => console.error('Error saving final position:', error));
+      
+      // Add call to update full video watched status
+      moduleService.updateFullVideoWatched(moduleId, true)
+        .catch(error => console.error('Error updating full video watched status:', error));
+    }
+    onVideoEnd?.();
   };
 
   const handleDuration = (durationInSeconds) => {
     setDuration(formatTime(durationInSeconds));
+    onDuration?.(formatTime(durationInSeconds));
   };
 
   const handleSeek = (e) => {
@@ -82,9 +201,27 @@ const VideoPlayer = ({ videoUrl, posterUrl }) => {
         width="100%"
         height="100%"
         onProgress={handleProgress}
+        onPause={handlePause}
+        onEnded={handleEnded}
         onDuration={handleDuration}
+        onReady={() => {
+          setIsReady(true);
+          if (lastPlayPosition && !hasSetInitialPosition.current) {
+            playerRef.current.seekTo(lastPlayPosition);
+            hasSetInitialPosition.current = true;
+          }
+        }}
         style={isFullScreen ? { position: "absolute", top: 0, left: 0 } : {}}
       />
+
+      {/* Last position indicator */}
+      <div className="absolute bottom-14 left-0 right-0 px-4">
+        {lastPlayPosition > 1 && (
+          <div className="text-white text-sm bg-black/60 p-2 rounded inline-block">
+            Last watched position: {formatTime(lastPlayPosition)}
+          </div>
+        )}
+      </div>
 
       {/* Custom Controls */}
       <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-4 sm:p-6">
@@ -245,11 +382,7 @@ const VideoPlayer = ({ videoUrl, posterUrl }) => {
           </button>
         </div>
       </div>
-
-
-
     </div>
-
   );
 };
 

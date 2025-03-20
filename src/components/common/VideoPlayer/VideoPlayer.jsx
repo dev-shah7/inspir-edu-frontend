@@ -1,9 +1,17 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import ReactPlayer from "react-player";
+import PropTypes from "prop-types";
 import { moduleService } from "../../../services/api/moduleService";
 
-
-const VideoPlayer = ({ videoUrl, posterUrl, lastPlayPosition, isWatched, setIsWatched, onDuration, moduleId, onVideoEnd, isFullVideoWatched }) => {
+const VideoPlayer = ({
+  videoUrl,
+  lastPlayPosition,
+  isWatched,
+  setIsWatched,
+  onDuration,
+  moduleId,
+  onVideoEnd,
+}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [played, setPlayed] = useState(0);
   const [muted, setMuted] = useState(false);
@@ -12,50 +20,132 @@ const VideoPlayer = ({ videoUrl, posterUrl, lastPlayPosition, isWatched, setIsWa
   const [isFullScreen, setIsFullScreen] = useState(false);
   const playerRef = useRef(null);
   const containerRef = useRef(null);
-  const [currentPlayTime, setCurrentPlayTime] = useState(0);
   const currentPlayTimeRef = useRef(0);
   const hasSetInitialPosition = useRef(false);
   const isInitialMount = useRef(true);
   const [isReady, setIsReady] = useState(false);
+
+  // Add interval state for periodic saving
+  const saveIntervalRef = useRef(null);
+  const lastSavedPositionRef = useRef(0);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullScreen(!!document.fullscreenElement);
     };
 
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
 
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
 
-  // Save video position when user leaves/closes tab
+  // Save video position when user leaves/closes tab using sendBeacon API for reliability
   useEffect(() => {
-    const handleBeforeUnload = async () => {
-      if (moduleId && currentPlayTimeRef.current > 2) {
-        try {
-          await moduleService.updateLastPlayPosition(moduleId, currentPlayTimeRef.current);
-        } catch (error) {
-          console.error('Error saving play position:', error);
-        }
+    const handleBeforeUnload = () => {
+      if (
+        moduleId &&
+        currentPlayTimeRef.current > 2 &&
+        Math.abs(currentPlayTimeRef.current - lastSavedPositionRef.current) > 3
+      ) {
+        // Use sendBeacon API which is more reliable for beforeunload events
+        const endpoint = `${
+          import.meta.env.VITE_API_BASE_URL || ""
+        }/api/UserModule/update-last-play-position`;
+        const data = JSON.stringify({
+          id: moduleId,
+          lastPlayPosition: Math.floor(currentPlayTimeRef.current),
+        });
+
+        navigator.sendBeacon(
+          endpoint,
+          new Blob([data], { type: "application/json" })
+        );
+        lastSavedPositionRef.current = currentPlayTimeRef.current;
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      if (moduleId && currentPlayTimeRef.current > 2) {
-        moduleService.updateLastPlayPosition(moduleId, currentPlayTimeRef.current)
-          .catch(error => console.error('Error saving final play position:', error));
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      // Save on component unmount
+      if (
+        moduleId &&
+        currentPlayTimeRef.current > 2 &&
+        Math.abs(currentPlayTimeRef.current - lastSavedPositionRef.current) > 3
+      ) {
+        // For unmount, try regular API first
+        moduleService
+          .updateLastPlayPosition(
+            moduleId,
+            Math.floor(currentPlayTimeRef.current)
+          )
+          .catch(() => {
+            // Fallback to sendBeacon if regular request fails
+            const endpoint = `${
+              import.meta.env.VITE_API_BASE_URL || ""
+            }/api/UserModule/update-last-play-position`;
+            const data = JSON.stringify({
+              id: moduleId,
+              lastPlayPosition: Math.floor(currentPlayTimeRef.current),
+            });
+            navigator.sendBeacon(
+              endpoint,
+              new Blob([data], { type: "application/json" })
+            );
+          });
+      }
+
+      // Clear interval on unmount
+      if (saveIntervalRef.current) {
+        clearInterval(saveIntervalRef.current);
       }
     };
   }, [moduleId]);
 
+  // Setup periodic saving on a regular interval (every 10 seconds)
+  useEffect(() => {
+    if (moduleId) {
+      saveIntervalRef.current = setInterval(() => {
+        if (
+          isPlaying &&
+          currentPlayTimeRef.current > 2 &&
+          Math.abs(currentPlayTimeRef.current - lastSavedPositionRef.current) >
+            3
+        ) {
+          moduleService
+            .updateLastPlayPosition(
+              moduleId,
+              Math.floor(currentPlayTimeRef.current)
+            )
+            .then(() => {
+              lastSavedPositionRef.current = currentPlayTimeRef.current;
+            })
+            .catch((error) =>
+              console.error("Error saving periodic play position:", error)
+            );
+        }
+      }, 10000); // Save every 10 seconds while playing
+
+      return () => {
+        if (saveIntervalRef.current) {
+          clearInterval(saveIntervalRef.current);
+          saveIntervalRef.current = null;
+        }
+      };
+    }
+  }, [moduleId, isPlaying]);
+
   // Restore last play position when video is ready
   useEffect(() => {
-    if (isReady && playerRef.current && !hasSetInitialPosition.current && lastPlayPosition > 1) {
+    if (
+      isReady &&
+      playerRef.current &&
+      !hasSetInitialPosition.current &&
+      lastPlayPosition > 1
+    ) {
       playerRef.current.seekTo(parseFloat(lastPlayPosition));
       hasSetInitialPosition.current = true;
     }
@@ -69,23 +159,29 @@ const VideoPlayer = ({ videoUrl, posterUrl, lastPlayPosition, isWatched, setIsWa
       .padStart(2, "0")}`;
   };
 
-  // Function to save play position
+  // Enhanced save play position function
   const savePlayPosition = async (time) => {
-    if (isInitialMount.current || !moduleId || time <= 1) {
+    if (
+      isInitialMount.current ||
+      !moduleId ||
+      time <= 1 ||
+      Math.abs(time - lastSavedPositionRef.current) <= 3
+    ) {
       return;
     }
 
     try {
       await moduleService.updateLastPlayPosition(moduleId, Math.floor(time));
+      lastSavedPositionRef.current = time;
     } catch (error) {
-      console.error('Error saving play position:', error);
+      console.error("Error saving play position:", error);
     }
   };
 
   // Effect to handle component unmount and tab/window close
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden' && playerRef.current) {
+      if (document.visibilityState === "hidden" && playerRef.current) {
         const currentTime = playerRef.current.getCurrentTime();
         if (currentTime > 1 && !isInitialMount.current) {
           savePlayPosition(currentTime);
@@ -93,11 +189,11 @@ const VideoPlayer = ({ videoUrl, posterUrl, lastPlayPosition, isWatched, setIsWa
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     isInitialMount.current = false;
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       if (playerRef.current && !isInitialMount.current) {
         const currentTime = playerRef.current.getCurrentTime();
         if (currentTime > 1) {
@@ -111,21 +207,29 @@ const VideoPlayer = ({ videoUrl, posterUrl, lastPlayPosition, isWatched, setIsWa
   const handleProgress = (progress) => {
     setPlayed(progress.played * 100);
     setCurrentTime(formatTime(progress.playedSeconds));
-    setCurrentPlayTime(progress.playedSeconds);
     currentPlayTimeRef.current = progress.playedSeconds;
+
+    // Save position when significant progress is made (more than 5 seconds)
+    if (
+      isPlaying &&
+      Math.abs(progress.playedSeconds - lastSavedPositionRef.current) > 5
+    ) {
+      savePlayPosition(progress.playedSeconds);
+    }
 
     // Mark video as watched when within 5 seconds of end
     if (playerRef.current) {
       const duration = playerRef.current.getDuration();
       const currentTime = playerRef.current.getCurrentTime();
-      if (currentTime >= (duration - 5)) {
+      if (currentTime >= duration - 5) {
         if (!isWatched) {
           setIsWatched(true);
           // Also update backend when near end of video
-          moduleService.updateLastPlayPosition(moduleId, currentTime)
-            .catch(error => console.error('Error updating watch status:', error));
-          moduleService.updateFullVideoWatched(moduleId, true)
-            .catch(error => console.error('Error updating full video watched status:', error));
+          moduleService
+            .updateLastPlayPosition(moduleId, currentTime)
+            .catch((error) =>
+              console.error("Error updating watch status:", error)
+            );
         }
       }
     }
@@ -134,22 +238,30 @@ const VideoPlayer = ({ videoUrl, posterUrl, lastPlayPosition, isWatched, setIsWa
   // Save position when video is paused
   const handlePause = () => {
     if (moduleId && currentPlayTimeRef.current > 2) {
-      moduleService.updateLastPlayPosition(moduleId, currentPlayTimeRef.current)
-        .catch(error => console.error('Error saving position on pause:', error));
+      moduleService
+        .updateLastPlayPosition(moduleId, currentPlayTimeRef.current)
+        .catch((error) =>
+          console.error("Error saving position on pause:", error)
+        );
     }
   };
 
-  // Handle video completion
+  // Handle video completion with improved error handling
   const handleEnded = () => {
     if (playerRef.current && !isInitialMount.current) {
       const duration = playerRef.current.getDuration();
-      // Update with isFullVideoWatched as true when video ends
-      moduleService.updateLastPlayPosition(moduleId, duration)
-        .catch(error => console.error('Error saving final position:', error));
 
-      // Add call to update full video watched status
-      moduleService.updateFullVideoWatched(moduleId, true)
-        .catch(error => console.error('Error updating full video watched status:', error));
+      // Update position first
+      moduleService
+        .updateLastPlayPosition(moduleId, duration)
+        .then(() => {
+          lastSavedPositionRef.current = duration;
+          // Then update watched status
+          return moduleService.updateFullVideoWatched(moduleId, true);
+        })
+        .catch((error) =>
+          console.error("Error saving final position or watch status:", error)
+        );
     }
     onVideoEnd?.();
   };
@@ -189,8 +301,22 @@ const VideoPlayer = ({ videoUrl, posterUrl, lastPlayPosition, isWatched, setIsWa
   return (
     <div
       ref={containerRef}
-      className={`${isFullScreen ? "w-full h-full" : "w-[90vw] lg:w-[75vw] h-[50vw] lg:h-[45vw]"} mx-auto relative`}
-      style={isFullScreen ? { position: "fixed", top: 0, left: 0, zIndex: 1000, backgroundColor: "black" } : {}}
+      className={`${
+        isFullScreen
+          ? "w-full h-full"
+          : "w-[90vw] lg:w-[75vw] h-[50vw] lg:h-[45vw]"
+      } mx-auto relative`}
+      style={
+        isFullScreen
+          ? {
+              position: "fixed",
+              top: 0,
+              left: 0,
+              zIndex: 1000,
+              backgroundColor: "black",
+            }
+          : {}
+      }
     >
       <ReactPlayer
         ref={playerRef}
@@ -268,19 +394,11 @@ const VideoPlayer = ({ videoUrl, posterUrl, lastPlayPosition, isWatched, setIsWa
             onClick={() => setIsPlaying(!isPlaying)}
           >
             {isPlaying ? (
-              <svg
-                className="w-8 h-8"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
               </svg>
             ) : (
-              <svg
-                className="w-8 h-8"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
             )}
@@ -388,6 +506,27 @@ const VideoPlayer = ({ videoUrl, posterUrl, lastPlayPosition, isWatched, setIsWa
       </div>
     </div>
   );
+};
+
+VideoPlayer.propTypes = {
+  videoUrl: PropTypes.string.isRequired,
+  posterUrl: PropTypes.string,
+  lastPlayPosition: PropTypes.number,
+  isWatched: PropTypes.bool,
+  setIsWatched: PropTypes.func,
+  onDuration: PropTypes.func,
+  moduleId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    .isRequired,
+  onVideoEnd: PropTypes.func,
+};
+
+VideoPlayer.defaultProps = {
+  posterUrl: "",
+  lastPlayPosition: 0,
+  isWatched: false,
+  setIsWatched: () => {},
+  onDuration: () => {},
+  onVideoEnd: () => {},
 };
 
 export default VideoPlayer;

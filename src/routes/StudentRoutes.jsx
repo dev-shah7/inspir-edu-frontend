@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import PrivateRoute from "../auth/PrivateRoute";
 import Layout from "../components/Layout/Layout";
 import CourseList from "../student/courses/CourseList";
 import CourseContent from "../student/components/Course/CourseContent";
@@ -14,47 +13,45 @@ import CourseResult from "../student/result/CourseResult";
 const StudentRoutes = () => {
   return (
     <Routes>
-      <Route element={<PrivateRoute roleRequired="student" />}>
-        <Route path="/" element={<Layout userRole="student" />}>
-          <Route index element={<CourseList />} />
-          <Route path="myCourses" element={<CourseList />} />
-          <Route
-            path="courses/:courseId/overview"
-            element={
-              <CourseContent>
-                <CourseOverview />
-              </CourseContent>
-            }
-          />
-          <Route
-            path="courses/:courseId/modules"
-            element={
-              <CourseContent>
-                <ModuleList />
-              </CourseContent>
-            }
-          />
-          <Route path=":courseId/modules/:moduleId/media" element={<ModuleMedia />} />
-          <Route
-            path=":courseId/modules/:moduleId/questions"
-            element={
-              <CourseContent showNav={false}>
-                <QuestionsList />
-              </CourseContent>
-            }
-          />
-          {/* <Route path="courses/modules/dashboard" element={<ModulesDashboard />} /> */}
-          <Route
-            path="courses/:courseId/result"
-            element={
-              <CourseContent showNav={false}>
-                <CourseResult />
-              </CourseContent>
-            }
-          />
-          <Route path="/support" element={<Support />} />
-          <Route path="*" element={<Navigate to="/student" replace />} />
-        </Route>
+      <Route path="/" element={<Layout userRole="student" />}>
+        <Route index element={<CourseList />} />
+        <Route path="myCourses" element={<CourseList />} />
+        <Route
+          path="courses/:courseId/overview"
+          element={
+            <CourseContent>
+              <CourseOverview />
+            </CourseContent>
+          }
+        />
+        <Route
+          path="courses/:courseId/modules"
+          element={
+            <CourseContent>
+              <ModuleList />
+            </CourseContent>
+          }
+        />
+        <Route path=":courseId/modules/:moduleId/media" element={<ModuleMedia />} />
+        <Route
+          path=":courseId/modules/:moduleId/questions"
+          element={
+            <CourseContent showNav={false}>
+              <QuestionsList />
+            </CourseContent>
+          }
+        />
+        {/* <Route path="courses/modules/dashboard" element={<ModulesDashboard />} /> */}
+        <Route
+          path="courses/:courseId/result"
+          element={
+            <CourseContent showNav={false}>
+              <CourseResult />
+            </CourseContent>
+          }
+        />
+        <Route path="/support" element={<Support />} />
+        <Route path="*" element={<Navigate to="/student" replace />} />
       </Route>
     </Routes>
   );

@@ -11,12 +11,14 @@ import { IoIosArrowBack, IoIosArrowForward, IoMdAdd } from "react-icons/io";
 import InviteUsersContent from "../users/InviteUsersContent";
 import CourseUsersContent from "./CourseUsersContent";
 import { usePaymentStatusHandler } from '../../hooks/usePaymentStatusHandler';
+import useAuthStore from "../../store/auth/useAuthStore";
 
 const Courses = () => {
   const navigate = useNavigate();
   const { openModal, queueModal, closeModal } = useModalStore();
   const { courses, fetchCourses, deleteCourse, isLoading, setCurrentCourse } =
     useCourseStore();
+  const { user } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [isOperationLoading, setIsOperationLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,7 +29,12 @@ const Courses = () => {
   useEffect(() => {
     const loadCourses = async () => {
       try {
-        await fetchCourses();
+        console.log("user", user);
+        if(user) {
+          await fetchCourses();
+        } else {
+          // await fetchCourses();
+        }
       } catch (error) {
         toast.error("Failed to load courses");
       }

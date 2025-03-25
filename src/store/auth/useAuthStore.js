@@ -297,6 +297,60 @@ const useAuthStore = create(
           isLoading: false,
         }));
       },
+
+      registerGuestUser: async (userData) => {
+        set({ isLoading: true, error: null });
+        try {
+          const { data } = await authService.registerGuestUser(userData);
+          set({ isLoading: false, error: null });
+
+          const guestUserData = {
+            id: data.id,
+            name: data.name,
+            email: data.email,
+            phoneNumber: data.phoneNumber,
+            companyId: data.companyId,
+            roles: data.roles,
+          };
+
+          const token = data.token;
+          localStorage.setItem("token", token);
+
+          try {
+            const companyResponse = await companyService.getCompanyDetails(data.companyId);
+            const companyData = companyResponse.data.data;
+            const initialRole = data.roles[0].toLowerCase();
+            set({
+              user: guestUserData,
+              token: token,
+              isLoading: false,
+              isAuthenticated: true,
+              userRole: initialRole,
+              activeRole: initialRole,
+              companyDetails: companyData,
+            });
+          } catch (companyError) {
+            console.error("Failed to fetch company details:", companyError);
+            const initialRole = data.roles[0].toLowerCase();
+            set({
+              user: guestUserData,
+              token: token,
+              isLoading: false,
+              isAuthenticated: true,
+              userRole: initialRole,
+              activeRole: initialRole,
+            });
+          }
+
+          return data;
+        } catch (error) {
+          set({
+            error: error.response?.data?.message || "Guest registration failed",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
     }),
     {
       name: "auth-storage",

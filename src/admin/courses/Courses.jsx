@@ -11,29 +11,47 @@ import { IoIosArrowBack, IoIosArrowForward, IoMdAdd } from "react-icons/io";
 import InviteUsersContent from "../users/InviteUsersContent";
 import CourseUsersContent from "./CourseUsersContent";
 import { usePaymentStatusHandler } from '../../hooks/usePaymentStatusHandler';
+import useAuthStore from "../../store/auth/useAuthStore";
+import LoginContent from "../../components/Login/LoginContent";
 
 const Courses = () => {
   const navigate = useNavigate();
   const { openModal, queueModal, closeModal } = useModalStore();
-  const { courses, fetchCourses, deleteCourse, isLoading, setCurrentCourse } =
-    useCourseStore();
+  const {
+    courses,
+    fetchCourses,
+    fetchGuestCourseById,
+    deleteCourse,
+    deleteGuestCourse,
+    isLoading,
+    setCurrentCourse,
+  } = useCourseStore();
+
+  const { user } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [isOperationLoading, setIsOperationLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
 
   usePaymentStatusHandler();
-  
+
   useEffect(() => {
     const loadCourses = async () => {
       try {
-        await fetchCourses();
+        if (user) {
+          await fetchCourses();
+        } else {
+          const guestCourseId = sessionStorage.getItem('guestCourseId');
+          if (guestCourseId) {
+            await fetchGuestCourseById(guestCourseId);
+          }
+        }
       } catch (error) {
         toast.error("Failed to load courses");
       }
     };
     loadCourses();
-  }, [fetchCourses]);
+  }, [fetchCourses, fetchGuestCourseById, user]);
 
   const filteredCourses = useMemo(() => {
     return courses.filter((course) =>
@@ -54,10 +72,18 @@ const Courses = () => {
   };
 
   const handleCreateCourse = () => {
+    if (!user && courses.length > 0) {
+      openModal("Add Email", <LoginContent courseId={sessionStorage.getItem('guestCourseId')} message="Please submit your email first to be able to create another course." />);
+      return;
+    }
     openModal("Add Course", <CreateCourseContent />);
   };
 
   const handleEditCourse = (courseId) => {
+    if (!user) {
+      openModal("Add Email", <LoginContent courseId={sessionStorage.getItem('guestCourseId')} message="Please submit your email first to be able to edit courses." />);
+      return;
+    }
     openModal(
       "Edit Course",
       <CreateCourseContent mode="edit" courseId={courseId} />
@@ -67,15 +93,31 @@ const Courses = () => {
   const handleDeleteCourse = async (courseId) => {
     if (window.confirm("Are you sure you want to delete this course?")) {
       try {
-        await deleteCourse(courseId);
+        setIsOperationLoading(true);
+        if (user) {
+          await deleteCourse(courseId);
+        } else {
+          // await deleteGuestCourse(courseId);
+          // sessionStorage.removeItem('guestCourseId');
+          openModal("Add Email", <LoginContent courseId={sessionStorage.getItem('guestCourseId')} message="Please submit your email first to be able to delete courses." />);
+          return;
+        }
         toast.success("Course deleted successfully");
       } catch (error) {
         toast.error("Failed to delete course");
+      } finally {
+        setIsOperationLoading(false);
       }
     }
   };
 
   const handleInviteUsers = (courseId) => {
+    if (!user) {
+      toast.error("This feature is only available for registered users");
+      queueModal("Add Email", <LoginContent courseId={courseId} />);
+      closeModal();
+      return;
+    }
     queueModal("Invite Users", <InviteUsersContent courseId={courseId} />);
     closeModal();
   };
@@ -86,6 +128,10 @@ const Courses = () => {
   };
 
   const handleViewUsers = (courseId) => {
+    if (!user) {
+      toast.error("This feature is only available for registered users");
+      return;
+    }
     openModal("Course Users", <CourseUsersContent courseId={courseId} />);
   };
 

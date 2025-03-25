@@ -146,6 +146,68 @@ const useModuleStore = create((set, get) => ({
     }
   },
 
+  fetchGuestModulesByCourse: async (courseId) => {
+    const hasModules = get().modules.length > 0;
+    if (!hasModules) {
+      set({ isLoading: true });
+    }
+
+    try {
+      const response = await moduleService.guestGetModulesByCourse(courseId);
+      set({
+        modules: response.data,
+        isLoading: false,
+      });
+      return response;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to fetch guest modules",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  fetchGuestSingleModuleByCourseId: async (courseId) => {
+    set({ isFetchingModule: true });
+    try {
+      const response = await moduleService.guestGetModulesByCourse(courseId);
+      set({
+        currentModule: response?.data?.[0],
+        isFetchingModule: false,
+      });
+      return response?.data?.[0];
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to fetch module",
+        isFetchingModule: false,
+      });
+      throw error;
+    }
+  },
+
+  saveGuestModule: async (moduleData) => {
+    try {
+      const response = await moduleService.guestSaveModule(moduleData);
+      sessionStorage.setItem('guestModuleId', response?.data);
+      set((state) => ({
+        modules: moduleData.id
+          ? state.modules.map((module) =>
+              module.id === moduleData.id ? response : module
+            )
+          : [...state.modules, response],
+        currentModule: response,
+      }));
+
+      return response;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to save guest module",
+      });
+      throw error;
+    }
+  },
+
   clearError: () => set({ error: null }),
   setUploadProgress: (progress) => set({ uploadProgress: progress }),
   clearCurrentModule: () => set({ currentModule: null }),

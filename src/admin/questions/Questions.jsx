@@ -12,13 +12,22 @@ import { AiOutlineEye } from "react-icons/ai";
 import QuestionCard from "../../components/QuestionCard";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { usePaymentStatusHandler } from "../../hooks/usePaymentStatusHandler";
+import useAuthStore from "../../store/auth/useAuthStore";
+import LoginContent from "../../components/Login/LoginContent";
+
 
 const Questions = () => {
   const { moduleId } = useParams();
   const { openModal } = useModalStore();
   const navigate = useNavigate();
-  const { questions, fetchQuestionsByModule, deleteQuestion, isLoading } =
-    useQuestionStore();
+  const {
+    questions,
+    fetchQuestionsByModule,
+    fetchGuestQuestionsByModule,
+    deleteQuestion,
+    isLoading,
+  } = useQuestionStore();
+  const { user } = useAuthStore();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isOperationLoading, setIsOperationLoading] = useState(false);
@@ -31,7 +40,11 @@ const Questions = () => {
     const loadQuestions = async () => {
       try {
         setIsInitialLoad(true);
-        await fetchQuestionsByModule(moduleId);
+        if (user) {
+          await fetchQuestionsByModule(moduleId);
+        } else {
+          await fetchGuestQuestionsByModule(moduleId);
+        }
       } catch (error) {
         toast.error("Failed to load questions");
       } finally {
@@ -42,7 +55,7 @@ const Questions = () => {
     if (moduleId) {
       loadQuestions();
     }
-  }, [moduleId, fetchQuestionsByModule]);
+  }, [moduleId, fetchQuestionsByModule, fetchGuestQuestionsByModule, user]);
 
   const filteredQuestions = useMemo(() => {
     return questions.filter((question) =>
@@ -55,6 +68,10 @@ const Questions = () => {
   };
 
   const handleEditQuestion = (questionId) => {
+    if (!user) {
+      openModal("Add Email", <LoginContent courseId={sessionStorage.getItem('guestCourseId')} message="Please submit your email first to be able to edit questions." />);
+      return;  
+    }
     openModal(
       "Edit Question",
       <CreateQuestionContent mode="edit" questionId={questionId} />
@@ -65,11 +82,17 @@ const Questions = () => {
     if (window.confirm("Are you sure you want to delete this question?")) {
       try {
         setIsOperationLoading(true);
-        await deleteQuestion(questionId);
+        if (user) {
+          await deleteQuestion(questionId);
+        } else {
+          openModal("Add Email", <LoginContent courseId={sessionStorage.getItem('guestCourseId')} message="Please submit your email first to be able to delete questions." />);
+          return;     
+        }
         toast.success("Question deleted successfully");
 
         // Refresh the list in the background
-        fetchQuestionsByModule(moduleId).catch(console.error);
+        const fetchQuestions = user ? fetchQuestionsByModule : fetchGuestQuestionsByModule;
+        fetchQuestions(moduleId).catch(console.error);
       } catch (error) {
         toast.error("Failed to delete question");
       } finally {
@@ -184,7 +207,6 @@ const Questions = () => {
               </button>
             </div>
           </div>
-          <p className="text-lg text-gray-600">Module Name</p>
         </div>
         <div className="relative w-full lg:w-64 lg:mt-8">
           <input

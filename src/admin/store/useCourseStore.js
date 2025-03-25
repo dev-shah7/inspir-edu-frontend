@@ -94,6 +94,119 @@ const useCourseStore = create((set, get) => ({
 
   clearError: () => set({ error: null }),
   clearCurrentCourse: () => set({ currentCourse: null }),
+
+  fetchGuestCourse: async (token) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await courseService.guestGetCourseByToken(token);
+      set({
+        currentCourse: response,
+        isLoading: false,
+      });
+      return response;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to fetch guest course",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  saveGuestCourse: async (courseData) => {
+    try {
+      const response = await courseService.guestSaveCourse(courseData);
+      set((state) => ({
+        courses: courseData.id
+          ? state.courses.map((course) =>
+              course.id === courseData.id ? response : course
+            )
+          : [...state.courses, response],
+        currentCourse: response.data.id,
+      }));
+      
+      // Store the guest course ID in sessionStorage
+      sessionStorage.setItem('guestCourseId', response?.data?.id);
+      sessionStorage.setItem('guestToken', response?.data?.token);
+      
+      return response;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to save guest course",
+      });
+      throw error;
+    }
+  },
+
+  deleteGuestCourse: async (courseId) => {
+    try {
+      await courseService.guestDeleteCourse(courseId);
+      set((state) => ({
+        courses: state.courses.filter((course) => course.id !== courseId),
+        currentCourse: null,
+      }));
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to delete guest course",
+      });
+      throw error;
+    }
+  },
+
+  fetchGuestGradingInstructions: async (courseId) => {
+    set({ isLoadingInstructions: true, instructionsError: null });
+    try {
+      const response = await courseService.guestGetGradingInstructions(courseId);
+      set({
+        gradingInstructions: response.data,
+        isLoadingInstructions: false,
+      });
+      return response;
+    } catch (error) {
+      set({
+        instructionsError: error.message,
+        isLoadingInstructions: false,
+      });
+      throw error;
+    }
+  },
+
+  saveGuestGradingInstructions: async (instructionsData) => {
+    set({ isLoadingInstructions: true, instructionsError: null });
+    try {
+      const response = await courseService.guestSaveGradingInstructions(instructionsData);
+      set({
+        gradingInstructions: response,
+        isLoadingInstructions: false,
+      });
+      return response;
+    } catch (error) {
+      set({
+        instructionsError: error.message,
+        isLoadingInstructions: false,
+      });
+      throw error;
+    }
+  },
+
+  fetchGuestCourseById: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await courseService.guestGetCourseById(id);
+      set({
+        currentCourse: response.data,
+        courses: [response.data],
+        isLoading: false,
+      });
+      return response;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to fetch guest course by id",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
 }));
 
 export default useCourseStore;

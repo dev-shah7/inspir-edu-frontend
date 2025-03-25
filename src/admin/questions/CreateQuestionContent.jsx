@@ -8,6 +8,7 @@ import useModuleStore from "../store/useModuleStore";
 import { questionService } from "../../services/api/questionService";
 import { toast } from "react-hot-toast";
 import AddMoreQuestionsContent from "./AddMoreQuestionsContent";
+import useAuthStore from "../../store/auth/useAuthStore";
 
 const CreateQuestionContent = ({ mode = "add", questionId }) => {
   const { moduleId: paramModuleId } = useParams();
@@ -18,9 +19,12 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
     fetchQuestionsByModule,
     fetchQuestionById,
     isFetchingQuestion,
+    saveGuestQuestion,
+    fetchGuestQuestionsByModule
   } = useQuestionStore();
+  const { user } = useAuthStore();
 
-  const moduleId = paramModuleId || currentModule;
+  const moduleId = sessionStorage.getItem('guestModuleId') || paramModuleId || currentModule;
 
   const [isLoading, setIsLoading] = useState(false);
   const [questionType, setQuestionType] = useState("");
@@ -159,10 +163,10 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
         options: getOptions(),
       };
 
-      await saveQuestion(questionData);
+      await user ? saveQuestion(questionData) : saveGuestQuestion(questionData);
 
       // Refresh questions list in the background
-      fetchQuestionsByModule(moduleId).catch(console.error);
+      user ? fetchQuestionsByModule(moduleId).catch(console.error) : fetchGuestQuestionsByModule(moduleId).catch(console.error);
 
       toast.success("Question saved successfully");
 

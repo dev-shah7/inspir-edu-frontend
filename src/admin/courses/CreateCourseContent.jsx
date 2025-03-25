@@ -10,7 +10,7 @@ import UpdateSubscription from "../common/UpdateSubscription/UpdateSubscription"
 
 const CreateCourseContent = ({ mode = "add", courseId }) => {
   const { closeModal, queueModal } = useModalStore();
-  const { saveCourse, fetchCourses } = useCourseStore();
+  const { saveCourse, fetchCourses, saveGuestCourse, fetchGuestCourseById } = useCourseStore();
   const { user } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(mode === "edit");
@@ -40,15 +40,14 @@ const CreateCourseContent = ({ mode = "add", courseId }) => {
       const fetchCourseData = async () => {
         try {
           setIsFetching(true);
-          const response = await courseService.getCourse(courseId);
+          const response = user ? await courseService.getCourse(courseId) : await courseService.guestGetCourseById(courseId);
           const courseData = response.data;
-
           // Set form values
-          setValue("courseName", courseData.name);
-          setValue("description", courseData.description);
-          setValue("deadlineBased", courseData.isDeadlineBase ? "Yes" : "No");
-          setValue("time", courseData.defaultDeadlineHrs);
-          setValue("type", courseData.type);
+          setValue("courseName", courseData?.name);
+          setValue("description", courseData?.description);
+          setValue("deadlineBased", courseData?.isDeadlineBase ? "Yes" : "No");
+          setValue("time", courseData?.defaultDeadlineHrs);
+          setValue("type", courseData?.type);
         } catch (error) {
           console.error("Error fetching course data:", error);
           toast.error("Failed to load course data");
@@ -73,19 +72,36 @@ const CreateCourseContent = ({ mode = "add", courseId }) => {
         defaultDeadlineHrs:
           data.deadlineBased === "Yes" ? parseInt(data.time) : 0,
       };
-
-      await saveCourse(courseData);
+      
+      user ? await saveCourse(courseData) : await saveGuestCourse(courseData);
 
       if (mode === "edit") {
-        fetchCourses().catch(console.error);
+        // Refresh course data based on user type
+        if (user) {
+          await fetchCourses();
+        } else {
+          await fetchGuestCourseById(courseData.id);
+        }
         closeModal();
       } else {
-        fetchCourses().catch(console.error);
+        // For new course creation
+        if (user) {
+          await fetchCourses();
+        } else {
+          const guestCourseId = sessionStorage.getItem('guestCourseId');
+          if (guestCourseId) {
+            await fetchGuestCourseById(guestCourseId);
+          }
+        }
+        
+        // Queue grading modal for both guest and authenticated users
         queueModal("Add Grading", <GradingContent />, {
           hideCloseButton: true,
         });
         closeModal();
       }
+
+      toast.success(`Course ${mode === "edit" ? "updated" : "created"} successfully`);
     } catch (error) {
       console.error("Error saving course:", error);
       if (error?.response?.data?.data?.subscriptionMissingOrUpgradeRequired) {

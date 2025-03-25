@@ -17,7 +17,6 @@ const useCourseStore = create((set, get) => ({
         courses: response.data,
         isLoading: false,
       });
-      console.log("response is : ", response);
       return response;
     } catch (error) {
       set({
@@ -52,7 +51,6 @@ const useCourseStore = create((set, get) => ({
     });
     try {
       const response = await studentCourseService.getEnrolledCourse(courseId);
-      console.log(response, "response");
       set((state) => ({
         currentCourse: response.data,
         isLoading: false,
@@ -72,7 +70,6 @@ const useCourseStore = create((set, get) => ({
         courseId: courseData.id,
       }
       const response = await studentCourseService.enrollCourse(data);
-      console.log(response, "response");
       return response;
     } catch (error) {
       set({
@@ -88,7 +85,6 @@ const useCourseStore = create((set, get) => ({
     });
     try {
       const response = await studentCourseService.submitCourse(courseId);
-      console.log(response, "response");
       set({
         isLoading: false,
         courseSubmissionResult: response.data,

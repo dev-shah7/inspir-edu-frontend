@@ -91,6 +91,75 @@ const useQuestionStore = create((set, get) => ({
       throw error;
     }
   },
+
+  saveGuestQuestion: async (questionData) => {
+    try {
+      const formattedData = questionService.formatQuestionData(questionData);
+      const response = await questionService.guestSaveQuestion(formattedData);
+
+      // Update store without setting loading state
+      set((state) => ({
+        questions: questionData.id
+          ? state.questions.map((question) =>
+              question.id === questionData.id ? response : question
+            )
+          : [...state.questions, response],
+        currentQuestion: response,
+      }));
+
+      return response;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to save guest question",
+      });
+      throw error;
+    }
+  },
+
+  saveGuestQuestionOptions: async (optionsData) => {
+    try {
+      const response = await questionService.guestSaveQuestionOptions(optionsData);
+      
+      // Update the current question's options if it exists
+      if (get().currentQuestion) {
+        set((state) => ({
+          currentQuestion: {
+            ...state.currentQuestion,
+            questionOptions: response,
+          },
+        }));
+      }
+
+      return response;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to save guest question options",
+      });
+      throw error;
+    }
+  },
+
+  fetchGuestQuestionsByModule: async (moduleId) => {
+    const hasQuestions = get().questions.length > 0;
+    if (!hasQuestions) {
+      set({ isLoading: true });
+    }
+
+    try {
+      const response = await questionService.guestGetQuestionsByModule(moduleId);
+      set({
+        questions: response.data,
+        isLoading: false,
+      });
+      return response;
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to fetch guest module questions",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
 }));
 
 export default useQuestionStore;

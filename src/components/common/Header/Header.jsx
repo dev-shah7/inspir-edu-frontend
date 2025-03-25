@@ -42,6 +42,7 @@ const Header = ({ isSidebarOpen, setSidebarOpen }) => {
     try {
       setIsDropdownOpen(false);
       clearCurrentCourse();
+      sessionStorage.clear();
       await logout();
     } catch (error) {
       console.error("Logout failed:", error);
@@ -165,7 +166,7 @@ const Header = ({ isSidebarOpen, setSidebarOpen }) => {
 
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-20">
-              {activeRole === "admin" && (
+              {activeRole === "admin" && user && (
                 <div
                   onClick={handleProfileClick}
                   className="flex items-center space-x-3 px-4 py-3 text-gray-800 hover:bg-gray-100 cursor-pointer"
@@ -174,13 +175,15 @@ const Header = ({ isSidebarOpen, setSidebarOpen }) => {
                   <span className="text-lg font-medium">My Profile</span>
                 </div>
               )}
-              <div
-                onClick={handleLogout}
-                className="flex items-center space-x-3 px-4 py-3 text-gray-800 hover:bg-gray-100 cursor-pointer"
-              >
-                <FaSignOutAlt className="text-red-500 text-lg" />
-                <span className="text-lg font-medium">Logout</span>
-              </div>
+              {user && (
+                <div
+                  onClick={handleLogout}
+                  className="flex items-center space-x-3 px-4 py-3 text-gray-800 hover:bg-gray-100 cursor-pointer"
+                >
+                  <FaSignOutAlt className="text-red-500 text-lg" />
+                  <span className="text-lg font-medium">Logout</span>
+                </div>
+              )}
             </div>
           )}
         </div>

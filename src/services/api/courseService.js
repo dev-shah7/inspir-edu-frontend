@@ -53,12 +53,6 @@ export const courseService = {
       throw error;
     }
   },
-  getGradingInstructions: async (courseId) => {
-    const response = await api.get(
-      `/Course/get-grading-instructions/${courseId}`
-    );
-    return response.data;
-  },
 
   getCourseInvitations: async (courseId) => {
     try {
@@ -102,6 +96,72 @@ export const courseService = {
       return response.data;
     } catch (error) {
       console.error("Error in getEnrollmentDetails:", error);
+      throw error;
+    }
+  },
+
+  // Guest course operations
+  guestGetCourseByToken: async (token) => {
+    try {
+      const response = await api.get(`/GuestCourse/get-by-token/${token}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching guest course:", error);
+      throw error;
+    }
+  },
+
+  guestSaveCourse: async (courseData) => {
+    try {
+      const response = await api.post("/GuestCourse/save", courseData);
+      return response.data;
+    } catch (error) {
+      console.error("Error saving guest course:", error);
+      throw error;
+    }
+  },
+
+  guestGetGradingInstructions: async (courseId) => {
+    try {
+      const response = await api.get(
+        `/GuestCourse/get-grading-instructions/${courseId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching guest grading instructions:", error);
+      throw error;
+    }
+  },
+
+  guestSaveGradingInstructions: async (instructionsData) => {
+    try {
+      const response = await api.post(
+        "/GuestCourse/save-grading-instructions",
+        instructionsData
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error saving guest grading instructions:", error);
+      throw error;
+    }
+  },
+
+  guestDeleteCourse: async (id) => {
+    try {
+      const response = await api.delete(`/GuestCourse/delete/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting guest course:", error);
+      throw error;
+    }
+  },
+
+  guestGetCourseById: async (id) => {
+    try {
+      const response = await api.get(`/GuestCourse/get-by-id/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching guest course by id:", error);
       throw error;
     }
   },

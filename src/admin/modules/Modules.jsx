@@ -12,6 +12,8 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import ModuleCard from "../common/ModuleCard/ModuleCard";
 import useCourseStore from "../store/useCourseStore";
 import { usePaymentStatusHandler } from "../../hooks/usePaymentStatusHandler";
+import useAuthStore from "../../store/auth/useAuthStore";
+import LoginContent from "../../components/Login/LoginContent";
 
 const Modules = () => {
   const { courseId } = useParams();
@@ -20,6 +22,7 @@ const Modules = () => {
   const {
     modules,
     fetchModulesByCourse,
+    fetchGuestModulesByCourse,
     deleteModule,
     isLoading: modulesLoading,
   } = useModuleStore();
@@ -28,7 +31,8 @@ const Modules = () => {
   const [isOperationLoading, setIsOperationLoading] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  const { gradingInstructions, fetchGradingInstructions } = useCourseStore();
+  const { gradingInstructions, fetchGradingInstructions, fetchGuestGradingInstructions } = useCourseStore();
+  const { user } = useAuthStore();
 
   usePaymentStatusHandler();
 
@@ -36,7 +40,11 @@ const Modules = () => {
     const loadModules = async () => {
       try {
         setIsInitialLoad(true);
-        await fetchModulesByCourse(courseId);
+        if (user) {
+          await fetchModulesByCourse(courseId);
+        } else {
+          await fetchGuestModulesByCourse(courseId);
+        }
       } catch (error) {
         toast.error("Failed to load modules");
       } finally {
@@ -47,13 +55,21 @@ const Modules = () => {
     if (courseId) {
       loadModules();
     }
-  }, [courseId, fetchModulesByCourse]);
+  }, [courseId, fetchModulesByCourse, fetchGuestModulesByCourse, user]);
 
   useEffect(() => {
-    if (courseId) {
-      fetchGradingInstructions(courseId);
-    }
-  }, [courseId, fetchGradingInstructions]);
+    const loadGradingInstructions = async () => {
+      if (courseId) {
+        if (user) {
+          await fetchGradingInstructions(courseId);
+        } else {
+          await fetchGuestGradingInstructions(courseId);
+        }
+      }
+    };
+
+    loadGradingInstructions();
+  }, [courseId, fetchGradingInstructions, fetchGuestGradingInstructions, user]);
 
   const filteredModules = useMemo(() => {
     return modules.filter((module) =>
@@ -62,10 +78,18 @@ const Modules = () => {
   }, [searchQuery, modules]);
 
   const handleCreateModule = () => {
+    if (!user && modules.length >= 1) {
+      openModal("Add Email", <LoginContent courseId={courseId} message="Please submit your email first to be able to create more modules." />);
+      return;
+    }
     openModal("Add Module", <CreateModuleContent />);
   };
 
   const handleEditModule = (moduleId) => {
+    if (!user) {
+      openModal("Add Email", <LoginContent courseId={sessionStorage.getItem('guestCourseId')} message="Please submit your email first to be able to edit modules." />);
+      return;
+    }
     openModal(
       "Edit Module",
       <CreateModuleContent mode="edit" moduleId={moduleId} />
@@ -75,7 +99,12 @@ const Modules = () => {
   const handleDeleteModule = async (moduleId) => {
     if (window.confirm("Are you sure you want to delete this module?")) {
       try {
-        await deleteModule(moduleId);
+        if (user) {
+          await deleteModule(moduleId);
+        } else {
+          openModal("Add Email", <LoginContent courseId={courseId} message="Please submit your email first to be able to delete modules." />);
+          return;       
+        }
         toast.success("Module deleted successfully");
       } catch (error) {
         toast.error("Failed to delete module");

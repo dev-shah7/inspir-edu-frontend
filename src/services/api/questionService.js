@@ -153,4 +153,35 @@ export const questionService = {
     };
     return types[type] || "short-answer";
   },
+
+  // Guest-specific question operations
+  guestSaveQuestion: async (questionData) => {
+    try {
+      const response = await api.post("/GuestCourse/save-question", questionData);
+      return response.data;
+    } catch (error) {
+      console.error("Error saving guest question:", error);
+      throw error;
+    }
+  },
+
+  guestSaveQuestionOptions: async (optionsData) => {
+    try {
+      const response = await api.post("/GuestCourse/save-question-options", optionsData);
+      return response.data;
+    } catch (error) {
+      console.error("Error saving guest question options:", error);
+      throw error;
+    }
+  },
+
+  guestGetQuestionsByModule: async (moduleId) => {
+    try {
+      const response = await api.get(`/GuestCourse/get-all-questions-by-module/${moduleId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching guest module questions:", error);
+      throw error;
+    }
+  },
 };

@@ -90,4 +90,14 @@ export const authService = {
       throw new Error("Failed to update payment status");
     }
   },
+
+  registerGuestUser: async (userData) => {
+    try {
+      const response = await api.post("/GuestCourse/register-guest-user", userData);
+      return response.data;
+    } catch (error) {
+      console.error("Error registering guest user:", error);
+      throw error;
+    }
+  },
 };

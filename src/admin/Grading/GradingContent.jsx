@@ -6,10 +6,12 @@ import useCourseStore from "../store/useCourseStore";
 import { courseService } from "../../services/api/courseService";
 import Loader from "../../components/common/Loader/Loader";
 import { toast } from "react-hot-toast";
+import useAuthStore from "../../store/auth/useAuthStore";
 
 const GradingContent = () => {
   const { closeModal, queueModal } = useModalStore();
   const { currentCourse } = useCourseStore();
+  const { user } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -32,12 +34,12 @@ const GradingContent = () => {
       }
 
       const gradingData = {
-        courseId: currentCourse,
+        courseId: user ? currentCourse : currentCourse?.id,
         instructions: data.instructions,
         passingPercentage: parseInt(data.percentage),
       };
 
-      await courseService.saveGradingInstructions(gradingData);
+      user ? await courseService.saveGradingInstructions(gradingData) : await courseService.guestSaveGradingInstructions(gradingData);
       toast.success("Grading instructions saved successfully");
       queueModal("Add Module?", <ProceedToNextStepContent />);
       closeModal();

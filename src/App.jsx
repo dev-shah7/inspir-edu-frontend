@@ -16,72 +16,27 @@ import ResetPassword from "./components/ResetPassword/ResetPassword";
 
 const NotFound = () => {
   const { activeRole } = useAuthStore();
-  return <Navigate to={`/${activeRole}`} replace />;
+  return <Navigate to={`/${activeRole === 'student' ? 'student' : 'admin'}`} replace />;
 };
 
 const App = () => {
-  const { isAuthenticated, user, activeRole } = useAuthStore();
-
-  const getRedirectPath = () => {
-    if (!isAuthenticated) return "/login";
-    return `/${activeRole}`;
-  };
+  const { activeRole } = useAuthStore();
 
   return (
     <>
       <Toaster position="top-right" />
       <Router>
         <Routes>
-          <Route
-            path="/login"
-            element={
-              isAuthenticated ? <Navigate to={getRedirectPath()} /> : <Login />
-            }
-          />
-
-          <Route
-            path="/signup"
-            element={
-              isAuthenticated ? (
-                <Navigate to={getRedirectPath()} />
-              ) : (
-                <Resgister />
-              )
-            }
-          />
-
-          <Route
-            path="/signup/:token"
-            element={
-              isAuthenticated ? (
-                <Navigate to={getRedirectPath()} />
-              ) : (
-                <Resgister />
-              )
-            }
-          />
-
-          <Route
-            path="/"
-            element={
-              isAuthenticated ? (
-                <Navigate to={getRedirectPath()} />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
-          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Resgister />} />
+          <Route path="/signup/:token" element={<Resgister />} />
+          <Route path="/" element={<Navigate to={`/${activeRole === 'student' ? 'student' : 'admin'}`} />} />
 
           <Route path="/admin/*" element={<AdminRoutes />} />
-
-          {/* Student Routes */}
           <Route path="/student/*" element={<StudentRoutes />} />
-
+          
           <Route path="/forgot-password" element={<ForgotPassword />} />
-
           <Route path="/reset-password" element={<ResetPassword />} />
-
-          {/* Not Found - Redirect based on active role */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

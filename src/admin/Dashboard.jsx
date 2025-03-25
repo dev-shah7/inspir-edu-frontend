@@ -17,7 +17,7 @@ const Dashboard = () => {
   return (
     <>
       <h1 className="mt-6 text-4xl font-bold text-gray-800">
-        Hi, {user?.name || "Admin"}
+        Hi, {user ? user.name || "Admin" : "New User"}
       </h1>
       <p className="text-xl text-gray-600 mt-2">
         Welcome to inspireEDU Dashboard

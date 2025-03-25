@@ -42,7 +42,9 @@ const Header = ({ isSidebarOpen, setSidebarOpen }) => {
     try {
       setIsDropdownOpen(false);
       clearCurrentCourse();
+      sessionStorage.clear();
       await logout();
+      navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -142,48 +144,67 @@ const Header = ({ isSidebarOpen, setSidebarOpen }) => {
 
         <div className="h-10 w-[1px] bg-[#1A73E8]"></div>
 
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center hover:bg-gray-400 transition-colors"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-7 w-7 text-gray-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+        {user ? (
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center hover:bg-gray-400 transition-colors"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-          </button>
-
-          {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-20">
-              {activeRole === "admin" && (
-                <div
-                  onClick={handleProfileClick}
-                  className="flex items-center space-x-3 px-4 py-3 text-gray-800 hover:bg-gray-100 cursor-pointer"
-                >
-                  <FaUser className="text-[#1A73E8] text-lg" />
-                  <span className="text-lg font-medium">My Profile</span>
-                </div>
-              )}
-              <div
-                onClick={handleLogout}
-                className="flex items-center space-x-3 px-4 py-3 text-gray-800 hover:bg-gray-100 cursor-pointer"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-7 w-7 text-gray-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                <FaSignOutAlt className="text-red-500 text-lg" />
-                <span className="text-lg font-medium">Logout</span>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            </button>
+
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-20">
+                {activeRole === "admin" && user && (
+                  <div
+                    onClick={handleProfileClick}
+                    className="flex items-center space-x-3 px-4 py-3 text-gray-800 hover:bg-gray-100 cursor-pointer"
+                  >
+                    <FaUser className="text-[#1A73E8] text-lg" />
+                    <span className="text-lg font-medium">My Profile</span>
+                  </div>
+                )}
+                {user && (
+                  <div
+                    onClick={handleLogout}
+                    className="flex items-center space-x-3 px-4 py-3 text-gray-800 hover:bg-gray-100 cursor-pointer"
+                  >
+                    <FaSignOutAlt className="text-red-500 text-lg" />
+                    <span className="text-lg font-medium">Logout</span>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center space-x-4">
+            <Link
+              to="/login"
+              className="px-6 py-2.5 bg-white text-[#1A73E8] text-lg font-semibold rounded-lg hover:bg-[#1A73E8] hover:text-white transition-all duration-300 border-2 border-[#1A73E8] shadow-sm"
+            >
+              Log In
+            </Link>
+            <Link
+              to="/signup"
+              className="px-6 py-2.5 bg-white text-[#1A73E8] text-lg font-semibold rounded-lg hover:bg-[#1A73E8] hover:text-white transition-all duration-300 border-2 border-[#1A73E8] shadow-sm"
+            >
+              Sign Up
+            </Link>
+          </div>
+        )}
       </div>
     </header>
   );

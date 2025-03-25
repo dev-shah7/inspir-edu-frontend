@@ -1,9 +1,12 @@
 import useModalStore from "../store/useModalStore";
 import CreateQuestionContent from "./CreateQuestionContent";
 import AddMoreModulesContent from "../modules/AddMoreModulesContent";
+import LoginContent from "../../components/Login/LoginContent";
+import useAuthStore from "../../store/auth/useAuthStore";
 
 const AddMoreQuestionsContent = () => {
   const { closeModal, queueModal } = useModalStore();
+  const { user } = useAuthStore();
 
   const handleSave = () => {
     queueModal("Create Question", <CreateQuestionContent />);
@@ -11,6 +14,11 @@ const AddMoreQuestionsContent = () => {
   };
 
   const handleClose = () => {
+    if (!user) {
+      queueModal("Add Email", <LoginContent courseId={sessionStorage.getItem('guestCourseId')} message="Please submit your email first to be able to invite users." inviteUsers={true} />);
+      closeModal();
+      return;
+    }
     queueModal("Add More Modules", <AddMoreModulesContent />);
     closeModal();
   };

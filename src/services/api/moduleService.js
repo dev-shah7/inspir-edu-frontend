@@ -81,4 +81,25 @@ export const moduleService = {
     });
     return response.data;
   },
+
+  // Guest-specific module operations
+  guestGetModulesByCourse: async (courseId) => {
+    try {
+      const response = await api.get(`/GuestCourse/get-modules-by-course/${courseId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching guest course modules:", error);
+      throw error;
+    }
+  },
+
+  guestSaveModule: async (moduleData) => {
+    try {
+      const response = await api.post("/GuestCourse/save-module", moduleData);
+      return response.data;
+    } catch (error) {
+      console.error("Error saving guest module:", error);
+      throw error;
+    }
+  },
 };

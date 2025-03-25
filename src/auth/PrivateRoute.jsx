@@ -2,29 +2,17 @@ import { Navigate, Outlet } from "react-router-dom";
 import PropTypes from "prop-types";
 import useAuthStore from "../store/auth/useAuthStore";
 
-const PrivateRoute = ({ roleRequired }) => {
-  const { isAuthenticated, user, activeRole, isLoading } = useAuthStore();
+const PrivateRoute = ({ roleRequired = 'admin' }) => {
+  const { user, activeRole, isLoading } = useAuthStore();
 
   if (isLoading) {
     return null;
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  const currentRole = activeRole || 'admin';
 
-  const hasRequiredRole = user?.roles
-    .map((role) => role.toLowerCase())
-    .includes(roleRequired.toLowerCase());
-
-  if (roleRequired && !hasRequiredRole) {
-    return <Navigate to={`/${activeRole}`} replace />;
-  }
-
-  if (roleRequired.toLowerCase() !== activeRole) {
-    if (hasRequiredRole) {
-      useAuthStore.getState().switchRole(roleRequired);
-    }
+  if (roleRequired.toLowerCase() !== currentRole) {
+    useAuthStore.getState().switchRole(roleRequired);
   }
 
   return <Outlet />;

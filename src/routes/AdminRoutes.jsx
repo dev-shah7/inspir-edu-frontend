@@ -16,74 +16,72 @@ import Support from "../components/common/Support/Support";
 const AdminRoutes = () => {
   return (
     <Routes>
-      <Route element={<PrivateRoute roleRequired="admin" />}>
-        <Route path="/" element={<Layout userRole="admin" />}>
-          <Route
-            index
-            element={
-              <MainContent>
-                <Dashboard />
-              </MainContent>
-            }
-          />
-          <Route
-            path="courses"
-            element={
-              <MainContent>
-                <Courses />
-              </MainContent>
-            }
-          />
-          <Route
-            path="courses/:courseId/modules"
-            element={
-              <MainContent>
-                <Modules />
-              </MainContent>
-            }
-          />
-          <Route
-            path="courses/:courseId/modules/:moduleId/questions"
-            element={
-              <MainContent>
-                <Questions />
-              </MainContent>
-            }
-          />
-          <Route
-            path="users"
-            element={
-              <MainContent>
-                <UsersList />
-              </MainContent>
-            }
-          />
-          <Route
-            path="enrolled-courses"
-            element={
-              <MainContent>
-                <EnrolledCourses />
-              </MainContent>
-            }
-          />
-          <Route
-            path="profile"
-            element={
-              <MainContent>
-                <ProfilePage />
-              </MainContent>
-            }
-          />
-          <Route
-            path="/support"
-            element={
-              <MainContent>
-                <Support />
-              </MainContent>
-            }
-          />
-          <Route path="*" element={<Navigate to="/admin" replace />} />
-        </Route>
+      <Route path="/" element={<Layout userRole="admin" />}>
+        <Route
+          index
+          element={
+            <MainContent>
+              <Dashboard />
+            </MainContent>
+          }
+        />
+        <Route
+          path="courses"
+          element={
+            <MainContent>
+              <Courses />
+            </MainContent>
+          }
+        />
+        <Route
+          path="courses/:courseId/modules"
+          element={
+            <MainContent>
+              <Modules />
+            </MainContent>
+          }
+        />
+        <Route
+          path="courses/:courseId/modules/:moduleId/questions"
+          element={
+            <MainContent>
+              <Questions />
+            </MainContent>
+          }
+        />
+        <Route
+          path="users"
+          element={
+            <MainContent>
+              <UsersList />
+            </MainContent>
+          }
+        />
+        <Route
+          path="enrolled-courses"
+          element={
+            <MainContent>
+              <EnrolledCourses />
+            </MainContent>
+          }
+        />
+        <Route
+          path="profile"
+          element={
+            <MainContent>
+              <ProfilePage />
+            </MainContent>
+          }
+        />
+        <Route
+          path="/support"
+          element={
+            <MainContent>
+              <Support />
+            </MainContent>
+          }
+        />
+        <Route path="*" element={<Navigate to="/admin" replace />} />
       </Route>
     </Routes>
   );

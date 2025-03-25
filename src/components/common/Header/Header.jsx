@@ -44,6 +44,7 @@ const Header = ({ isSidebarOpen, setSidebarOpen }) => {
       clearCurrentCourse();
       sessionStorage.clear();
       await logout();
+      navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }

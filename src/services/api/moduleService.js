@@ -95,7 +95,17 @@ export const moduleService = {
 
   guestSaveModule: async (moduleData) => {
     try {
-      const response = await api.post("/GuestCourse/save-module", moduleData);
+      const formattedData = {
+        id: moduleData.id || 0,
+        name: moduleData.name,
+        url: moduleData.url,
+        description: moduleData.description,
+        position: moduleData.position || 0,
+        releaseDate: moduleData.releaseDate || new Date().toISOString(),
+        courseId: moduleData.courseId,
+        type: moduleData.moduleType,
+      };
+      const response = await api.post("/GuestCourse/save-module", formattedData);
       return response.data;
     } catch (error) {
       console.error("Error saving guest module:", error);

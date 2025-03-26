@@ -9,9 +9,11 @@ import {
 } from "react-icons/io5";
 import { LuLayoutDashboard } from "react-icons/lu";
 import useCourseStore from "../../../admin/store/useCourseStore";
+import useAuthStore from "../../../store/auth/useAuthStore";
 
 const Sidebar = ({ isSidebarOpen, userRole }) => {
   const [isUsersMenuOpen, setUsersMenuOpen] = useState(false);
+  const { user } = useAuthStore();
   const clearCurrentCourse = useCourseStore(
     (state) => state.clearCurrentCourse
   );
@@ -45,6 +47,7 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
               <IoBookOutline className="h-6 w-6 mr-2 text-blue-600" />
               <span>Courses</span>
             </button>
+            {user && 
             <div className="relative">
               <button
                 onClick={() => setUsersMenuOpen(!isUsersMenuOpen)}
@@ -100,6 +103,7 @@ const Sidebar = ({ isSidebarOpen, userRole }) => {
                 </div>
               </div>
             </div>
+            }
           </>
         )}
 

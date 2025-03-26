@@ -96,7 +96,7 @@ const Header = ({ isSidebarOpen, setSidebarOpen }) => {
 
         <div className="hidden md:flex items-center space-x-4">
           <span className="text-2xl flex items-center font-bold text-[#1A73E8]">
-            {activeRole === "admin" ? "Admin Portal" : "Student Portal"}
+            {user ? activeRole === "admin" ? "Admin Portal" : "Student Portal" : "Admin Portal"}
             <span className="text-base font-medium text-gray-600 ml-3">
               | Welcome back
             </span>

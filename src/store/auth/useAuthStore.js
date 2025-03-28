@@ -223,16 +223,16 @@ const useAuthStore = create(
 
       logout: () => {
         localStorage.clear();
-        set({
-          user: null,
-          token: null,
-          isAuthenticated: false,
-          userRole: null,
-          activeRole: null,
-          companyDetails: null,
-          isLoading: false,
-          error: null,
-        });
+        // set({
+        //   user: null,
+        //   token: null,
+        //   isAuthenticated: false,
+        //   userRole: null,
+        //   activeRole: null,
+        //   companyDetails: null,
+        //   isLoading: false,
+        //   error: null,
+        // });
       },
 
       clearError: () => set({ error: null }),

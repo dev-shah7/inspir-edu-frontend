@@ -37,9 +37,7 @@ const QuestionsList = () => {
       fetchAnswers(moduleId);
       fetchQuestionsByModule(moduleId);
       getModuleStatus(moduleId);
-      if (!currentModule) {
-        fetchModuleById(moduleId);
-      }
+      fetchModuleById(moduleId);
     }
   }, [moduleId]);
 

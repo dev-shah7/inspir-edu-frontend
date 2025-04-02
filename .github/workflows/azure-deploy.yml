@@ -6,7 +6,7 @@ on:
       - main # or your default branch name
 
 env:
-  AZURE_WEBAPP_NAME: inspir-edu-frontend # Replace with your Azure App Service name
+  AZURE_WEBAPP_NAME: inspir-edu-frontend
   AZURE_WEBAPP_PACKAGE_PATH: "./dist"
 
 jobs:

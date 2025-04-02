@@ -398,7 +398,7 @@ const QuestionsList = () => {
         )}
       </div>
       {renderContent()}
-
+      {/* <>  
       {isVideoSufficientlyWatched() && (
         <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2">
           <button
@@ -428,6 +428,8 @@ const QuestionsList = () => {
           </button>
         </div>
       )}
+      </> */}
+
     </>
   );
 };

@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { toast } from 'react-hot-toast';
 import ProgressBar from '../components/common/ProgressBar';
 import Module from './Module';
@@ -7,13 +7,18 @@ import Loader from '../../components/common/Loader/Loader';
 import { CourseEnrollmentStatus, ResultStatus } from '../../helpers/enums';
 import CongratulationsBanner from '../components/common/CongratulationsBanner';
 import FailedBanner from '../components/common/FailedBanner';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import DeadlineCountdown from '../components/common/DeadlineCountdown';
+import ConfirmationDialog from '../../components/common/ConfirmationDialog/DialogBox';
 
 const ModuleList = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isSubmitted = searchParams.get('isSubmitted') === 'true';
   const { courseId } = useParams();
   const { currentCourse, submitCourse, isLoading, getEnrolledCourse, clearSubmissionResult, courseSubmissionResult } = useCourseStore();
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
+  const [submissionError, setSubmissionError] = useState(false);
 
   useEffect(() => {
     if (!currentCourse && courseId) {
@@ -21,13 +26,30 @@ const ModuleList = () => {
     }
   }, [getEnrolledCourse, currentCourse, courseId])
 
+  // Add effect to check if last module was just completed
+  useEffect(() => {
+    if (currentCourse?.userModules) {
+      const allModules = currentCourse.userModules;
+      const lastModule = allModules[allModules.length - 1];
+      const isLastModuleCompleted = lastModule?.status === 2;
+      const areAllModulesCompleted = allModules.every((module) => module.status === 2);
+      
+      if (isLastModuleCompleted && areAllModulesCompleted && 
+          currentCourse.enrollmentStatus !== CourseEnrollmentStatus.Completed && 
+          currentCourse.enrollmentStatus !== CourseEnrollmentStatus.DeadlineCrossed) {
+        setShowSubmitDialog(true);
+      }
+    }
+  }, [currentCourse]);
 
   const handleCourseSubmission = async () => {
     try {
+      setSubmissionError(false);
       await submitCourse(currentCourse?.courseId);
       navigate(`/student/courses/${courseId}/result`);
     } catch (error) {
       console.error('Error submitting the course:', error);
+      setSubmissionError(true);
       toast.error('Failed to submit the course. Please try again.');
     }
   };
@@ -42,6 +64,25 @@ const ModuleList = () => {
 
   return (
     <>
+      <ConfirmationDialog
+        isOpen={showSubmitDialog}
+        title="Submit Course"
+        message={
+          submissionError 
+            ? "There was an error submitting your course. Would you like to try again?"
+            : isSubmitted 
+              ? "Congratulations! You've completed all modules. Would you like to submit the course now?" 
+              : "You did not submit the course. Would you like to submit the course?"
+        }
+        onConfirm={() => {
+          setShowSubmitDialog(false);
+          handleCourseSubmission();
+        }}
+        onCancel={() => {
+          setShowSubmitDialog(false);
+          setSubmissionError(false);
+        }}
+      />
       {currentCourse?.deadLineDate && !currentCourse?.resultDetail && (
         <div className='mb-6'>
           <DeadlineCountdown

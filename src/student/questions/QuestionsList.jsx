@@ -74,7 +74,7 @@ const QuestionsList = () => {
       await submitModule(moduleId);
       toast.success("Your answers have been submitted!");
       clearCurrentCourse();
-      navigate(`/student/courses/${courseId}/modules`);
+      navigate(`/student/courses/${courseId}/modules?isSubmitted=true`);
     } catch (error) {
       console.error("Error submitting the answers:", error);
       toast.error("Failed to submit your answers. Please try again.");

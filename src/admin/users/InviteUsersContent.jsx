@@ -84,6 +84,7 @@ const InviteUsersContent = ({ courseId, companyId, withCourse = false }) => {
             });
             toast.success("Invitation sent to registered user!");
           } else {
+            console.log("course details", courseDetails);
             await sendInvitationEmail(
               studentEmail,
               invitationToken,

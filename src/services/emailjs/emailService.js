@@ -2,6 +2,7 @@ import emailjs from "@emailjs/browser";
 import { emailConfig } from "./emailConfig";
 
 export const sendTemplateEmail = async (templateId, templateParams) => {
+  console.log("templateParams", templateParams);
   try {
     const response = await emailjs.send(
       emailConfig.serviceId,
@@ -71,10 +72,11 @@ export const sendAdminNotificationEmail = async (params) => {
 };
 
 export const sendPasswordResetEmail = async (userEmail, resetToken) => {
-  const resetLink = `${window.location.origin
-    }/reset-password?token=${encodeURIComponent(
-      resetToken
-    )}&email=${encodeURIComponent(userEmail)}`;
+  const resetLink = `${
+    window.location.origin
+  }/reset-password?token=${encodeURIComponent(
+    resetToken
+  )}&email=${encodeURIComponent(userEmail)}`;
 
   const templateParams = {
     user_email: userEmail,
@@ -106,7 +108,6 @@ export const sendSupportEmail = async (formData) => {
 };
 
 export const sendAdminCourseStartEmail = async (templateParams) => {
-
   try {
     return sendTemplateEmail(
       emailConfig.templates.courseStartAdmin,
@@ -119,7 +120,6 @@ export const sendAdminCourseStartEmail = async (templateParams) => {
 };
 
 export const sendStudentCourseStartEmail = async (templateParams) => {
-
   try {
     return sendTemplateEmail(
       emailConfig.templates.courseStartStudent,
@@ -132,7 +132,6 @@ export const sendStudentCourseStartEmail = async (templateParams) => {
 };
 
 export const sendAdminCourseSubmissionEmail = async (templateParams) => {
-
   try {
     return sendTemplateEmail(
       emailConfig.templates.courseSubmissionAdmin,
@@ -145,14 +144,16 @@ export const sendAdminCourseSubmissionEmail = async (templateParams) => {
 };
 
 export const sendStudentCourseSubmissionEmail = async (templateParams) => {
-
   try {
     return sendTemplateEmail(
       emailConfig.templates.courseSubmissionStudent,
       templateParams
     );
   } catch (error) {
-    console.error("Error sending student course submission notification:", error);
+    console.error(
+      "Error sending student course submission notification:",
+      error
+    );
     throw new Error("Failed to send student course submission notification");
   }
 };

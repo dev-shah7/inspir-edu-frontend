@@ -35,13 +35,6 @@ jobs:
         env:
           CI: false
 
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          client-id: ${{secrets.AZUREAPPSERVICE_CLIENTID_A644E058B57045839F92BD988DAEA4A1}}
-          tenant-id: ${{secrets.AZUREAPPSERVICE_TENANTID_8E62CAB418494FA7BA41B8D482CAAC85}}
-          subscription-id: ${{secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0EA6BE4C4885453D811962763FBC3233}}
-
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v2
         with:

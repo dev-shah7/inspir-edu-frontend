@@ -35,8 +35,10 @@ jobs:
         env:
           CI: false
 
-      - name: Deploy to Azure App Service
+      # Deploy using Publish Profile (instead of logging in directly)
+      - name: Deploy to Azure App Service using Publish Profile
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          publish-profile: ${{ secrets.AZUREAPPSSERVICE_PUBLISHPROFILE }} # Use Publish Profile secret

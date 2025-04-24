@@ -16,6 +16,7 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +42,7 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_8E62CAB418494FA7BA41B8D482CAAC85 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0EA6BE4C4885453D811962763FBC3233 }}
           enable-AzPSSession: true
+          allow-no-subscriptions: true
 
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v2

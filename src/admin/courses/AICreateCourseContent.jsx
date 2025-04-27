@@ -1,0 +1,427 @@
+import { useState, memo } from "react";
+import { toast } from "react-hot-toast";
+import useModalStore from "../store/useModalStore";
+import useCourseStore from "../store/useCourseStore";
+import useAuthStore from "../../store/auth/useAuthStore";
+import useModuleStore from "../store/useModuleStore";
+import PropTypes from "prop-types";
+
+// Memoize MediaPreview component
+const MediaPreview = memo(({ type, file, url }) => {
+  if (!file && !url) return null;
+
+  if (type === "Image") {
+    return (
+      <div className="mt-4">
+        <img
+          src={file ? URL.createObjectURL(file) : url}
+          alt="Preview"
+          className="w-48 h-48 object-cover rounded-md mx-auto"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "path/to/fallback-image.png";
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (type === "Video") {
+    return (
+      <div className="mt-4">
+        {file ? (
+          <video
+            className="w-full max-w-lg mx-auto rounded-md"
+            controls
+            src={URL.createObjectURL(file)}
+          >
+            Your browser does not support the video tag.
+          </video>
+        ) : (
+          <div className="aspect-video w-full max-w-lg mx-auto">
+            {url?.includes("youtube") ? (
+              <iframe
+                className="w-full h-full rounded-md"
+                src={getYouTubeEmbedUrl(url)}
+                title="Video preview"
+                allowFullScreen
+              />
+            ) : (
+              <video className="w-full rounded-md" controls src={url}>
+                Your browser does not support the video tag.
+              </video>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4">
+      <p className="text-sm text-gray-600">
+        Selected File: {file?.name || url}
+      </p>
+    </div>
+  );
+});
+
+MediaPreview.propTypes = {
+  type: PropTypes.oneOf(["Image", "Video", "Pdf"]).isRequired,
+  file: PropTypes.shape({
+    name: PropTypes.string,
+  }),
+  url: PropTypes.string,
+};
+
+MediaPreview.displayName = "MediaPreview";
+
+const getYouTubeEmbedUrl = (url) => {
+  if (!url) return "";
+
+  // Handle different YouTube URL formats
+  const regExp =
+    /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+
+  if (match && match[2].length === 11) {
+    return `https://www.youtube.com/embed/${match[2]}`;
+  }
+
+  return url;
+};
+
+const AICreateCourseContent = () => {
+  const { closeModal } = useModalStore();
+  const { saveCourse } = useCourseStore();
+  const { uploadFile } = useModuleStore();
+  const { user } = useAuthStore();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [mediaInputType, setMediaInputType] = useState("upload");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [mediaUrl, setMediaUrl] = useState("");
+
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    mediaType: "Pdf",
+    numberOfModules: 3,
+    questionsPerModule: 5,
+    difficulty: "Beginner",
+  });
+
+  const mediaTypes = [
+    { label: "PDF", value: "Pdf", icon: "337/337946" },
+    { label: "Image", value: "Image", icon: "1000/1000917" },
+    { label: "Video", value: "Video", icon: "1384/1384060" },
+  ];
+
+  const difficulties = ["Beginner", "Intermediate", "Advanced"];
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Log all form inputs
+    console.log("Form Data:", {
+      ...formData,
+      mediaInputType,
+      selectedFile: selectedFile
+        ? {
+            name: selectedFile.name,
+            type: selectedFile.type,
+            size: selectedFile.size,
+          }
+        : null,
+      mediaUrl,
+    });
+
+    try {
+      setIsLoading(true);
+
+      let fileUrl = "";
+      if (selectedFile) {
+        fileUrl = await uploadFile(
+          selectedFile,
+          formData.mediaType,
+          (progress) => {
+            setUploadProgress(progress);
+          }
+        );
+      } else if (mediaInputType === "url" && mediaUrl) {
+        fileUrl = mediaUrl;
+      }
+
+      // Mock API call - replace with actual API when backend is ready
+      const mockResponse = {
+        success: true,
+        course: {
+          id: Math.floor(Math.random() * 1000),
+          name: formData.name,
+          description: formData.description,
+          modules: Array(parseInt(formData.numberOfModules)).fill({
+            name: "AI Generated Module",
+            description: "This module was generated by AI",
+            url: fileUrl || "https://example.com/ai-content",
+            position: 1,
+            questions: Array(parseInt(formData.questionsPerModule)).fill({
+              question: "AI Generated Question",
+              options: ["Option 1", "Option 2", "Option 3", "Option 4"],
+              correctAnswer: 0,
+            }),
+          }),
+        },
+      };
+
+      console.log(mockResponse);
+
+      toast.success("Course created successfully with AI!");
+      closeModal();
+    } catch (error) {
+      console.error("Error creating course:", error);
+      toast.error("Failed to create course");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const renderMediaSection = () => {
+    return (
+      <div>
+        <div className="mb-6">
+          <div className="flex justify-center space-x-6">
+            {mediaTypes.map(({ label, value, icon }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({ ...prev, mediaType: value }))
+                }
+                className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${
+                  formData.mediaType === value
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300 bg-gray-100 opacity-50"
+                } hover:shadow-md transition`}
+              >
+                <img
+                  src={`https://cdn-icons-png.flaticon.com/512/${icon}.png`}
+                  alt={label}
+                  className="w-12"
+                />
+                <p className="text-sm mt-2">{label}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex justify-center space-x-4 mb-4">
+          <button
+            type="button"
+            onClick={() => setMediaInputType("upload")}
+            className={`px-4 py-2 border rounded-lg ${
+              mediaInputType === "upload"
+                ? "border-blue-500 bg-blue-50 text-blue-700"
+                : "border-gray-300 bg-gray-100 text-gray-700"
+            } hover:shadow-md transition`}
+          >
+            Upload {formData.mediaType}
+          </button>
+          <button
+            type="button"
+            onClick={() => setMediaInputType("url")}
+            className={`px-4 py-2 border rounded-lg ${
+              mediaInputType === "url"
+                ? "border-blue-500 bg-blue-50 text-blue-700"
+                : "border-gray-300 bg-gray-100 text-gray-700"
+            } hover:shadow-md transition`}
+          >
+            {formData.mediaType} URL
+          </button>
+        </div>
+
+        {mediaInputType === "upload" && (
+          <div>
+            <label className="block mb-2 text-sm font-medium text-[#0F172A]">
+              Select file
+            </label>
+            <input
+              type="file"
+              onChange={handleFileChange}
+              accept={
+                formData.mediaType === "Image"
+                  ? "image/*"
+                  : formData.mediaType === "Video"
+                  ? "video/*"
+                  : ".pdf"
+              }
+              className="w-full p-2 border rounded-md focus:outline-none"
+            />
+            <MediaPreview type={formData.mediaType} file={selectedFile} />
+          </div>
+        )}
+
+        {mediaInputType === "url" && (
+          <div>
+            <label className="block mb-2 text-sm font-medium text-[#0F172A]">
+              Enter {formData.mediaType} URL
+            </label>
+            <input
+              type="text"
+              value={mediaUrl}
+              onChange={(e) => setMediaUrl(e.target.value)}
+              className="w-full p-2 border rounded-md focus:outline-none"
+              placeholder={`Enter ${formData.mediaType} URL`}
+            />
+            <MediaPreview type={formData.mediaType} url={mediaUrl} />
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <p className="text-gray-600">Creating course with AI...</p>
+        {uploadProgress > 0 && (
+          <div className="w-64">
+            <div className="bg-gray-200 rounded-full h-2.5">
+              <div
+                className="bg-blue-600 h-2.5 rounded-full"
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+            </div>
+            <p className="text-sm text-gray-600 mt-2">
+              Uploading: {uploadProgress}%
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="my-2">
+      <form onSubmit={handleSubmit} className="space-y-6 px-16">
+        {/* Course Name */}
+        <div>
+          <label className="block mb-2 text-md font-light text-[#031F42]">
+            Course Name
+          </label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Enter course name"
+            required
+          />
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="block mb-2 text-sm font-medium text-[#0F172A]">
+            Description
+          </label>
+          <textarea
+            value={formData.description}
+            name="description"
+            onChange={handleInputChange}
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            rows="4"
+            placeholder="Enter course description"
+          />
+        </div>
+
+        {/* Media Section */}
+        {renderMediaSection()}
+
+        {/* Number of Modules */}
+        <div>
+          <label className="block mb-2 text-sm font-medium text-[#0F172A]">
+            Number of Modules
+          </label>
+          <input
+            type="number"
+            name="numberOfModules"
+            value={formData.numberOfModules}
+            onChange={handleInputChange}
+            min="1"
+            max="10"
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
+
+        {/* Questions per Module */}
+        <div>
+          <label className="block mb-2 text-sm font-medium text-[#0F172A]">
+            Questions per Module
+          </label>
+          <input
+            type="number"
+            name="questionsPerModule"
+            value={formData.questionsPerModule}
+            onChange={handleInputChange}
+            min="1"
+            max="10"
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
+
+        {/* Difficulty Level */}
+        <div>
+          <label className="block mb-2 text-sm font-medium text-[#0F172A]">
+            Difficulty Level
+          </label>
+          <select
+            name="difficulty"
+            value={formData.difficulty}
+            onChange={handleInputChange}
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
+            {difficulties.map((level) => (
+              <option key={level} value={level}>
+                {level}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-center space-x-4">
+          <button
+            type="button"
+            onClick={() => closeModal()}
+            className="px-6 py-2 bg-[#C6433D] text-white font-medium rounded-md hover:bg-[#B91C1C] transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-6 py-2 bg-[#1A73E8] text-white font-medium rounded-md hover:bg-[#1E40AF] transition"
+          >
+            Generate Course
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default AICreateCourseContent;

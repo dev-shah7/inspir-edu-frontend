@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import useAuthStore from "../../store/auth/useAuthStore";
 import UpdateSubscription from "../common/UpdateSubscription/UpdateSubscription";
 import PropTypes from "prop-types";
+import AIAssistant from "../common/AIAssistant";
 
 // Memoize MediaPreview component
 const MediaPreview = memo(({ type, file, url }) => {
@@ -96,7 +97,7 @@ const getYouTubeEmbedUrl = (url) => {
 };
 
 const CreateModuleContent = ({ mode = "add", moduleId }) => {
-  const { closeModal, queueModal } = useModalStore();
+  const { closeModal, queueModal, openModal } = useModalStore();
   const {
     saveModule,
     fetchModuleById,
@@ -105,15 +106,17 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
     isFetchingModule,
     saveGuestModule,
     fetchGuestModulesByCourse,
-    fetchGuestSingleModuleByCourseId
+    fetchGuestSingleModuleByCourseId,
   } = useModuleStore();
   const { currentCourse } = useCourseStore();
   const { user } = useAuthStore();
   const { courseId: courseIdFromParams } = useParams();
 
-  const courseId = user 
-    ? (currentCourse || courseIdFromParams)
-    : (currentCourse?.id || courseIdFromParams || sessionStorage.getItem('guestCourseId'));
+  const courseId = user
+    ? currentCourse || courseIdFromParams
+    : currentCourse?.id ||
+      courseIdFromParams ||
+      sessionStorage.getItem("guestCourseId");
 
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -189,7 +192,11 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
     if (mode === "edit" && moduleId) {
       const loadModule = async () => {
         try {
-          const moduleData = user ? await fetchModuleById(moduleId) : await fetchGuestSingleModuleByCourseId(sessionStorage.getItem('guestCourseId'));
+          const moduleData = user
+            ? await fetchModuleById(moduleId)
+            : await fetchGuestSingleModuleByCourseId(
+                sessionStorage.getItem("guestCourseId")
+              );
 
           // Set the media type based on the URL
           if (moduleData.url) {
@@ -251,10 +258,11 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
                     setReplaceMedia(true);
                   }
                 }}
-                className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${selectedType === value
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300 bg-gray-100 opacity-50"
-                  } hover:shadow-md transition`}
+                className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${
+                  selectedType === value
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300 bg-gray-100 opacity-50"
+                } hover:shadow-md transition`}
               >
                 <img
                   src={`https://cdn-icons-png.flaticon.com/512/${icon}.png`}
@@ -293,20 +301,22 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
               <button
                 type="button"
                 onClick={() => setMediaInputType("upload")}
-                className={`px-4 py-2 border rounded-lg ${mediaInputType === "upload"
-                  ? "border-blue-500 bg-blue-50 text-blue-700"
-                  : "border-gray-300 bg-gray-100 text-gray-700"
-                  } hover:shadow-md transition`}
+                className={`px-4 py-2 border rounded-lg ${
+                  mediaInputType === "upload"
+                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-gray-300 bg-gray-100 text-gray-700"
+                } hover:shadow-md transition`}
               >
                 Upload {selectedType}
               </button>
               <button
                 type="button"
                 onClick={() => setMediaInputType("url")}
-                className={`px-4 py-2 border rounded-lg ${mediaInputType === "url"
-                  ? "border-blue-500 bg-blue-50 text-blue-700"
-                  : "border-gray-300 bg-gray-100 text-gray-700"
-                  } hover:shadow-md transition`}
+                className={`px-4 py-2 border rounded-lg ${
+                  mediaInputType === "url"
+                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-gray-300 bg-gray-100 text-gray-700"
+                } hover:shadow-md transition`}
               >
                 {selectedType} URL
               </button>
@@ -324,8 +334,8 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
                     selectedType === "Image"
                       ? "image/*"
                       : selectedType === "Video"
-                        ? "video/*"
-                        : ".pdf"
+                      ? "video/*"
+                      : ".pdf"
                   }
                   className="w-full p-2 border rounded-md focus:outline-none"
                 />
@@ -412,7 +422,9 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
         url: fileUrl,
         position: formData.position,
         releaseDate: formData.releaseDate,
-        courseId: user ? Number(courseId) : sessionStorage.getItem('guestCourseId'),
+        courseId: user
+          ? Number(courseId)
+          : sessionStorage.getItem("guestCourseId"),
         moduleType: getModuleTypeNumber(selectedType),
       };
       console.log("course Id : ", courseId);
@@ -420,16 +432,17 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
       if (user) {
         await saveModule(moduleData);
       } else {
-        if (courseId || sessionStorage.getItem('guestCourseId')) {
+        if (courseId || sessionStorage.getItem("guestCourseId")) {
           await saveGuestModule(moduleData);
-        }
-        else {
+        } else {
           toast.error("Invalid course!");
         }
       }
 
       // Then refresh the list in the background
-      user ? fetchModulesByCourse(courseId).catch(console.error) : fetchGuestModulesByCourse(courseId).catch(console.error);
+      user
+        ? fetchModulesByCourse(courseId).catch(console.error)
+        : fetchGuestModulesByCourse(courseId).catch(console.error);
 
       toast.success(
         `Module ${mode === "edit" ? "updated" : "created"} successfully`
@@ -462,6 +475,12 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
       default:
         return 2; // Default to PDF
     }
+  };
+
+  const handleAIGeneratedContent = (content) => {
+    // For now, just log the generated content
+    console.log("AI Generated Content:", content);
+    // TODO: Implement the logic to add this content to the form
   };
 
   if (showSubscriptionForm) {
@@ -512,9 +531,28 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
   return (
     <div className="my-2">
       <form onSubmit={handleSubmit} className="space-y-6 px-16">
-        <h2 className="text-md text-center font-light text-[#0F172A]">
-          {mode === "edit" ? "Edit Module" : "Create New Module"}
-        </h2>
+        <div className="flex justify-between items-center">
+          <h2 className="text-md text-center font-light text-[#0F172A]">
+            {mode === "edit" ? "Edit Module" : "Create New Module"}
+          </h2>
+          <button
+            type="button"
+            onClick={() =>
+              openModal(
+                "AI Module Assistant",
+                <AIAssistant
+                  context="module"
+                  onGenerate={handleAIGeneratedContent}
+                  onClose={() => closeModal()}
+                />
+              )
+            }
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          >
+            <span className="text-lg">🤖</span>
+            <span>Get AI Assistance</span>
+          </button>
+        </div>
 
         {/* Media Section */}
         {renderMediaSection()}
@@ -530,8 +568,9 @@ const CreateModuleContent = ({ mode = "add", moduleId }) => {
             {...register("name", {
               required: "Module name is required",
             })}
-            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 ${errors.name ? "border-red-500" : ""
-              }`}
+            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+              errors.name ? "border-red-500" : ""
+            }`}
             placeholder="Enter module name"
             onChange={(e) => {
               handleInputChange(e);

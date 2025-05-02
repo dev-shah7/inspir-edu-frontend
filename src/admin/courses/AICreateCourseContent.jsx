@@ -1,10 +1,136 @@
-import { useState, memo } from "react";
+import { useState, memo, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import useModalStore from "../store/useModalStore";
 import useCourseStore from "../store/useCourseStore";
 import useAuthStore from "../../store/auth/useAuthStore";
 import useModuleStore from "../store/useModuleStore";
 import PropTypes from "prop-types";
+import axios from "axios";
+
+const FAST_API_BASE_URL = import.meta.env.VITE_FAST_API_BASE_URL;
+
+// AI Loading Modal Component
+const AILoadingModal = ({ isOpen }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
+        <div className="flex flex-col items-center">
+          {/* AI Icon Animation */}
+          <div className="relative w-24 h-24 mb-6">
+            <div className="absolute inset-0 rounded-full bg-blue-500/20 animate-ping"></div>
+            <div className="relative flex items-center justify-center w-full h-full rounded-full bg-blue-500">
+              <svg
+                className="w-12 h-12 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                ></path>
+              </svg>
+            </div>
+          </div>
+
+          {/* Title and Description */}
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">
+            Generating Your Course
+          </h3>
+          <div className="space-y-2 text-center mb-8">
+            <p className="text-gray-600">
+              Our AI is analyzing your media and creating comprehensive course
+              content.
+            </p>
+            <p className="text-sm text-gray-500">
+              This process may take a few minutes...
+            </p>
+          </div>
+
+          {/* Progress Steps */}
+          <div className="w-full space-y-4">
+            <div className="flex items-center">
+              <div className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                <svg
+                  className="w-5 h-5 animate-spin"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              </div>
+              <div className="ml-4 flex-1">
+                <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-blue-500 rounded-full animate-loading"></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 text-sm font-medium text-gray-600">
+              <div className="flex flex-col items-center">
+                <div className="w-2 h-2 rounded-full bg-blue-500 mb-1 animate-pulse"></div>
+                <span>Analyzing Media</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-2 h-2 rounded-full bg-blue-500 mb-1 animate-pulse delay-100"></div>
+                <span>Creating Modules</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-2 h-2 rounded-full bg-blue-500 mb-1 animate-pulse delay-200"></div>
+                <span>Generating Questions</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Processing Status */}
+          <div className="mt-8 text-sm text-gray-500 flex items-center">
+            <svg
+              className="w-4 h-4 mr-2 animate-spin"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            Processing your request...
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+AILoadingModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+};
 
 // Memoize MediaPreview component
 const MediaPreview = memo(({ type, file, url }) => {
@@ -93,15 +219,11 @@ const getYouTubeEmbedUrl = (url) => {
 
 const AICreateCourseContent = () => {
   const { closeModal } = useModalStore();
-  const { saveCourse } = useCourseStore();
+  const { saveCourse, courses, refreshCourses, fetchCourses } =
+    useCourseStore();
   const { uploadFile } = useModuleStore();
   const { user } = useAuthStore();
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [mediaInputType, setMediaInputType] = useState("upload");
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [mediaUrl, setMediaUrl] = useState("");
+  const token = localStorage.getItem("token");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -111,6 +233,10 @@ const AICreateCourseContent = () => {
     questionsPerModule: 5,
     difficulty: "Beginner",
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isAILoading, setIsAILoading] = useState(false);
 
   const mediaTypes = [
     { label: "PDF", value: "Pdf", icon: "337/337946" },
@@ -136,66 +262,103 @@ const AICreateCourseContent = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Log all form inputs
-    console.log("Form Data:", {
-      ...formData,
-      mediaInputType,
-      selectedFile: selectedFile
-        ? {
-            name: selectedFile.name,
-            type: selectedFile.type,
-            size: selectedFile.size,
-          }
-        : null,
-      mediaUrl,
-    });
-
     try {
-      setIsLoading(true);
+      setIsSubmitting(true);
+      console.log("Starting course creation...");
 
-      let fileUrl = "";
-      if (selectedFile) {
-        fileUrl = await uploadFile(
-          selectedFile,
-          formData.mediaType,
-          (progress) => {
-            setUploadProgress(progress);
-          }
-        );
-      } else if (mediaInputType === "url" && mediaUrl) {
-        fileUrl = mediaUrl;
+      if (!selectedFile) {
+        toast.error("Please select a file");
+        return;
       }
 
-      // Mock API call - replace with actual API when backend is ready
-      const mockResponse = {
-        success: true,
-        course: {
-          id: Math.floor(Math.random() * 1000),
-          name: formData.name,
-          description: formData.description,
-          modules: Array(parseInt(formData.numberOfModules)).fill({
-            name: "AI Generated Module",
-            description: "This module was generated by AI",
-            url: fileUrl || "https://example.com/ai-content",
-            position: 1,
-            questions: Array(parseInt(formData.questionsPerModule)).fill({
-              question: "AI Generated Question",
-              options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-              correctAnswer: 0,
-            }),
-          }),
-        },
-      };
+      // Handle PDF course generation
+      if (formData.mediaType === "Pdf" && selectedFile) {
+        const formDataToSend = new FormData();
+        formDataToSend.append("pdf_file", selectedFile);
+        formDataToSend.append("course_name", formData.name);
+        formDataToSend.append("course_description", formData.description);
+        formDataToSend.append("num_modules", formData.numberOfModules);
+        formDataToSend.append(
+          "questions_per_module",
+          formData.questionsPerModule
+        );
+        formDataToSend.append("difficulty_level", formData.difficulty);
 
-      console.log(mockResponse);
+        try {
+          setIsAILoading(true);
 
-      toast.success("Course created successfully with AI!");
+          console.log("Sending form data:", {
+            course_name: formData.name,
+            course_description: formData.description,
+            num_modules: formData.numberOfModules,
+            questions_per_module: formData.questionsPerModule,
+            difficulty_level: formData.difficulty,
+          });
+
+          const response = await axios.post(
+            `${FAST_API_BASE_URL}/courses/generate`,
+            formDataToSend,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+
+          if (response.status !== 200) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          console.log("Course generation result:", response.data);
+
+          // Fetch updated courses list
+          await fetchCourses();
+
+          toast.success(
+            "Course generation started! You'll be notified when it's ready.",
+            {
+              duration: 4000,
+              position: "bottom-right",
+            }
+          );
+
+          closeModal();
+          return;
+        } catch (error) {
+          console.error("Error generating course:", error);
+          if (error.response?.status === 401) {
+            toast.error("Unauthorized. Please log in again.", {
+              duration: 4000,
+              position: "bottom-right",
+            });
+          } else {
+            const errorMessage =
+              error.response?.data?.detail?.[0]?.msg ||
+              error.response?.data?.message ||
+              "Failed to generate course from PDF";
+            toast.error(errorMessage, {
+              duration: 4000,
+              position: "bottom-right",
+            });
+          }
+          return;
+        } finally {
+          setIsAILoading(false);
+          setIsSubmitting(false);
+        }
+      }
+
       closeModal();
     } catch (error) {
-      console.error("Error creating course:", error);
-      toast.error("Failed to create course");
+      console.error("Error starting course creation:", error);
+      toast.error("Failed to start course creation", {
+        duration: 4000,
+        position: "bottom-right",
+        id: "course-creation-start-error",
+      });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -228,95 +391,31 @@ const AICreateCourseContent = () => {
           </div>
         </div>
 
-        <div className="flex justify-center space-x-4 mb-4">
-          <button
-            type="button"
-            onClick={() => setMediaInputType("upload")}
-            className={`px-4 py-2 border rounded-lg ${
-              mediaInputType === "upload"
-                ? "border-blue-500 bg-blue-50 text-blue-700"
-                : "border-gray-300 bg-gray-100 text-gray-700"
-            } hover:shadow-md transition`}
-          >
-            Upload {formData.mediaType}
-          </button>
-          <button
-            type="button"
-            onClick={() => setMediaInputType("url")}
-            className={`px-4 py-2 border rounded-lg ${
-              mediaInputType === "url"
-                ? "border-blue-500 bg-blue-50 text-blue-700"
-                : "border-gray-300 bg-gray-100 text-gray-700"
-            } hover:shadow-md transition`}
-          >
-            {formData.mediaType} URL
-          </button>
+        <div>
+          <label className="block mb-2 text-sm font-medium text-[#0F172A]">
+            Select file
+          </label>
+          <input
+            type="file"
+            onChange={handleFileChange}
+            accept={
+              formData.mediaType === "Image"
+                ? "image/*"
+                : formData.mediaType === "Video"
+                ? "video/*"
+                : ".pdf"
+            }
+            className="w-full p-2 border rounded-md focus:outline-none"
+          />
+          <MediaPreview type={formData.mediaType} file={selectedFile} />
         </div>
-
-        {mediaInputType === "upload" && (
-          <div>
-            <label className="block mb-2 text-sm font-medium text-[#0F172A]">
-              Select file
-            </label>
-            <input
-              type="file"
-              onChange={handleFileChange}
-              accept={
-                formData.mediaType === "Image"
-                  ? "image/*"
-                  : formData.mediaType === "Video"
-                  ? "video/*"
-                  : ".pdf"
-              }
-              className="w-full p-2 border rounded-md focus:outline-none"
-            />
-            <MediaPreview type={formData.mediaType} file={selectedFile} />
-          </div>
-        )}
-
-        {mediaInputType === "url" && (
-          <div>
-            <label className="block mb-2 text-sm font-medium text-[#0F172A]">
-              Enter {formData.mediaType} URL
-            </label>
-            <input
-              type="text"
-              value={mediaUrl}
-              onChange={(e) => setMediaUrl(e.target.value)}
-              className="w-full p-2 border rounded-md focus:outline-none"
-              placeholder={`Enter ${formData.mediaType} URL`}
-            />
-            <MediaPreview type={formData.mediaType} url={mediaUrl} />
-          </div>
-        )}
       </div>
     );
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-        <p className="text-gray-600">Creating course with AI...</p>
-        {uploadProgress > 0 && (
-          <div className="w-64">
-            <div className="bg-gray-200 rounded-full h-2.5">
-              <div
-                className="bg-blue-600 h-2.5 rounded-full"
-                style={{ width: `${uploadProgress}%` }}
-              ></div>
-            </div>
-            <p className="text-sm text-gray-600 mt-2">
-              Uploading: {uploadProgress}%
-            </p>
-          </div>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className="my-2">
+      <AILoadingModal isOpen={isAILoading} />
       <form onSubmit={handleSubmit} className="space-y-6 px-16">
         {/* Course Name */}
         <div>
@@ -346,6 +445,7 @@ const AICreateCourseContent = () => {
             className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             rows="4"
             placeholder="Enter course description"
+            required
           />
         </div>
 
@@ -414,9 +514,12 @@ const AICreateCourseContent = () => {
           </button>
           <button
             type="submit"
-            className="px-6 py-2 bg-[#1A73E8] text-white font-medium rounded-md hover:bg-[#1E40AF] transition"
+            disabled={isSubmitting}
+            className={`px-6 py-2 bg-[#1A73E8] text-white font-medium rounded-md hover:bg-[#1E40AF] transition ${
+              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            Generate Course
+            {isSubmitting ? "Starting..." : "Generate Course"}
           </button>
         </div>
       </form>

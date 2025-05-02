@@ -11,7 +11,11 @@ import AddMoreQuestionsContent from "./AddMoreQuestionsContent";
 import useAuthStore from "../../store/auth/useAuthStore";
 import AIAssistant from "../common/AIAssistant";
 
-const CreateQuestionContent = ({ mode = "add", questionId }) => {
+const CreateQuestionContent = ({
+  mode = "add",
+  questionId,
+  onQuestionCreated,
+}) => {
   const { moduleId: paramModuleId } = useParams();
   const { currentModule } = useModuleStore();
   const { closeModal, queueModal, openModal } = useModalStore();
@@ -165,22 +169,27 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
         options: getOptions(),
       };
 
-      (await user)
+      // Save the question
+      const response = await (user
         ? saveQuestion(questionData)
-        : saveGuestQuestion(questionData);
+        : saveGuestQuestion(questionData));
 
-      // Refresh questions list in the background
-      user
-        ? fetchQuestionsByModule(moduleId).catch(console.error)
-        : fetchGuestQuestionsByModule(moduleId).catch(console.error);
+      if (response) {
+        toast.success("Question saved successfully");
 
-      toast.success("Question saved successfully");
+        // Call the onQuestionCreated callback if provided
+        if (onQuestionCreated) {
+          await onQuestionCreated();
+        }
 
-      if (mode === "add") {
-        queueModal("Add Questions", <AddMoreQuestionsContent />);
+        if (mode === "add") {
+          queueModal("Add Questions", <AddMoreQuestionsContent />);
+        }
+
+        closeModal();
       }
-      closeModal();
     } catch (error) {
+      console.error("Error saving question:", error);
       toast.error(error.message || "Failed to save question");
     } finally {
       setIsLoading(false);
@@ -228,7 +237,7 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
       case "checkbox":
         return options.map((opt, idx) => ({
           value: opt.value,
-          isCorrect: selectedCheckboxes.has(index),
+          isCorrect: selectedCheckboxes.has(idx),
         }));
       default:
         return [];

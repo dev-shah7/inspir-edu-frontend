@@ -15,7 +15,6 @@ import { usePaymentStatusHandler } from "../../hooks/usePaymentStatusHandler";
 import useAuthStore from "../../store/auth/useAuthStore";
 import LoginContent from "../../components/Login/LoginContent";
 
-
 const Questions = () => {
   const { moduleId } = useParams();
   const { openModal } = useModalStore();
@@ -55,7 +54,7 @@ const Questions = () => {
     if (moduleId) {
       loadQuestions();
     }
-  }, [moduleId, fetchQuestionsByModule, fetchGuestQuestionsByModule, user]);
+  }, [moduleId, user]);
 
   const filteredQuestions = useMemo(() => {
     return questions.filter((question) =>
@@ -64,13 +63,36 @@ const Questions = () => {
   }, [searchQuery, questions]);
 
   const handleCreateQuestion = () => {
-    openModal("Add Question", <CreateQuestionContent />);
+    openModal(
+      "Add Question",
+      <CreateQuestionContent
+        onQuestionCreated={async () => {
+          try {
+            // Refresh questions list after creation
+            if (user) {
+              await fetchQuestionsByModule(moduleId);
+            } else {
+              await fetchGuestQuestionsByModule(moduleId);
+            }
+          } catch (error) {
+            console.error("Error refreshing questions:", error);
+            toast.error("Failed to refresh questions list");
+          }
+        }}
+      />
+    );
   };
 
   const handleEditQuestion = (questionId) => {
     if (!user) {
-      openModal("Add Email", <LoginContent courseId={sessionStorage.getItem('guestCourseId')} message="Please submit your email first to be able to edit questions." />);
-      return;  
+      openModal(
+        "Add Email",
+        <LoginContent
+          courseId={sessionStorage.getItem("guestCourseId")}
+          message="Please submit your email first to be able to edit questions."
+        />
+      );
+      return;
     }
     openModal(
       "Edit Question",
@@ -85,13 +107,21 @@ const Questions = () => {
         if (user) {
           await deleteQuestion(questionId);
         } else {
-          openModal("Add Email", <LoginContent courseId={sessionStorage.getItem('guestCourseId')} message="Please submit your email first to be able to delete questions." />);
-          return;     
+          openModal(
+            "Add Email",
+            <LoginContent
+              courseId={sessionStorage.getItem("guestCourseId")}
+              message="Please submit your email first to be able to delete questions."
+            />
+          );
+          return;
         }
         toast.success("Question deleted successfully");
 
         // Refresh the list in the background
-        const fetchQuestions = user ? fetchQuestionsByModule : fetchGuestQuestionsByModule;
+        const fetchQuestions = user
+          ? fetchQuestionsByModule
+          : fetchGuestQuestionsByModule;
         fetchQuestions(moduleId).catch(console.error);
       } catch (error) {
         toast.error("Failed to delete question");
@@ -197,10 +227,11 @@ const Questions = () => {
               </button>
               <button
                 onClick={handlePreviewClick}
-                className={`w-full lg:w-auto px-4 py-2 ${isPreviewMode
-                  ? "bg-gray-600"
-                  : "bg-blue-500 hover:bg-blue-600"
-                  } text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring focus:ring-blue-300 transition flex items-center justify-center gap-2`}
+                className={`w-full lg:w-auto px-4 py-2 ${
+                  isPreviewMode
+                    ? "bg-gray-600"
+                    : "bg-blue-500 hover:bg-blue-600"
+                } text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring focus:ring-blue-300 transition flex items-center justify-center gap-2`}
               >
                 <AiOutlineEye className="text-md" />
                 {isPreviewMode ? "Exit Preview" : "Question Preview"}

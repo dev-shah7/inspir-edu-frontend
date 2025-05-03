@@ -1,4 +1,4 @@
-import { useState, memo, useEffect } from "react";
+import { useState, memo } from "react";
 import { toast } from "react-hot-toast";
 import useModalStore from "../store/useModalStore";
 import useCourseStore from "../store/useCourseStore";
@@ -133,14 +133,14 @@ AILoadingModal.propTypes = {
 };
 
 // Memoize MediaPreview component
-const MediaPreview = memo(({ type, file, url }) => {
-  if (!file && !url) return null;
+const MediaPreview = memo(({ type, file }) => {
+  if (!file) return null;
 
   if (type === "Image") {
     return (
       <div className="mt-4">
         <img
-          src={file ? URL.createObjectURL(file) : url}
+          src={URL.createObjectURL(file)}
           alt="Preview"
           className="w-48 h-48 object-cover rounded-md mx-auto"
           onError={(e) => {
@@ -155,39 +155,20 @@ const MediaPreview = memo(({ type, file, url }) => {
   if (type === "Video") {
     return (
       <div className="mt-4">
-        {file ? (
-          <video
-            className="w-full max-w-lg mx-auto rounded-md"
-            controls
-            src={URL.createObjectURL(file)}
-          >
-            Your browser does not support the video tag.
-          </video>
-        ) : (
-          <div className="aspect-video w-full max-w-lg mx-auto">
-            {url?.includes("youtube") ? (
-              <iframe
-                className="w-full h-full rounded-md"
-                src={getYouTubeEmbedUrl(url)}
-                title="Video preview"
-                allowFullScreen
-              />
-            ) : (
-              <video className="w-full rounded-md" controls src={url}>
-                Your browser does not support the video tag.
-              </video>
-            )}
-          </div>
-        )}
+        <video
+          className="w-full max-w-lg mx-auto rounded-md"
+          controls
+          src={URL.createObjectURL(file)}
+        >
+          Your browser does not support the video tag.
+        </video>
       </div>
     );
   }
 
   return (
     <div className="mt-4">
-      <p className="text-sm text-gray-600">
-        Selected File: {file?.name || url}
-      </p>
+      <p className="text-sm text-gray-600">Selected File: {file?.name}</p>
     </div>
   );
 });
@@ -197,34 +178,49 @@ MediaPreview.propTypes = {
   file: PropTypes.shape({
     name: PropTypes.string,
   }),
-  url: PropTypes.string,
 };
 
 MediaPreview.displayName = "MediaPreview";
 
-const getYouTubeEmbedUrl = (url) => {
-  if (!url) return "";
+const mediaTypes = [
+  { label: "PDF", value: "Pdf", icon: "337/337946" },
+  { label: "Image", value: "Image", icon: "1000/1000917" },
+  { label: "Video", value: "Video", icon: "1384/1384060" },
+];
 
-  // Handle different YouTube URL formats
-  const regExp =
-    /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-  const match = url.match(regExp);
+const difficulties = ["Beginner", "Intermediate", "Advanced"];
 
-  if (match && match[2].length === 11) {
-    return `https://www.youtube.com/embed/${match[2]}`;
-  }
+function buildCourseFormData({
+  file,
+  name,
+  description,
+  numberOfModules,
+  questionsPerModule,
+  difficulty,
+}) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("course_name", name);
+  formData.append("course_description", description);
+  formData.append("num_modules", numberOfModules);
+  formData.append("questions_per_module", questionsPerModule);
+  formData.append("difficulty_level", difficulty);
+  return formData;
+}
 
-  return url;
-};
+async function createAICourse({ formData, token }) {
+  return axios.post(`${FAST_API_BASE_URL}/courses/generate`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+  });
+}
 
 const AICreateCourseContent = () => {
   const { closeModal } = useModalStore();
-  const { saveCourse, courses, refreshCourses, fetchCourses } =
-    useCourseStore();
-  const { uploadFile } = useModuleStore();
-  const { user } = useAuthStore();
+  const { fetchCourses } = useCourseStore();
   const token = localStorage.getItem("token");
-
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -233,184 +229,58 @@ const AICreateCourseContent = () => {
     questionsPerModule: 5,
     difficulty: "Beginner",
   });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isAILoading, setIsAILoading] = useState(false);
 
-  const mediaTypes = [
-    { label: "PDF", value: "Pdf", icon: "337/337946" },
-    { label: "Image", value: "Image", icon: "1000/1000917" },
-    { label: "Video", value: "Video", icon: "1384/1384060" },
-  ];
-
-  const difficulties = ["Beginner", "Intermediate", "Advanced"];
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file);
+    setSelectedFile(e.target.files[0]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!selectedFile) {
+      toast.error("Please select a file");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setIsAILoading(true);
     try {
-      setIsSubmitting(true);
-      console.log("Starting course creation...");
-
-      if (!selectedFile) {
-        toast.error("Please select a file");
-        return;
-      }
-
-      // Handle PDF course generation
-      if (formData.mediaType === "Pdf" && selectedFile) {
-        const formDataToSend = new FormData();
-        formDataToSend.append("pdf_file", selectedFile);
-        formDataToSend.append("course_name", formData.name);
-        formDataToSend.append("course_description", formData.description);
-        formDataToSend.append("num_modules", formData.numberOfModules);
-        formDataToSend.append(
-          "questions_per_module",
-          formData.questionsPerModule
-        );
-        formDataToSend.append("difficulty_level", formData.difficulty);
-
-        try {
-          setIsAILoading(true);
-
-          console.log("Sending form data:", {
-            course_name: formData.name,
-            course_description: formData.description,
-            num_modules: formData.numberOfModules,
-            questions_per_module: formData.questionsPerModule,
-            difficulty_level: formData.difficulty,
-          });
-
-          const response = await axios.post(
-            `${FAST_API_BASE_URL}/courses/generate`,
-            formDataToSend,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
-
-          if (response.status !== 200) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          console.log("Course generation result:", response.data);
-
-          // Fetch updated courses list
-          await fetchCourses();
-
-          toast.success(
-            "Course generation started! You'll be notified when it's ready.",
-            {
-              duration: 4000,
-              position: "bottom-right",
-            }
-          );
-
-          closeModal();
-          return;
-        } catch (error) {
-          console.error("Error generating course:", error);
-          if (error.response?.status === 401) {
-            toast.error("Unauthorized. Please log in again.", {
-              duration: 4000,
-              position: "bottom-right",
-            });
-          } else {
-            const errorMessage =
-              error.response?.data?.detail?.[0]?.msg ||
-              error.response?.data?.message ||
-              "Failed to generate course from PDF";
-            toast.error(errorMessage, {
-              duration: 4000,
-              position: "bottom-right",
-            });
-          }
-          return;
-        } finally {
-          setIsAILoading(false);
-          setIsSubmitting(false);
-        }
-      }
-
+      const fd = buildCourseFormData({
+        file: selectedFile,
+        name: formData.name,
+        description: formData.description,
+        numberOfModules: formData.numberOfModules,
+        questionsPerModule: formData.questionsPerModule,
+        difficulty: formData.difficulty,
+      });
+      const response = await createAICourse({ formData: fd, token });
+      if (response.status !== 200)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      await fetchCourses();
+      toast.success(
+        "Course generation started! You'll be notified when it's ready.",
+        { duration: 4000, position: "bottom-right" }
+      );
       closeModal();
     } catch (error) {
-      console.error("Error starting course creation:", error);
-      toast.error("Failed to start course creation", {
-        duration: 4000,
-        position: "bottom-right",
-        id: "course-creation-start-error",
-      });
+      console.error("Error generating course:", error);
+      const errorMessage =
+        error.response?.data?.detail?.[0]?.msg ||
+        error.response?.data?.message ||
+        "Failed to generate course";
+      toast.error(errorMessage, { duration: 4000, position: "bottom-right" });
     } finally {
+      setIsAILoading(false);
       setIsSubmitting(false);
     }
-  };
-
-  const renderMediaSection = () => {
-    return (
-      <div>
-        <div className="mb-6">
-          <div className="flex justify-center space-x-6">
-            {mediaTypes.map(({ label, value, icon }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() =>
-                  setFormData((prev) => ({ ...prev, mediaType: value }))
-                }
-                className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${
-                  formData.mediaType === value
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-300 bg-gray-100 opacity-50"
-                } hover:shadow-md transition`}
-              >
-                <img
-                  src={`https://cdn-icons-png.flaticon.com/512/${icon}.png`}
-                  alt={label}
-                  className="w-12"
-                />
-                <p className="text-sm mt-2">{label}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="block mb-2 text-sm font-medium text-[#0F172A]">
-            Select file
-          </label>
-          <input
-            type="file"
-            onChange={handleFileChange}
-            accept={
-              formData.mediaType === "Image"
-                ? "image/*"
-                : formData.mediaType === "Video"
-                ? "video/*"
-                : ".pdf"
-            }
-            className="w-full p-2 border rounded-md focus:outline-none"
-          />
-          <MediaPreview type={formData.mediaType} file={selectedFile} />
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -450,7 +320,52 @@ const AICreateCourseContent = () => {
         </div>
 
         {/* Media Section */}
-        {renderMediaSection()}
+        <div>
+          <div className="mb-6">
+            <div className="flex justify-center space-x-6">
+              {mediaTypes.map(({ label, value, icon }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() =>
+                    setFormData((prev) => ({ ...prev, mediaType: value }))
+                  }
+                  className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${
+                    formData.mediaType === value
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-300 bg-gray-100 opacity-50"
+                  } hover:shadow-md transition`}
+                >
+                  <img
+                    src={`https://cdn-icons-png.flaticon.com/512/${icon}.png`}
+                    alt={label}
+                    className="w-12"
+                  />
+                  <p className="text-sm mt-2">{label}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block mb-2 text-sm font-medium text-[#0F172A]">
+              Select file
+            </label>
+            <input
+              type="file"
+              onChange={handleFileChange}
+              accept={
+                formData.mediaType === "Image"
+                  ? "image/*"
+                  : formData.mediaType === "Video"
+                  ? "video/*"
+                  : ".pdf"
+              }
+              className="w-full p-2 border rounded-md focus:outline-none"
+            />
+            <MediaPreview type={formData.mediaType} file={selectedFile} />
+          </div>
+        </div>
 
         {/* Number of Modules */}
         <div>

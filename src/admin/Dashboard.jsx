@@ -1,17 +1,14 @@
 import Card from "./common/Card/Card";
-import CreateCourseContent from "./courses/CreateCourseContent";
 import useModalStore from "./store/useModalStore";
 import useAuthStore from "../store/auth/useAuthStore";
-import { useNavigate } from "react-router";
+import CourseCreationChoice from "./courses/CourseCreationChoice";
 
 const Dashboard = () => {
   const { openModal } = useModalStore();
   const { user } = useAuthStore();
-  const navigate = useNavigate();
 
   const handleAddCourse = () => {
-    openModal("Create Course", <CreateCourseContent mode="add" />);
-    navigate('courses');
+    openModal("Create Course", <CourseCreationChoice />);
   };
 
   return (

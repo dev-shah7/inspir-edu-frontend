@@ -10,9 +10,10 @@ import { toast } from "react-hot-toast";
 import { IoIosArrowBack, IoIosArrowForward, IoMdAdd } from "react-icons/io";
 import InviteUsersContent from "../users/InviteUsersContent";
 import CourseUsersContent from "./CourseUsersContent";
-import { usePaymentStatusHandler } from '../../hooks/usePaymentStatusHandler';
+import { usePaymentStatusHandler } from "../../hooks/usePaymentStatusHandler";
 import useAuthStore from "../../store/auth/useAuthStore";
 import LoginContent from "../../components/Login/LoginContent";
+import CourseCreationChoice from "./CourseCreationChoice";
 
 const Courses = () => {
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ const Courses = () => {
         if (user) {
           await fetchCourses();
         } else {
-          const guestCourseId = sessionStorage.getItem('guestCourseId');
+          const guestCourseId = sessionStorage.getItem("guestCourseId");
           if (guestCourseId) {
             await fetchGuestCourseById(guestCourseId);
           }
@@ -73,15 +74,28 @@ const Courses = () => {
 
   const handleCreateCourse = () => {
     if (!user && courses.length > 0) {
-      openModal("Add Email", <LoginContent courseId={sessionStorage.getItem('guestCourseId')} message="Please submit your email first to be able to create another course." />);
+      openModal(
+        "Add Email",
+        <LoginContent
+          courseId={sessionStorage.getItem("guestCourseId")}
+          message="Please submit your email first to be able to create another course."
+        />
+      );
       return;
     }
-    openModal("Add Course", <CreateCourseContent />);
+    // openModal("Add Course", <CreateCourseContent />);
+    openModal("Create Course", <CourseCreationChoice />);
   };
 
   const handleEditCourse = (courseId) => {
     if (!user) {
-      openModal("Add Email", <LoginContent courseId={sessionStorage.getItem('guestCourseId')} message="Please submit your email first to be able to edit courses." />);
+      openModal(
+        "Add Email",
+        <LoginContent
+          courseId={sessionStorage.getItem("guestCourseId")}
+          message="Please submit your email first to be able to edit courses."
+        />
+      );
       return;
     }
     openModal(
@@ -99,7 +113,13 @@ const Courses = () => {
         } else {
           // await deleteGuestCourse(courseId);
           // sessionStorage.removeItem('guestCourseId');
-          openModal("Add Email", <LoginContent courseId={sessionStorage.getItem('guestCourseId')} message="Please submit your email first to be able to delete courses." />);
+          openModal(
+            "Add Email",
+            <LoginContent
+              courseId={sessionStorage.getItem("guestCourseId")}
+              message="Please submit your email first to be able to delete courses."
+            />
+          );
           return;
         }
         toast.success("Course deleted successfully");
@@ -289,10 +309,11 @@ const Courses = () => {
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`text-sm md:text-base text-blue-500 font-medium ${currentPage === 1
-              ? "text-gray-400 cursor-not-allowed"
-              : "hover:text-blue-700"
-              }`}
+            className={`text-sm md:text-base text-blue-500 font-medium ${
+              currentPage === 1
+                ? "text-gray-400 cursor-not-allowed"
+                : "hover:text-blue-700"
+            }`}
           >
             <IoIosArrowBack size={20} />
           </button>
@@ -302,10 +323,11 @@ const Courses = () => {
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className={`text-sm md:text-base text-blue-500 font-medium ${currentPage === totalPages
-              ? "text-gray-400 cursor-not-allowed"
-              : "hover:text-blue-700"
-              }`}
+            className={`text-sm md:text-base text-blue-500 font-medium ${
+              currentPage === totalPages
+                ? "text-gray-400 cursor-not-allowed"
+                : "hover:text-blue-700"
+            }`}
           >
             <IoIosArrowForward size={20} />
           </button>

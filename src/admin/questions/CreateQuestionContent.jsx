@@ -9,22 +9,28 @@ import { questionService } from "../../services/api/questionService";
 import { toast } from "react-hot-toast";
 import AddMoreQuestionsContent from "./AddMoreQuestionsContent";
 import useAuthStore from "../../store/auth/useAuthStore";
+import AIAssistant from "../common/AIAssistant";
 
-const CreateQuestionContent = ({ mode = "add", questionId }) => {
+const CreateQuestionContent = ({
+  mode = "add",
+  questionId,
+  onQuestionCreated,
+}) => {
   const { moduleId: paramModuleId } = useParams();
   const { currentModule } = useModuleStore();
-  const { closeModal, queueModal } = useModalStore();
+  const { closeModal, queueModal, openModal } = useModalStore();
   const {
     saveQuestion,
     fetchQuestionsByModule,
     fetchQuestionById,
     isFetchingQuestion,
     saveGuestQuestion,
-    fetchGuestQuestionsByModule
+    fetchGuestQuestionsByModule,
   } = useQuestionStore();
   const { user } = useAuthStore();
 
-  const moduleId = sessionStorage.getItem('guestModuleId') || paramModuleId || currentModule;
+  const moduleId =
+    sessionStorage.getItem("guestModuleId") || paramModuleId || currentModule;
 
   const [isLoading, setIsLoading] = useState(false);
   const [questionType, setQuestionType] = useState("");
@@ -163,18 +169,27 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
         options: getOptions(),
       };
 
-      await user ? saveQuestion(questionData) : saveGuestQuestion(questionData);
+      // Save the question
+      const response = await (user
+        ? saveQuestion(questionData)
+        : saveGuestQuestion(questionData));
 
-      // Refresh questions list in the background
-      user ? fetchQuestionsByModule(moduleId).catch(console.error) : fetchGuestQuestionsByModule(moduleId).catch(console.error);
+      if (response) {
+        toast.success("Question saved successfully");
 
-      toast.success("Question saved successfully");
+        // Call the onQuestionCreated callback if provided
+        if (onQuestionCreated) {
+          await onQuestionCreated();
+        }
 
-      if (mode === "add") {
-        queueModal("Add Questions", <AddMoreQuestionsContent />);
+        if (mode === "add") {
+          queueModal("Add Questions", <AddMoreQuestionsContent />);
+        }
+
+        closeModal();
       }
-      closeModal();
     } catch (error) {
+      console.error("Error saving question:", error);
       toast.error(error.message || "Failed to save question");
     } finally {
       setIsLoading(false);
@@ -448,6 +463,12 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
     return isLoading ? "Creating..." : "Create Question";
   };
 
+  const handleAIGeneratedQuestions = (questions) => {
+    // For now, just log the generated questions
+    console.log("AI Generated Questions:", questions);
+    // TODO: Implement the logic to add these questions to the form
+  };
+
   if (isLoading || (mode === "edit" && isFetchingQuestion)) {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
@@ -460,57 +481,84 @@ const CreateQuestionContent = ({ mode = "add", questionId }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="mb-4">
-        <QuestionTypeDropdown value={questionType} onChange={setQuestionType} />
-      </div>
-      <div className="mb-4">
-        <label
-          htmlFor="questionText"
-          className="block mb-2 text-sm font-medium text-gray-700"
-        >
-          Question
-        </label>
-        <input
-          type="text"
-          id="questionText"
-          {...register("questionText", {
-            required: "Question text is required",
-            minLength: {
-              value: 3,
-              message: "Question must be at least 3 characters",
-            },
-            maxLength: {
-              value: 1000,
-              message: "Question must not exceed 1000 characters",
-            },
-          })}
-          placeholder="What is the topic of this session?"
-          className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        {errors.questionText && (
-          <p className="text-sm text-red-500 mt-1">
-            {errors.questionText.message}
-          </p>
-        )}
-      </div>
-      <div className="mb-6">{renderAnswerInput()}</div>
-      <div className="flex justify-center space-x-4">
-        <button
-          type="submit"
-          className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-        >
-          {mode === "edit" ? "Update Question" : "Create Question"}
-        </button>
-        <button
-          type="button"
-          className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
-          onClick={closeModal}
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
+    <div className="my-2">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 px-16">
+        <div className="flex justify-between items-center">
+          <h2 className="text-md text-center font-light text-[#0F172A]">
+            {mode === "edit" ? "Edit Question" : "Create New Question"}
+          </h2>
+          <button
+            type="button"
+            onClick={() =>
+              openModal(
+                "AI Question Assistant",
+                <AIAssistant
+                  context="question"
+                  onGenerate={handleAIGeneratedQuestions}
+                  onClose={() => closeModal()}
+                />
+              )
+            }
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          >
+            <span className="text-lg">🤖</span>
+            <span>Get AI Assistance</span>
+          </button>
+        </div>
+        <div className="mb-4">
+          <QuestionTypeDropdown
+            value={questionType}
+            onChange={setQuestionType}
+          />
+        </div>
+        <div className="mb-4">
+          <label
+            htmlFor="questionText"
+            className="block mb-2 text-sm font-medium text-gray-700"
+          >
+            Question
+          </label>
+          <input
+            type="text"
+            id="questionText"
+            {...register("questionText", {
+              required: "Question text is required",
+              minLength: {
+                value: 3,
+                message: "Question must be at least 3 characters",
+              },
+              maxLength: {
+                value: 1000,
+                message: "Question must not exceed 1000 characters",
+              },
+            })}
+            placeholder="What is the topic of this session?"
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          {errors.questionText && (
+            <p className="text-sm text-red-500 mt-1">
+              {errors.questionText.message}
+            </p>
+          )}
+        </div>
+        <div className="mb-6">{renderAnswerInput()}</div>
+        <div className="flex justify-center space-x-4">
+          <button
+            type="submit"
+            className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+          >
+            {mode === "edit" ? "Update Question" : "Create Question"}
+          </button>
+          <button
+            type="button"
+            className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+            onClick={closeModal}
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 

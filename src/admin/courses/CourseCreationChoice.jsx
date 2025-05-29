@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import useModalStore from "../store/useModalStore";
 import CreateCourseContent from "./CreateCourseContent";
-import AICreateCourseContent from "./AICreateCourseContent";
+import CourseCreationStepper from "./CourseCreationStepper";
 
 const CourseCreationChoice = () => {
   const { openModal, closeModal } = useModalStore();
@@ -15,7 +15,7 @@ const CourseCreationChoice = () => {
 
   const handleAICreation = () => {
     closeModal();
-    openModal("Create Course with AI", <AICreateCourseContent />);
+    openModal("Create Course with AI", <CourseCreationStepper />);
     navigate("courses");
   };
 

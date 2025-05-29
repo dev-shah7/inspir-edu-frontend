@@ -4,6 +4,7 @@ import Layout from "../components/Layout/Layout";
 
 import Dashboard from "../admin/Dashboard";
 import Courses from "../admin/courses/Courses";
+import CourseCreationStepper from "../admin/courses/CourseCreationStepper";
 
 import MainContent from "../admin/MainContent";
 import Questions from "../admin/questions/Questions";
@@ -30,6 +31,14 @@ const AdminRoutes = () => {
           element={
             <MainContent>
               <Courses />
+            </MainContent>
+          }
+        />
+        <Route
+          path="courses/create"
+          element={
+            <MainContent>
+              <CourseCreationStepper />
             </MainContent>
           }
         />

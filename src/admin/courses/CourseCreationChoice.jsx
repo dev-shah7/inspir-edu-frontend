@@ -32,7 +32,7 @@ const CourseCreationChoice = () => {
             className="p-8 w-64 h-64 flex flex-col items-center justify-center border rounded-lg border-gray-300 bg-gray-100 hover:shadow-md transition hover:border-blue-500 hover:bg-blue-50"
           >
             <img
-              src="https://cdn-icons-png.flaticon.com/512/1000/1000917.png"
+              src="https://cdn-icons-png.flaticon.com/512/1827/1827933.png"
               alt="Manual Creation"
               className="w-16 mb-4"
             />
@@ -48,7 +48,7 @@ const CourseCreationChoice = () => {
             className="p-8 w-64 h-64 flex flex-col items-center justify-center border rounded-lg border-gray-300 bg-gray-100 hover:shadow-md transition hover:border-blue-500 hover:bg-blue-50"
           >
             <img
-              src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png"
+              src="https://cdn-icons-png.flaticon.com/512/8618/8618883.png"
               alt="AI Creation"
               className="w-16 mb-4"
             />

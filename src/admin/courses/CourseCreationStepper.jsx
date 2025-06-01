@@ -299,9 +299,9 @@ const CourseCreationStepper = () => {
                 }
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition"
               >
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
+                <option value="high_school">High School</option>
+                <option value="professional">Professional</option>
+                <option value="no_experience">No Experience</option>
               </select>
             </div>
           </div>
@@ -321,8 +321,8 @@ const CourseCreationStepper = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition"
               >
                 <option value="text">Text</option>
-                <option value="video">Video</option>
-                <option value="mixed">Mixed</option>
+                {/* <option value="video">Video</option>
+                <option value="mixed">Mixed</option> */}
               </select>
             </div>
             <div>

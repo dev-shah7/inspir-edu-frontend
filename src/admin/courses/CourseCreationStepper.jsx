@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 import axios from "axios";
+import useModalStore from "../store/useModalStore";
+import useCourseStore from "../store/useCourseStore";
+import useAuthStore from "../../store/auth/useAuthStore";
 
 const FAST_API_BASE_URL = import.meta.env.VITE_FAST_API_BASE_URL;
 
@@ -12,7 +15,7 @@ const steps = [
 ];
 
 const initialStepStates = [
-  { topic: "", audience: "", audience_level: "beginner" },
+  { topic: "", audience: "", audience_level: "high_school" },
   { content_type: "text", tone_style: "", key_points: "" },
   {
     question_format: "multiple_choice",
@@ -114,6 +117,9 @@ const CourseCreationStepper = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [stepStates, setStepStates] = useState(initialStepStates);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { closeModal } = useModalStore();
+  const { fetchCourses, fetchGuestCourseById } = useCourseStore();
+  const { user } = useAuthStore();
 
   // Handlers for each field in each step
   const handleFieldChange = (stepIdx, field, value) => {
@@ -225,7 +231,25 @@ const CourseCreationStepper = () => {
         position: "top-right",
       });
 
-      // Reset form or redirect as needed
+      // Close modal and refresh course list
+      closeModal();
+
+      // Refresh the course list
+      try {
+        if (user) {
+          await fetchCourses();
+        } else {
+          const guestCourseId = sessionStorage.getItem("guestCourseId");
+          if (guestCourseId) {
+            await fetchGuestCourseById(guestCourseId);
+          }
+        }
+      } catch (refreshError) {
+        console.error("Error refreshing course list:", refreshError);
+        // Don't show error to user as the course was created successfully
+      }
+
+      // Reset form
       setActiveStep(0);
       setStepStates(initialStepStates);
     } catch (error) {

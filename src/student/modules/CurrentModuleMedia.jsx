@@ -13,8 +13,9 @@ const CurrentModuleMedia = ({
 }) => {
   const { currentModule, lastPlayPosition, userModuleId, isFullVideoWatched } =
     useModuleStore();
-  const moduleType = currentModule?.data?.type || 1;
+  const moduleType = currentModule?.data?.type || 2;
 
+  console.log(currentModule, "currentModule, ", moduleType);
   return (
     <div className="mx-5">
       {moduleType === 1 && (
@@ -30,9 +31,7 @@ const CurrentModuleMedia = ({
           isFullVideoWatched={isFullVideoWatched}
         />
       )}
-      {(moduleType === 2 || moduleType === null) && (
-        <PdfViewer fileUrl={currentModule?.data?.url} />
-      )}
+      {moduleType === 2 && <PdfViewer fileUrl={currentModule?.data?.url} />}
       {moduleType === 3 && (
         <ImageViewer
           imageUrl={currentModule.data.url}

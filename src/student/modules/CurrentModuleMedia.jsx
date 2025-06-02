@@ -30,10 +30,9 @@ const CurrentModuleMedia = ({
           isFullVideoWatched={isFullVideoWatched}
         />
       )}
-      {moduleType === 2 ||
-        (moduleType === null && (
-          <PdfViewer fileUrl={currentModule?.data?.url} />
-        ))}
+      {(moduleType === 2 || moduleType === null) && (
+        <PdfViewer fileUrl={currentModule?.data?.url} />
+      )}
       {moduleType === 3 && (
         <ImageViewer
           imageUrl={currentModule.data.url}

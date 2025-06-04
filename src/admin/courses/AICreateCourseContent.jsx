@@ -1,443 +1,973 @@
-import { useState, memo } from "react";
+import React, { useState } from "react";
 import { toast } from "react-hot-toast";
-import useModalStore from "../store/useModalStore";
+import { useNavigate } from "react-router-dom";
 import useCourseStore from "../store/useCourseStore";
 import useAuthStore from "../../store/auth/useAuthStore";
-import useModuleStore from "../store/useModuleStore";
-import PropTypes from "prop-types";
 import axios from "axios";
+import { IoMdCloudUpload, IoMdTrash, IoMdArrowBack } from "react-icons/io";
+import { FaRobot, FaBrain, FaChartLine, FaUsers, FaCog } from "react-icons/fa";
 
 const FAST_API_BASE_URL = import.meta.env.VITE_FAST_API_BASE_URL;
 
-// AI Loading Modal Component
-const AILoadingModal = ({ isOpen }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
-        <div className="flex flex-col items-center">
-          {/* AI Icon Animation */}
-          <div className="relative w-24 h-24 mb-6">
-            <div className="absolute inset-0 rounded-full bg-blue-500/20 animate-ping"></div>
-            <div className="relative flex items-center justify-center w-full h-full rounded-full bg-blue-500">
-              <svg
-                className="w-12 h-12 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                ></path>
-              </svg>
-            </div>
-          </div>
-
-          {/* Title and Description */}
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">
-            Generating Your Course
-          </h3>
-          <div className="space-y-2 text-center mb-8">
-            <p className="text-gray-600">
-              Our AI is analyzing your media and creating comprehensive course
-              content.
-            </p>
-            <p className="text-sm text-gray-500">
-              This process may take a few minutes...
-            </p>
-          </div>
-
-          {/* Progress Steps */}
-          <div className="w-full space-y-4">
-            <div className="flex items-center">
-              <div className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                <svg
-                  className="w-5 h-5 animate-spin"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-              </div>
-              <div className="ml-4 flex-1">
-                <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-full animate-loading"></div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 text-sm font-medium text-gray-600">
-              <div className="flex flex-col items-center">
-                <div className="w-2 h-2 rounded-full bg-blue-500 mb-1 animate-pulse"></div>
-                <span>Analyzing Media</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-2 h-2 rounded-full bg-blue-500 mb-1 animate-pulse delay-100"></div>
-                <span>Creating Modules</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-2 h-2 rounded-full bg-blue-500 mb-1 animate-pulse delay-200"></div>
-                <span>Generating Questions</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Processing Status */}
-          <div className="mt-8 text-sm text-gray-500 flex items-center">
-            <svg
-              className="w-4 h-4 mr-2 animate-spin"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            Processing your request...
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-AILoadingModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-};
-
-// Memoize MediaPreview component
-const MediaPreview = memo(({ type, file }) => {
-  if (!file) return null;
-
-  if (type === "Image") {
-    return (
-      <div className="mt-4">
-        <img
-          src={URL.createObjectURL(file)}
-          alt="Preview"
-          className="w-48 h-48 object-cover rounded-md mx-auto"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = "path/to/fallback-image.png";
-          }}
-        />
-      </div>
-    );
-  }
-
-  if (type === "Video") {
-    return (
-      <div className="mt-4">
-        <video
-          className="w-full max-w-lg mx-auto rounded-md"
-          controls
-          src={URL.createObjectURL(file)}
-        >
-          Your browser does not support the video tag.
-        </video>
-      </div>
-    );
-  }
-
-  return (
-    <div className="mt-4">
-      <p className="text-sm text-gray-600">Selected File: {file?.name}</p>
-    </div>
-  );
-});
-
-MediaPreview.propTypes = {
-  type: PropTypes.oneOf(["Image", "Video", "Pdf"]).isRequired,
-  file: PropTypes.shape({
-    name: PropTypes.string,
-  }),
-};
-
-MediaPreview.displayName = "MediaPreview";
-
-const mediaTypes = [
-  { label: "PDF", value: "Pdf", icon: "337/337946" },
-  { label: "Image", value: "Image", icon: "1000/1000917" },
-  { label: "Video", value: "Video", icon: "1384/1384060" },
+const steps = [
+  {
+    id: 1,
+    title: "Course Overview",
+    icon: FaBrain,
+    description: "Basic course information and objectives",
+  },
+  {
+    id: 2,
+    title: "Content & Media",
+    icon: IoMdCloudUpload,
+    description: "Upload your learning materials",
+  },
+  {
+    id: 3,
+    title: "AI Configuration",
+    icon: FaRobot,
+    description: "Configure AI generation settings",
+  },
+  {
+    id: 4,
+    title: "Assessment Setup",
+    icon: FaChartLine,
+    description: "Define questions and grading",
+  },
+  {
+    id: 5,
+    title: "Access & Settings",
+    icon: FaCog,
+    description: "Final course settings",
+  },
 ];
 
-const difficulties = ["Beginner", "Intermediate", "Advanced"];
+const mediaTypes = [
+  {
+    value: "pdf",
+    label: "PDF Document",
+    accept: ".pdf",
+    icon: "📄",
+    color: "bg-red-50 border-red-200 text-red-700",
+  },
+  {
+    value: "image",
+    label: "Image",
+    accept: "image/*",
+    icon: "🖼️",
+    color: "bg-blue-50 border-blue-200 text-blue-700",
+  },
+  {
+    value: "video",
+    label: "Video",
+    accept: "video/*",
+    icon: "🎥",
+    color: "bg-purple-50 border-purple-200 text-purple-700",
+  },
+];
 
-function buildCourseFormData({
-  file,
-  name,
-  description,
-  numberOfModules,
-  questionsPerModule,
-  difficulty,
-}) {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("course_name", name);
-  formData.append("course_description", description);
-  formData.append("num_modules", numberOfModules);
-  formData.append("questions_per_module", questionsPerModule);
-  formData.append("difficulty_level", difficulty);
-  return formData;
-}
+const difficultyLevels = [
+  {
+    value: "beginner",
+    label: "Beginner",
+    description: "Basic concepts and introductory material",
+  },
+  {
+    value: "intermediate",
+    label: "Intermediate",
+    description: "Moderate complexity with some prerequisites",
+  },
+  {
+    value: "advanced",
+    label: "Advanced",
+    description: "Complex topics requiring solid foundation",
+  },
+];
 
-async function createAICourse({ formData, token }) {
-  return axios.post(`${FAST_API_BASE_URL}/courses/generate`, formData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "multipart/form-data",
-    },
-  });
-}
+const questionTypes = [
+  {
+    value: "multiple_choice",
+    label: "Multiple Choice",
+    description: "Choose one correct answer",
+  },
+  {
+    value: "true_false",
+    label: "True/False",
+    description: "Binary choice questions",
+  },
+  {
+    value: "short_answer",
+    label: "Short Answer",
+    description: "Brief text responses",
+  },
+  {
+    value: "essay",
+    label: "Essay",
+    description: "Long-form written responses",
+  },
+  {
+    value: "choose_all",
+    label: "Choose All That Apply",
+    description: "Multiple correct answers",
+  },
+];
+
+const learningObjectives = [
+  "Knowledge & Understanding",
+  "Application & Analysis",
+  "Synthesis & Evaluation",
+  "Practical Skills",
+  "Critical Thinking",
+  "Problem Solving",
+];
 
 const AICreateCourseContent = () => {
-  const { closeModal } = useModalStore();
+  const navigate = useNavigate();
   const { fetchCourses } = useCourseStore();
-  const token = localStorage.getItem("token");
-  const [formData, setFormData] = useState({
+  const { user } = useAuthStore();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [courseData, setCourseData] = useState({
+    // Step 1: Course Overview
     name: "",
     description: "",
-    mediaType: "Pdf",
-    numberOfModules: 3,
-    questionsPerModule: 5,
-    difficulty: "Beginner",
+    category: "",
+    estimatedDuration: "",
+    targetAudience: "",
+    prerequisites: "",
+    learningObjectives: [],
+
+    // Step 2: Content & Media
+    mediaFiles: [],
+    contentStructure: "auto", // auto, manual
+
+    // Step 3: AI Configuration
+    difficulty: "intermediate",
+    toneStyle: "professional", // professional, casual, academic, conversational
+    contentFocus: "balanced", // theoretical, practical, balanced
+    aiInstructions: "",
+
+    // Step 4: Assessment Setup
+    numberOfModules: 5,
+    questionsPerModule: 3,
+    questionTypes: ["multiple_choice", "short_answer"],
+    passingScore: 70,
+    allowRetakes: true,
+
+    // Step 5: Access & Settings
+    accessType: "public", // public, private, restricted
+    timeLimit: 0, // 0 = no limit
+    certificateEnabled: true,
+    emailNotifications: true,
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [isAILoading, setIsAILoading] = useState(false);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleInputChange = (field, value) => {
+    setCourseData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
+  const handleFileUpload = (files) => {
+    const newFiles = Array.from(files).map((file) => ({
+      id: Date.now() + Math.random(),
+      file,
+      name: file.name,
+      type: file.type.includes("image")
+        ? "image"
+        : file.type.includes("video")
+        ? "video"
+        : "pdf",
+      size: file.size,
+      preview: file.type.includes("image") ? URL.createObjectURL(file) : null,
+    }));
+
+    setCourseData((prev) => ({
+      ...prev,
+      mediaFiles: [...prev.mediaFiles, ...newFiles],
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const removeFile = (fileId) => {
+    setCourseData((prev) => ({
+      ...prev,
+      mediaFiles: prev.mediaFiles.filter((f) => f.id !== fileId),
+    }));
+  };
 
-    if (!selectedFile) {
-      toast.error("Please select a file");
+  const handleArrayToggle = (field, value) => {
+    setCourseData((prev) => ({
+      ...prev,
+      [field]: prev[field].includes(value)
+        ? prev[field].filter((item) => item !== value)
+        : [...prev[field], value],
+    }));
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  const validateStep = (step) => {
+    switch (step) {
+      case 1:
+        return (
+          courseData.name && courseData.description && courseData.targetAudience
+        );
+      case 2:
+        return courseData.mediaFiles.length > 0;
+      case 3:
+        return courseData.difficulty && courseData.toneStyle;
+      case 4:
+        return (
+          courseData.numberOfModules > 0 && courseData.questionsPerModule > 0
+        );
+      case 5:
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  const nextStep = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep((prev) => Math.min(prev + 1, steps.length));
+    } else {
+      toast.error("Please fill in all required fields before proceeding");
+    }
+  };
+
+  const prevStep = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleSubmit = async () => {
+    if (!validateStep(5)) {
+      toast.error("Please complete all required fields");
       return;
     }
 
     setIsSubmitting(true);
-    setIsAILoading(true);
     try {
-      const fd = buildCourseFormData({
-        file: selectedFile,
-        name: formData.name,
-        description: formData.description,
-        numberOfModules: formData.numberOfModules,
-        questionsPerModule: formData.questionsPerModule,
-        difficulty: formData.difficulty,
-      });
-      const response = await createAICourse({ formData: fd, token });
-      if (response.status !== 200)
-        throw new Error(`HTTP error! status: ${response.status}`);
-      await fetchCourses();
-      toast.success(
-        "Course generation started! You'll be notified when it's ready.",
-        { duration: 4000, position: "bottom-right" }
+      const formData = new FormData();
+
+      // Add course data
+      formData.append(
+        "courseData",
+        JSON.stringify({
+          name: courseData.name,
+          description: courseData.description,
+          category: courseData.category,
+          targetAudience: courseData.targetAudience,
+          prerequisites: courseData.prerequisites,
+          learningObjectives: courseData.learningObjectives,
+          difficulty: courseData.difficulty,
+          toneStyle: courseData.toneStyle,
+          contentFocus: courseData.contentFocus,
+          aiInstructions: courseData.aiInstructions,
+          numberOfModules: courseData.numberOfModules,
+          questionsPerModule: courseData.questionsPerModule,
+          questionTypes: courseData.questionTypes,
+          passingScore: courseData.passingScore,
+          allowRetakes: courseData.allowRetakes,
+          accessType: courseData.accessType,
+          timeLimit: courseData.timeLimit,
+          certificateEnabled: courseData.certificateEnabled,
+        })
       );
-      closeModal();
+
+      // Add media files
+      courseData.mediaFiles.forEach((mediaFile, index) => {
+        formData.append(`mediaFiles`, mediaFile.file);
+      });
+
+      const response = await axios.post(
+        `${FAST_API_BASE_URL}/courses/generate-advanced`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      toast.success(
+        "AI course generation started! You'll be notified when it's ready.",
+        {
+          duration: 5000,
+          position: "top-right",
+        }
+      );
+
+      await fetchCourses();
+      navigate("/admin/courses");
     } catch (error) {
       console.error("Error generating course:", error);
-      const errorMessage =
-        error.response?.data?.detail?.[0]?.msg ||
-        error.response?.data?.message ||
-        "Failed to generate course";
-      toast.error(errorMessage, { duration: 4000, position: "bottom-right" });
+      toast.error(error.response?.data?.message || "Failed to generate course");
     } finally {
-      setIsAILoading(false);
       setIsSubmitting(false);
     }
   };
 
-  return (
-    <div className="my-2">
-      <AILoadingModal isOpen={isAILoading} />
-      <form onSubmit={handleSubmit} className="space-y-6 px-16">
-        {/* Course Name */}
-        <div>
-          <label className="block mb-2 text-md font-light text-[#031F42]">
-            Course Name
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="Enter course name"
-            required
-          />
-        </div>
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Course Name *
+                </label>
+                <input
+                  type="text"
+                  value={courseData.name}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter an engaging course title"
+                />
+              </div>
 
-        {/* Description */}
-        <div>
-          <label className="block mb-2 text-sm font-medium text-[#0F172A]">
-            Description
-          </label>
-          <textarea
-            value={formData.description}
-            name="description"
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            rows="4"
-            placeholder="Enter course description"
-            required
-          />
-        </div>
-
-        {/* Media Section */}
-        <div>
-          <div className="mb-6">
-            <div className="flex justify-center space-x-6">
-              {mediaTypes.map(({ label, value, icon }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() =>
-                    setFormData((prev) => ({ ...prev, mediaType: value }))
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Course Description *
+                </label>
+                <textarea
+                  value={courseData.description}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
                   }
-                  className={`p-4 w-40 h-40 flex flex-col items-center justify-center border rounded-lg ${
-                    formData.mediaType === value
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-300 bg-gray-100 opacity-50"
-                  } hover:shadow-md transition`}
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  placeholder="Describe what students will learn and achieve..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Target Audience *
+                </label>
+                <input
+                  type="text"
+                  value={courseData.targetAudience}
+                  onChange={(e) =>
+                    handleInputChange("targetAudience", e.target.value)
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., Beginners, Professionals, Students"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category
+                </label>
+                <select
+                  value={courseData.category}
+                  onChange={(e) =>
+                    handleInputChange("category", e.target.value)
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <img
-                    src={`https://cdn-icons-png.flaticon.com/512/${icon}.png`}
-                    alt={label}
-                    className="w-12"
-                  />
-                  <p className="text-sm mt-2">{label}</p>
-                </button>
-              ))}
+                  <option value="">Select a category</option>
+                  <option value="technology">Technology</option>
+                  <option value="business">Business</option>
+                  <option value="design">Design</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="health">Health & Wellness</option>
+                  <option value="education">Education</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Prerequisites
+                </label>
+                <textarea
+                  value={courseData.prerequisites}
+                  onChange={(e) =>
+                    handleInputChange("prerequisites", e.target.value)
+                  }
+                  rows={2}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  placeholder="What should students know before taking this course?"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Learning Objectives
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {learningObjectives.map((objective) => (
+                  <label
+                    key={objective}
+                    className="flex items-center space-x-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={courseData.learningObjectives.includes(
+                        objective
+                      )}
+                      onChange={() =>
+                        handleArrayToggle("learningObjectives", objective)
+                      }
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">{objective}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Upload Your Learning Materials
+              </h3>
+              <p className="text-gray-600">
+                Upload multiple files that our AI will analyze to create your
+                course content
+              </p>
+            </div>
+
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+              <input
+                type="file"
+                multiple
+                accept=".pdf,image/*,video/*"
+                onChange={(e) => handleFileUpload(e.target.files)}
+                className="hidden"
+                id="file-upload"
+              />
+              <label htmlFor="file-upload" className="cursor-pointer">
+                <IoMdCloudUpload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <p className="text-lg font-medium text-gray-900 mb-2">
+                  Drop files here or click to upload
+                </p>
+                <p className="text-sm text-gray-500">
+                  Support for PDFs, Images, and Videos (Max 100MB per file)
+                </p>
+              </label>
+            </div>
+
+            {courseData.mediaFiles.length > 0 && (
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-900">
+                  Uploaded Files ({courseData.mediaFiles.length})
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {courseData.mediaFiles.map((file) => (
+                    <div
+                      key={file.id}
+                      className="border rounded-lg p-4 bg-gray-50"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-2xl">
+                            {
+                              mediaTypes.find((t) => t.value === file.type)
+                                ?.icon
+                            }
+                          </span>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {formatFileSize(file.size)}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => removeFile(file.id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <IoMdTrash />
+                        </button>
+                      </div>
+                      {file.preview && (
+                        <img
+                          src={file.preview}
+                          alt={file.name}
+                          className="w-full h-20 object-cover rounded"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Difficulty Level *
+                </label>
+                <div className="space-y-3">
+                  {difficultyLevels.map((level) => (
+                    <label
+                      key={level.value}
+                      className="flex items-start space-x-3 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name="difficulty"
+                        value={level.value}
+                        checked={courseData.difficulty === level.value}
+                        onChange={(e) =>
+                          handleInputChange("difficulty", e.target.value)
+                        }
+                        className="mt-1 text-blue-600 focus:ring-blue-500"
+                      />
+                      <div>
+                        <div className="font-medium text-gray-900">
+                          {level.label}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {level.description}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Content Tone & Style *
+                </label>
+                <select
+                  value={courseData.toneStyle}
+                  onChange={(e) =>
+                    handleInputChange("toneStyle", e.target.value)
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="professional">Professional & Formal</option>
+                  <option value="casual">Casual & Friendly</option>
+                  <option value="academic">Academic & Scholarly</option>
+                  <option value="conversational">
+                    Conversational & Engaging
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Content Focus
+                </label>
+                <select
+                  value={courseData.contentFocus}
+                  onChange={(e) =>
+                    handleInputChange("contentFocus", e.target.value)
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="theoretical">More Theoretical</option>
+                  <option value="practical">More Practical</option>
+                  <option value="balanced">Balanced Mix</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Special Instructions for AI
+              </label>
+              <textarea
+                value={courseData.aiInstructions}
+                onChange={(e) =>
+                  handleInputChange("aiInstructions", e.target.value)
+                }
+                rows={4}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                placeholder="Any specific requirements, topics to emphasize, or teaching approaches you'd like the AI to consider..."
+              />
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Number of Modules *
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={courseData.numberOfModules}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "numberOfModules",
+                      parseInt(e.target.value)
+                    )
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Questions per Module *
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={courseData.questionsPerModule}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "questionsPerModule",
+                      parseInt(e.target.value)
+                    )
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Passing Score (%)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={courseData.passingScore}
+                  onChange={(e) =>
+                    handleInputChange("passingScore", parseInt(e.target.value))
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="allowRetakes"
+                  checked={courseData.allowRetakes}
+                  onChange={(e) =>
+                    handleInputChange("allowRetakes", e.target.checked)
+                  }
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label
+                  htmlFor="allowRetakes"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Allow retakes
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Question Types
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {questionTypes.map((type) => (
+                  <label
+                    key={type.value}
+                    className="flex items-start space-x-3 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={courseData.questionTypes.includes(type.value)}
+                      onChange={() =>
+                        handleArrayToggle("questionTypes", type.value)
+                      }
+                      className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        {type.label}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {type.description}
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 5:
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Course Access
+                </label>
+                <select
+                  value={courseData.accessType}
+                  onChange={(e) =>
+                    handleInputChange("accessType", e.target.value)
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="public">Public - Anyone can access</option>
+                  <option value="private">Private - Invitation only</option>
+                  <option value="restricted">
+                    Restricted - Requires approval
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Time Limit (hours, 0 = unlimited)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={courseData.timeLimit}
+                  onChange={(e) =>
+                    handleInputChange("timeLimit", parseInt(e.target.value))
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="certificateEnabled"
+                  checked={courseData.certificateEnabled}
+                  onChange={(e) =>
+                    handleInputChange("certificateEnabled", e.target.checked)
+                  }
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label
+                  htmlFor="certificateEnabled"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Generate completion certificates
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="emailNotifications"
+                  checked={courseData.emailNotifications}
+                  onChange={(e) =>
+                    handleInputChange("emailNotifications", e.target.checked)
+                  }
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label
+                  htmlFor="emailNotifications"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Send email notifications to students
+                </label>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-medium text-blue-900 mb-2">Course Summary</h4>
+              <div className="text-sm text-blue-800 space-y-1">
+                <p>
+                  <strong>Name:</strong> {courseData.name || "Not specified"}
+                </p>
+                <p>
+                  <strong>Modules:</strong> {courseData.numberOfModules}
+                </p>
+                <p>
+                  <strong>Questions per Module:</strong>{" "}
+                  {courseData.questionsPerModule}
+                </p>
+                <p>
+                  <strong>Media Files:</strong> {courseData.mediaFiles.length}
+                </p>
+                <p>
+                  <strong>Difficulty:</strong> {courseData.difficulty}
+                </p>
+                <p>
+                  <strong>Tone:</strong> {courseData.toneStyle}
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen">
+      {/* Progress Steps */}
+      <div className="border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center justify-between mb-3">
+            <button
+              onClick={() => navigate("/admin/courses")}
+              className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              <IoMdArrowBack className="h-5 w-5 mr-2" />
+              <span className="text-sm font-medium">Back to Courses</span>
+            </button>
+            <div className="flex items-center space-x-2">
+              <FaRobot className="h-5 w-5 text-blue-600" />
+              <span className="text-sm text-gray-600">AI Course Creator</span>
             </div>
           </div>
 
-          <div>
-            <label className="block mb-2 text-sm font-medium text-[#0F172A]">
-              Select file
-            </label>
-            <input
-              type="file"
-              onChange={handleFileChange}
-              accept={
-                formData.mediaType === "Image"
-                  ? "image/*"
-                  : formData.mediaType === "Video"
-                  ? "video/*"
-                  : ".pdf"
-              }
-              className="w-full p-2 border rounded-md focus:outline-none"
-            />
-            <MediaPreview type={formData.mediaType} file={selectedFile} />
+          <div className="flex justify-between items-center">
+            {steps.map((step, index) => {
+              const StepIcon = step.icon;
+              const isActive = step.id === currentStep;
+              const isCompleted = step.id < currentStep;
+
+              return (
+                <div
+                  key={step.id}
+                  className="flex flex-col items-center flex-1 relative"
+                >
+                  {/* Connection line */}
+                  {index < steps.length - 1 && (
+                    <div
+                      className={`absolute top-4 left-1/2 w-full h-0.5 -z-10 ${
+                        step.id < currentStep ? "bg-blue-500" : "bg-gray-300"
+                      }`}
+                    />
+                  )}
+
+                  <div
+                    className={`
+                    w-8 h-8 rounded-full flex items-center justify-center mb-2 transition-all duration-300 relative z-10
+                    ${
+                      isActive
+                        ? "bg-blue-600 text-white shadow-lg ring-2 ring-blue-200"
+                        : isCompleted
+                        ? "bg-green-500 text-white"
+                        : "bg-white border-2 border-gray-300 text-gray-500"
+                    }
+                  `}
+                  >
+                    {isCompleted && !isActive ? (
+                      <svg
+                        className="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    ) : (
+                      <StepIcon className="w-4 h-4" />
+                    )}
+                  </div>
+                  <div className="text-center">
+                    <p
+                      className={`text-xs font-medium ${
+                        isActive ? "text-blue-600" : "text-gray-500"
+                      }`}
+                    >
+                      {step.title}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
+      </div>
 
-        {/* Number of Modules */}
-        <div>
-          <label className="block mb-2 text-sm font-medium text-[#0F172A]">
-            Number of Modules
-          </label>
-          <input
-            type="number"
-            name="numberOfModules"
-            value={formData.numberOfModules}
-            onChange={handleInputChange}
-            min="1"
-            max="10"
-            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
+      {/* Main Content */}
+      <div className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">
+              {steps[currentStep - 1].title}
+            </h1>
+            <p className="text-gray-600">
+              {steps[currentStep - 1].description}
+            </p>
+          </div>
 
-        {/* Questions per Module */}
-        <div>
-          <label className="block mb-2 text-sm font-medium text-[#0F172A]">
-            Questions per Module
-          </label>
-          <input
-            type="number"
-            name="questionsPerModule"
-            value={formData.questionsPerModule}
-            onChange={handleInputChange}
-            min="1"
-            max="10"
-            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
+          <div className="py-4">{renderStepContent()}</div>
         </div>
+      </div>
 
-        {/* Difficulty Level */}
-        <div>
-          <label className="block mb-2 text-sm font-medium text-[#0F172A]">
-            Difficulty Level
-          </label>
-          <select
-            name="difficulty"
-            value={formData.difficulty}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            {difficulties.map((level) => (
-              <option key={level} value={level}>
-                {level}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Footer */}
+      <div className="border-t bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center">
+            <button
+              onClick={prevStep}
+              disabled={currentStep === 1}
+              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                currentStep === 1
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              Previous
+            </button>
 
-        {/* Action Buttons */}
-        <div className="flex justify-center space-x-4">
-          <button
-            type="button"
-            onClick={() => closeModal()}
-            className="px-6 py-2 bg-[#C6433D] text-white font-medium rounded-md hover:bg-[#B91C1C] transition"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className={`px-6 py-2 bg-[#1A73E8] text-white font-medium rounded-md hover:bg-[#1E40AF] transition ${
-              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            {isSubmitting ? "Starting..." : "Generate Course"}
-          </button>
+            <div className="flex space-x-4">
+              <button
+                onClick={() => navigate("/admin/courses")}
+                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+
+              {currentStep === steps.length ? (
+                <button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className={`px-8 py-3 bg-blue-600 text-white rounded-lg font-medium transition-colors ${
+                    isSubmitting
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-blue-700"
+                  }`}
+                >
+                  {isSubmitting ? "Generating Course..." : "Generate Course"}
+                </button>
+              ) : (
+                <button
+                  onClick={nextStep}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Next
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

@@ -15,8 +15,7 @@ const CourseCreationChoice = () => {
 
   const handleAICreation = () => {
     closeModal();
-    openModal("Create Course with AI", <CourseCreationStepper />);
-    navigate("courses");
+    navigate("/admin/ai-course-creator");
   };
 
   return (

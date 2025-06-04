@@ -5,6 +5,7 @@ import Layout from "../components/Layout/Layout";
 import Dashboard from "../admin/Dashboard";
 import Courses from "../admin/courses/Courses";
 import CourseCreationStepper from "../admin/courses/CourseCreationStepper";
+import AICreateCourseContent from "../admin/courses/AICreateCourseContent";
 
 import MainContent from "../admin/MainContent";
 import Questions from "../admin/questions/Questions";
@@ -42,6 +43,7 @@ const AdminRoutes = () => {
             </MainContent>
           }
         />
+        <Route path="ai-course-creator" element={<AICreateCourseContent />} />
         <Route
           path="courses/:courseId/modules"
           element={
